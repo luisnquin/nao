@@ -2,3 +2,5 @@ linters:
   enable-all: true
   disable-all: false
   fast: true
+  disable:
+    - checknoglobals
