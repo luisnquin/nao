@@ -21,5 +21,5 @@ func Execute() {
 }
 
 func init() {
-	root.AddCommand(newCmd, renderCmd, mergeCmd)
+	root.AddCommand(newCmd, renderCmd, mergeCmd, selectCmd, filesCmd)
 }
