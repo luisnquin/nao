@@ -11,7 +11,7 @@ import (
 
 var draftCmd = &cobra.Command{
 	Use:   "draft",
-	Short: "main draft, it's unique",
+	Short: "Main draft, like a playground file",
 	Long:  "...",
 	Run: func(cmd *cobra.Command, args []string) {
 		path, remove, err := packer.LoadMainDraft()

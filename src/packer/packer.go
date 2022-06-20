@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -36,7 +37,7 @@ type Window struct {
 	LastUpdate time.Time
 }
 
-func LoadMainDraft() (string, func(), error) {
+func LoadMainDraft() (path string, remove func(), err error) {
 	appDirs := appdir.New(core.AppName)
 
 	data, err := LoadUserData(appDirs.UserData())
@@ -44,41 +45,11 @@ func LoadMainDraft() (string, func(), error) {
 		return "", nil, err
 	}
 
-	file, close := NewCachedIn(appDirs.UserCache())
+	file, remove := NewCachedIn(appDirs.UserCache())
 
 	_, err = file.WriteString(data.MainDraft.Content)
 
-	return file.Name(), close, err
-}
-
-func LoadUserData(dirPath string) (Data, error) {
-	var data Data
-
-	err := os.MkdirAll(dirPath, os.ModePerm)
-	if err != nil {
-		return data, err
-	}
-
-	var file *os.File
-
-	if _, err = os.Stat(dirPath + "/data.json"); errors.Is(err, os.ErrNotExist) {
-		file, err = os.Create(dirPath + "/data.json")
-	} else {
-		file, err = os.Open(dirPath + "/data.json")
-	}
-
-	if err != nil {
-		return data, err
-	}
-
-	err = json.NewDecoder(file).Decode(&data)
-	if err != nil {
-		return data, err
-	}
-
-	err = file.Close()
-
-	return data, err
+	return file.Name(), remove, err
 }
 
 func OverwriteMainDraft(content []byte) error {
@@ -102,7 +73,7 @@ func OverwriteMainDraft(content []byte) error {
 	return ioutil.WriteFile(appDirs.UserData()+"/data.json", b.Bytes(), 0644)
 }
 
-func NewCached() (f *os.File, close func()) {
+func NewCached() (f *os.File, remove func()) {
 	cacheDir := appdir.New(core.AppName).UserCache()
 
 	err := os.MkdirAll(cacheDir, os.ModePerm)
@@ -203,7 +174,7 @@ func SaveContent(key string, content string) error { // TODO: add the capacibili
 	return nil
 }
 
-func FileList() ([]Window, error) {
+func ListNaoSets() ([]Window, error) {
 	list := make([]Window, 0)
 
 	dataDir := appdir.New(core.AppName).UserData()
@@ -240,4 +211,48 @@ func FileList() ([]Window, error) {
 	}
 
 	return list, nil
+}
+
+func ListRawSets() (map[string]Set, error) {
+	dataDir := appdir.New(core.AppName).UserData()
+
+	if _, err := os.Stat(dataDir + "/data.json"); err != nil {
+		if !errors.Is(err, os.ErrNotExist) {
+			return nil, err
+		}
+
+		return make(map[string]Set), nil
+	}
+
+	file, err := os.Open(dataDir + "/data.json")
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+
+	var data Data
+
+	if err = json.NewDecoder(file).Decode(&data); err != nil {
+		if !errors.Is(err, io.EOF) {
+			return nil, err
+		}
+	}
+
+	return data.NaoSet, nil
+}
+
+func SearchInSet(prefix string) (string, Set, error) {
+	sets, err := ListRawSets()
+	if err != nil {
+		return "", Set{}, err
+	}
+
+	for k, v := range sets {
+		if strings.HasPrefix(k, prefix) {
+			return k, v, nil
+		}
+	}
+
+	return "", Set{}, fmt.Errorf("No such file: " + prefix)
 }

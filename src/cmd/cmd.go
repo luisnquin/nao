@@ -11,8 +11,19 @@ var root = &cobra.Command{
 	Long: `A tool to manage your notes or other types of files without
 		worry about the path where it is, safe and agile.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Usage()
+		switch length := len(args); {
+		case length == 0:
+			// TODO: if draftByDefaultDisabled ...
+			draftCmd.Run(cmd, args)
+
+		case length == 1:
+			editCmd.Run(cmd, args)
+
+		default:
+			cmd.Usage()
+		}
 	},
+	TraverseChildren: true,
 }
 
 func Execute() {
@@ -22,5 +33,5 @@ func Execute() {
 }
 
 func init() {
-	root.AddCommand(newCmd, renderCmd, mergeCmd, selectCmd, filesCmd, draftCmd)
+	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, draftCmd, editCmd)
 }
