@@ -14,15 +14,17 @@ import (
 	"github.com/cip8/autoname"
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/src/core"
+	"github.com/luisnquin/nao/src/utils"
 )
 
 type (
 	Data struct {
-		NaoSet map[string]Set `json:"naoSet"`
+		NaoSet    map[string]Set `json:"naoSet"`
+		MainDraft Set            `json:"mainDraft"`
 	}
 
 	Set struct {
-		Name       string    `json:"name"` // TODO: It should be named as 'Tag'
+		Name       string    `json:"name,omitempty"` // TODO: It should be named as 'Tag'
 		Content    string    `json:"content"`
 		LastUpdate time.Time `json:"lastUpdate"`
 	}
@@ -34,6 +36,72 @@ type Window struct {
 	LastUpdate time.Time
 }
 
+func LoadMainDraft() (string, func(), error) {
+	appDirs := appdir.New(core.AppName)
+
+	data, err := LoadUserData(appDirs.UserData())
+	if err != nil {
+		return "", nil, err
+	}
+
+	file, close := NewCachedIn(appDirs.UserCache())
+
+	_, err = file.WriteString(data.MainDraft.Content)
+
+	return file.Name(), close, err
+}
+
+func LoadUserData(dirPath string) (Data, error) {
+	var data Data
+
+	err := os.MkdirAll(dirPath, os.ModePerm)
+	if err != nil {
+		return data, err
+	}
+
+	var file *os.File
+
+	if _, err = os.Stat(dirPath + "/data.json"); errors.Is(err, os.ErrNotExist) {
+		file, err = os.Create(dirPath + "/data.json")
+	} else {
+		file, err = os.Open(dirPath + "/data.json")
+	}
+
+	if err != nil {
+		return data, err
+	}
+
+	err = json.NewDecoder(file).Decode(&data)
+	if err != nil {
+		return data, err
+	}
+
+	err = file.Close()
+
+	return data, err
+}
+
+func OverwriteMainDraft(content []byte) error {
+	appDirs := appdir.New(core.AppName)
+
+	data, err := LoadUserData(appDirs.UserData())
+	if err != nil {
+		return err
+	}
+
+	data.MainDraft.Content = string(content)
+	data.MainDraft.LastUpdate = time.Now()
+
+	b := new(bytes.Buffer)
+
+	err = utils.EncodeToJSONIndent(b, data)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(appDirs.UserData()+"/data.json", b.Bytes(), 0644)
+}
+
 func NewCached() (f *os.File, close func()) {
 	cacheDir := appdir.New(core.AppName).UserCache()
 
@@ -43,6 +111,27 @@ func NewCached() (f *os.File, close func()) {
 	}
 
 	file, err := os.Create(cacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
+	if err != nil {
+		panic(err)
+	}
+
+	return file, func() {
+		err = file.Close()
+		if err != nil {
+			panic(err)
+		}
+
+		err = os.Remove(file.Name())
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func NewCachedIn(path string) (f *os.File, close func()) {
+	_ = os.MkdirAll(path, os.ModePerm)
+
+	file, err := os.Create(path + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
 	if err != nil {
 		panic(err)
 	}
@@ -101,10 +190,7 @@ func SaveContent(key string, content string) error { // TODO: add the capacibili
 
 	b := new(bytes.Buffer)
 
-	e := json.NewEncoder(b)
-	e.SetIndent("", "\t")
-
-	err = e.Encode(data)
+	err = utils.EncodeToJSONIndent(b, data)
 	if err != nil {
 		return err
 	}

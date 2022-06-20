@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/spf13/cobra v1.4.0
+	github.com/xeonx/timeago v1.0.0-rc4
 )
 
 require (
