@@ -10,6 +10,7 @@ require (
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/spf13/cobra v1.4.0
 	github.com/xeonx/timeago v1.0.0-rc4
+	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
 	gopkg.in/yaml.v3 v3.0.1
 )
 

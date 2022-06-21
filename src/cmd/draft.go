@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var draftCmd = &cobra.Command{
-	Use:   "draft",
+var mainCmd = &cobra.Command{
+	Use:   "main",
 	Short: "Main draft, like a playground file",
 	Long:  "...",
 	Run: func(cmd *cobra.Command, args []string) {

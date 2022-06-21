@@ -1,9 +1,0 @@
-# Nao configuration file example
-
-editor:
-    name: nano
-    subCommands:
-        -
-behaviors:
-    redirectTo: 'main' # Options: main, last, none
-    mergeSeparator: '-'
