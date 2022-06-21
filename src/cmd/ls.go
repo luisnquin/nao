@@ -22,7 +22,7 @@ var lsCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		header := table.Row{"ID", "NAME", "LAST UPDATE"}
+		header := table.Row{"ID", "TAG", "LAST UPDATE"}
 		rows := make([]table.Row, 0)
 
 		for _, item := range list {
