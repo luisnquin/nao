@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -16,7 +17,8 @@ var draftCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		path, remove, err := packer.LoadMainDraft()
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		defer remove()
@@ -27,16 +29,19 @@ var draftCmd = &cobra.Command{
 		bin.Stdin = os.Stdin
 
 		if err = bin.Run(); err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		content, err := ioutil.ReadFile(path)
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		if err = packer.OverwriteMainDraft(content); err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 	},
 }

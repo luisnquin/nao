@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/luisnquin/nao/src/core"
 	"github.com/luisnquin/nao/src/packer"
@@ -15,7 +18,8 @@ var lsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		list, err := packer.ListNaoSets()
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		header := table.Row{"ID", "NAME", "LAST UPDATE"}
@@ -23,7 +27,7 @@ var lsCmd = &cobra.Command{
 
 		for _, item := range list {
 			rows = append(rows, table.Row{
-				item.Hash[:10], item.Name,
+				item.Hash[:10], item.Tag,
 				timeago.English.Format(item.LastUpdate),
 			})
 		}

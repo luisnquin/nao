@@ -3,6 +3,7 @@ package packer
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 )
 
@@ -27,7 +28,7 @@ func LoadUserData(dirPath string) (Data, error) {
 	}
 
 	err = json.NewDecoder(file).Decode(&data)
-	if err != nil {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return data, err
 	}
 

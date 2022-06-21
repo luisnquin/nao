@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/luisnquin/nao/src/config"
 	"github.com/luisnquin/nao/src/core"
 	"github.com/spf13/cobra"
 )
@@ -11,6 +15,8 @@ var root = &cobra.Command{
 	Long: `A tool to manage your notes or other types of files without
 		worry about the path where it is, safe and agile.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(config.App)
+
 		switch length := len(args); {
 		case length == 0:
 			// TODO: if draftByDefaultDisabled ...
@@ -28,7 +34,8 @@ var root = &cobra.Command{
 
 func Execute() {
 	if err := root.Execute(); err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }
 

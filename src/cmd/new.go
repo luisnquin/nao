@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -25,18 +26,21 @@ var newCmd = &cobra.Command{ // editor as a flag
 		bin.Stdin = os.Stdin
 
 		if err := bin.Run(); err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		content, err := ioutil.ReadAll(file)
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		hash := strings.TrimSuffix(path.Base(file.Name()), ".tmp")
 
 		if err = packer.SaveContent(hash, string(content)); err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 	},
 }

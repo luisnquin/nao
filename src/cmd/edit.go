@@ -27,7 +27,8 @@ var editCmd = &cobra.Command{
 
 		err = ioutil.WriteFile(file.Name(), []byte(set.Content), 0644)
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		bin := exec.CommandContext(cmd.Context(), "nano", file.Name())
@@ -36,17 +37,20 @@ var editCmd = &cobra.Command{
 		bin.Stdin = os.Stdin
 
 		if err = bin.Run(); err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		content, err := ioutil.ReadFile(file.Name())
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		err = packer.SaveContent(key, string(content))
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 	},
 	TraverseChildren: true,

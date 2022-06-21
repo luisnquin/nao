@@ -20,12 +20,13 @@ import (
 
 type (
 	Data struct {
+		LastSet   string         `json:"lastSet"`
 		NaoSet    map[string]Set `json:"naoSet"`
 		MainDraft Set            `json:"mainDraft"`
 	}
 
 	Set struct {
-		Name       string    `json:"name,omitempty"` // TODO: It should be named as 'Tag'
+		Tag        string    `json:"tag,omitempty"` // TODO: It should be named as 'Tag'
 		Content    string    `json:"content"`
 		LastUpdate time.Time `json:"lastUpdate"`
 	}
@@ -33,7 +34,7 @@ type (
 
 type Window struct {
 	Hash       string
-	Name       string
+	Tag        string
 	LastUpdate time.Time
 }
 
@@ -78,23 +79,27 @@ func NewCached() (f *os.File, remove func()) {
 
 	err := os.MkdirAll(cacheDir, os.ModePerm)
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	file, err := os.Create(cacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	return file, func() {
 		err = file.Close()
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		err = os.Remove(file.Name())
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 	}
 }
@@ -104,18 +109,21 @@ func NewCachedIn(path string) (f *os.File, close func()) {
 
 	file, err := os.Create(path + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	return file, func() {
 		err = file.Close()
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
 		err = os.Remove(file.Name())
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 	}
 }
@@ -154,7 +162,7 @@ func SaveContent(key string, content string) error { // TODO: add the capacibili
 	}
 
 	data.NaoSet[key] = Set{
-		Name:       autoname.Generate("-"),
+		Tag:        autoname.Generate("-"),
 		Content:    content,
 		LastUpdate: time.Now(),
 	}
@@ -205,7 +213,7 @@ func ListNaoSets() ([]Window, error) {
 	for hash, set := range data.NaoSet {
 		list = append(list, Window{
 			Hash:       hash,
-			Name:       set.Name,
+			Tag:        set.Tag,
 			LastUpdate: set.LastUpdate,
 		})
 	}
