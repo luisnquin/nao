@@ -7,11 +7,11 @@ import (
 
 	"github.com/ProtonMail/go-appdir"
 	"github.com/google/uuid"
-	"github.com/luisnquin/nao/src/core"
+	"github.com/luisnquin/nao/src/constants"
 )
 
 func NewCached() (*os.File, func(), error) {
-	cacheDir := appdir.New(core.AppName).UserCache()
+	cacheDir := appdir.New(constants.AppName).UserCache()
 
 	err := os.MkdirAll(cacheDir, os.ModePerm)
 	if err != nil {

@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/cip8/autoname"
+	"github.com/google/uuid"
 	"github.com/luisnquin/nao/src/security"
-	"github.com/luisnquin/nao/src/utils"
 )
 
 var ErrSetNotFound error = errors.New("set not found")
@@ -55,7 +55,7 @@ func (d *Box) ModifySetTag(key string, tag string) error {
 }
 
 func (d *Box) NewSet(content string) (string, error) {
-	key := utils.NewKey()
+	key := d.newKey()
 
 	d.NaoSet[key] = Set{
 		Tag:        autoname.Generate("-"),
@@ -69,7 +69,7 @@ func (d *Box) NewSet(content string) (string, error) {
 }
 
 func (d *Box) NewSetWithTag(content, tag string) (string, error) {
-	key := utils.NewKey()
+	key := d.newKey()
 
 	d.NaoSet[key] = Set{
 		Tag:        tag,
@@ -152,4 +152,8 @@ func (d *Box) updateDataFile() error {
 	}
 
 	return ioutil.WriteFile(d.filePath, content, 0644)
+}
+
+func (d *Box) newKey() string {
+	return strings.ReplaceAll(uuid.NewString(), "-", "")
 }

@@ -3,14 +3,15 @@ package helper
 import (
 	"io/ioutil"
 	"os"
+	"strings"
 
+	"github.com/google/uuid"
 	"github.com/luisnquin/nao/src/config"
-	"github.com/luisnquin/nao/src/utils"
 )
 
 func LoadContentInCache(key, content string) (*os.File, func(), error) {
 	if key == "" {
-		key = utils.NewKey()
+		key = strings.ReplaceAll(uuid.NewString(), "-", "")
 	}
 
 	f, remove, err := NewCachedIn(config.App.Dirs.UserCache() + key + ".tmp")

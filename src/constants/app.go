@@ -1,4 +1,4 @@
-package core
+package constants
 
 const (
 	AppName string = "nao"
