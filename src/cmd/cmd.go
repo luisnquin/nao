@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/luisnquin/nao/src/core"
-	"github.com/luisnquin/nao/src/data"
 	"github.com/spf13/cobra"
 )
 
@@ -15,8 +14,6 @@ var root = &cobra.Command{
 	Long: `A tool to manage your notes or other types of files without
 		worry about the path where it is, agile and safe if you want`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(data.Box)
-
 		switch length := len(args); {
 		case length == 0:
 			// TODO: if draftByDefaultDisabled ...

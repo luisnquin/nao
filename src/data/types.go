@@ -3,11 +3,13 @@ package data
 import "time"
 
 type (
-	Data struct {
+	Box struct {
 		// Is the key of the set.
 		LastAccess string         `json:"lastSet"`
 		NaoSet     map[string]Set `json:"naoSet"`
-		MainDraft  Set            `json:"mainDraft"`
+		MainSet    Set            `json:"mainDraft"`
+		password   string
+		filePath   string
 	}
 
 	Set struct {
@@ -22,3 +24,18 @@ type Window struct {
 	Tag        string
 	LastUpdate time.Time
 }
+
+type (
+	SetView struct {
+		Tag        string
+		Key        string
+		Content    string
+		LastUpdate time.Time
+	}
+
+	SetViewWithoutContent struct {
+		Tag        string
+		Key        string
+		LastUpdate time.Time
+	}
+)

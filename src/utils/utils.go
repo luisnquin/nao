@@ -1,12 +1,11 @@
 package utils
 
 import (
-	"encoding/json"
-	"io"
+	"strings"
+
+	"github.com/google/uuid"
 )
 
-func EncodeToJSONIndent(b io.Writer, content any) error {
-	e := json.NewEncoder(b)
-	e.SetIndent("", "\t")
-	return e.Encode(content)
+func NewKey() string {
+	return strings.ReplaceAll(uuid.NewString(), "-", "")
 }

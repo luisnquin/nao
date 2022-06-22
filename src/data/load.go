@@ -9,13 +9,9 @@ import (
 	"github.com/luisnquin/nao/src/config"
 )
 
-var Box Data
+func NewUserBox() *Box {
+	var box Box
 
-func init() {
-	loadUserData()
-}
-
-func loadUserData() {
 	dataDir := config.App.Dirs.UserData()
 
 	err := os.MkdirAll(dataDir, os.ModePerm)
@@ -39,11 +35,19 @@ func loadUserData() {
 
 	defer f.Close()
 
-	err = json.NewDecoder(f).Decode(&Box)
+	err = json.NewDecoder(f).Decode(&box)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	} // Do a recursive call in case that the decoder throws an error due to content file
 
+	box.filePath = dataDir + "/data.json"
+
+	if box.NaoSet == nil {
+		box.NaoSet = make(map[string]Set, 0)
+	}
+
 	// helper.AskPassword("Enter your password")
+
+	return &box
 }

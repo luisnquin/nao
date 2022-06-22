@@ -5,10 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
-	"strings"
 
-	"github.com/luisnquin/nao/src/packer"
+	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
 )
 
@@ -17,10 +16,17 @@ var newCmd = &cobra.Command{ // editor as a flag
 	Short: "Creates a new nao file",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		file, close := packer.NewCached()
-		defer close()
+		box := data.NewUserBox()
 
-		bin := exec.CommandContext(cmd.Context(), "nano", file.Name())
+		f, remove, err := helper.NewCached()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+
+		defer remove()
+
+		bin := exec.CommandContext(cmd.Context(), "nano", f.Name())
 		bin.Stderr = os.Stderr
 		bin.Stdout = os.Stdout
 		bin.Stdin = os.Stdin
@@ -30,15 +36,14 @@ var newCmd = &cobra.Command{ // editor as a flag
 			os.Exit(1)
 		}
 
-		content, err := ioutil.ReadAll(file)
+		content, err := ioutil.ReadAll(f)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 
-		hash := strings.TrimSuffix(path.Base(file.Name()), ".tmp")
-
-		if err = packer.SaveContent(hash, string(content)); err != nil {
+		_, err = box.NewSet(string(content))
+		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}

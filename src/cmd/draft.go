@@ -6,7 +6,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/luisnquin/nao/src/packer"
+	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +16,9 @@ var mainCmd = &cobra.Command{
 	Short: "Main draft, like a playground file",
 	Long:  "...",
 	Run: func(cmd *cobra.Command, args []string) {
-		path, remove, err := packer.LoadMainDraft()
+		box := data.NewUserBox()
+
+		f, remove, err := helper.LoadContentInCache("", box.GetMainSet().Content)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -23,7 +26,7 @@ var mainCmd = &cobra.Command{
 
 		defer remove()
 
-		bin := exec.CommandContext(cmd.Context(), "nano", path)
+		bin := exec.CommandContext(cmd.Context(), "nano", f.Name())
 		bin.Stderr = os.Stderr
 		bin.Stdout = os.Stdout
 		bin.Stdin = os.Stdin
@@ -33,13 +36,15 @@ var mainCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		content, err := ioutil.ReadFile(path)
+		content, err := ioutil.ReadAll(f)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 
-		if err = packer.OverwriteMainDraft(content); err != nil {
+		fmt.Println(string(content))
+
+		if err = box.ModifyMainNote(string(content)); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}

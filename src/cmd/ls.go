@@ -1,12 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/jedib0t/go-pretty/table"
-	"github.com/luisnquin/nao/src/core"
-	"github.com/luisnquin/nao/src/packer"
+	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
 	"github.com/xeonx/timeago"
 )
@@ -16,22 +13,15 @@ var lsCmd = &cobra.Command{
 	Short: "See a list of all available nao files",
 	Long:  "...",
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := packer.ListNaoSets()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		box := data.NewUserBox()
 
 		header := table.Row{"ID", "TAG", "LAST UPDATE"}
 		rows := make([]table.Row, 0)
 
-		for _, item := range list {
-			rows = append(rows, table.Row{
-				item.Hash[:10], item.Tag,
-				timeago.English.Format(item.LastUpdate),
-			})
+		for _, item := range box.ListSetWithHiddenContent() {
+			rows = append(rows, table.Row{item.Key[:10], item.Tag, timeago.English.Format(item.LastUpdate)})
 		}
 
-		core.RenderTable(header, rows)
+		helper.RenderTable(header, rows)
 	},
 }

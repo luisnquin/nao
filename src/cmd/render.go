@@ -5,7 +5,7 @@ import (
 	"os"
 
 	markdown "github.com/MichaelMure/go-term-markdown"
-	"github.com/luisnquin/nao/src/packer"
+	"github.com/luisnquin/nao/src/data"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,8 @@ var renderCmd = &cobra.Command{
 			return
 		}
 
-		_, set, err := packer.SearchInSet(args[0])
+		box := data.NewUserBox()
+		_, set, err := box.SearchSetByPattern(args[0])
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
