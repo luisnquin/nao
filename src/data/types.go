@@ -4,12 +4,15 @@ import "time"
 
 type (
 	Box struct {
-		// Is the key of the set.
+		data     BoxData
+		password string
+		filePath string
+	}
+
+	BoxData struct {
 		LastAccess string         `json:"lastSet"`
 		NaoSet     map[string]Set `json:"naoSet"`
 		MainSet    Set            `json:"mainDraft"`
-		password   string
-		filePath   string
 	}
 
 	Set struct {

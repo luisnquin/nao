@@ -3,9 +3,9 @@ package config
 import "github.com/ProtonMail/go-appdir"
 
 type AppConfig struct {
-	Editor    Editor    `json:"editor"`
-	Behaviors Behaviors `json:"behaviors"`
-	Dirs      appdir.Dirs
+	Editor      Editor      `json:"editor"`
+	Preferences Preferences `json:"preferences"`
+	appdir.Dirs
 }
 
 type Editor struct {
@@ -13,7 +13,7 @@ type Editor struct {
 	SubCommands []string `yaml:"subCommands"`
 }
 
-type Behaviors struct {
+type Preferences struct {
 	RedirectTo     string `json:"redirectTo"`
 	MergeSeparator string `json:"mergeSeparator"`
 }

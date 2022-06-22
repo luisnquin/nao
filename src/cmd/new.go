@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
@@ -26,12 +27,12 @@ var newCmd = &cobra.Command{ // editor as a flag
 
 		defer remove()
 
-		bin := exec.CommandContext(cmd.Context(), "nano", f.Name())
-		bin.Stderr = os.Stderr
-		bin.Stdout = os.Stdout
-		bin.Stdin = os.Stdin
+		editor := exec.CommandContext(cmd.Context(), "nano", f.Name())
+		editor.Stderr = os.Stderr
+		editor.Stdout = os.Stdout
+		editor.Stdin = os.Stdin
 
-		if err := bin.Run(); err != nil {
+		if err := editor.Run(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -48,4 +49,9 @@ var newCmd = &cobra.Command{ // editor as a flag
 			os.Exit(1)
 		}
 	},
+}
+
+func init() {
+	newCmd.PersistentFlags().String("from", "", constants.AppName+" new --from=<hash>\n\n"+
+		constants.AppName+" new --from=1e2487174d\n") // missing support
 }

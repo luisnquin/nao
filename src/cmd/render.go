@@ -5,6 +5,7 @@ import (
 	"os"
 
 	markdown "github.com/MichaelMure/go-term-markdown"
+	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 	"github.com/spf13/cobra"
 )
@@ -13,15 +14,9 @@ var renderCmd = &cobra.Command{
 	Use:   "render",
 	Short: "Render the file to markdown, customizable",
 	Long:  "...",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			cmd.Usage()
-
-			return
-		}
-
-		box := data.NewUserBox()
-		_, set, err := box.SearchSetByPattern(args[0])
+		_, set, err := data.NewUserBox().SearchSetByKeyTagPattern(args[0])
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -31,4 +26,9 @@ var renderCmd = &cobra.Command{
 
 		fmt.Fprintln(os.Stdout, string(c))
 	},
+}
+
+func init() {
+	renderCmd.PersistentFlags().String("editor", "", constants.AppName+" render --editor=<name>\n\n"+constants.AppName+
+		" render --editor=code\n") // missing support
 }

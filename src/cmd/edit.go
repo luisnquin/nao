@@ -12,19 +12,18 @@ import (
 )
 
 var editCmd = &cobra.Command{
-	Use:   "edit",
-	Short: "Edit almost any file",
-	Long:  `...`,
+	Use:     "edit",
+	Short:   "Edit almost any file",
+	Long:    `...`,
+	Example: "nao edit <hash>\n\nnao edit 1a9ebab0e5",
+	Args:    cobra.ExactValidArgs(1),
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return data.NewUserBox().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		box := data.NewUserBox()
 
-		if len(args) == 0 {
-			cmd.Usage()
-
-			return
-		}
-
-		key, set, err := box.SearchSetByPattern(args[0])
+		key, set, err := box.SearchSetByKeyTagPattern(args[0])
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -38,12 +37,12 @@ var editCmd = &cobra.Command{
 
 		defer remove()
 
-		bin := exec.CommandContext(cmd.Context(), "nano", f.Name())
-		bin.Stderr = os.Stderr
-		bin.Stdout = os.Stdout
-		bin.Stdin = os.Stdin
+		editor := exec.CommandContext(cmd.Context(), "nano", f.Name())
+		editor.Stderr = os.Stderr
+		editor.Stdout = os.Stdout
+		editor.Stdin = os.Stdin
 
-		if err = bin.Run(); err != nil {
+		if err = editor.Run(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}

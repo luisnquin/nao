@@ -35,7 +35,7 @@ func NewUserBox() *Box {
 
 	defer f.Close()
 
-	err = json.NewDecoder(f).Decode(&box)
+	err = json.NewDecoder(f).Decode(&box.data)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -43,8 +43,8 @@ func NewUserBox() *Box {
 
 	box.filePath = dataDir + "/data.json"
 
-	if box.NaoSet == nil {
-		box.NaoSet = make(map[string]Set, 0)
+	if box.data.NaoSet == nil {
+		box.data.NaoSet = make(map[string]Set, 0)
 	}
 
 	// helper.AskPassword("Enter your password")
