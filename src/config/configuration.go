@@ -7,14 +7,14 @@ import (
 	"os"
 
 	"github.com/ProtonMail/go-appdir"
-	"github.com/luisnquin/nao/src/core"
+	"github.com/luisnquin/nao/src/constants"
 	"gopkg.in/yaml.v3"
 )
 
 var App AppConfig
 
 func init() {
-	App.Dirs = appdir.New(core.AppName)
+	App.Dirs = appdir.New(constants.AppName)
 
 	file, err := os.Open(App.Dirs.UserConfig() + "/nao-config.yaml")
 	if err != nil {

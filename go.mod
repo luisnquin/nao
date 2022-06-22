@@ -3,6 +3,7 @@ module github.com/luisnquin/nao
 go 1.18
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.3.5
 	github.com/MichaelMure/go-term-markdown v0.1.4
 	github.com/ProtonMail/go-appdir v1.1.0
 	github.com/cip8/autoname v1.0.1
@@ -10,12 +11,10 @@ require (
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/spf13/cobra v1.4.0
 	github.com/xeonx/timeago v1.0.0-rc4
-	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.3.5 // indirect
 	github.com/MichaelMure/go-term-text v0.3.1 // indirect
 	github.com/alecthomas/chroma v0.7.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef // indirect
@@ -45,5 +44,6 @@ require (
 	golang.org/x/image v0.0.0-20191206065243-da761ea9ff43 // indirect
 	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7 // indirect
 	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c // indirect
+	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
 	golang.org/x/text v0.3.5 // indirect
 )
