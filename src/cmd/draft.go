@@ -42,8 +42,6 @@ var mainCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Println(string(content))
-
 		if err = box.ModifyMainNote(string(content)); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)

@@ -16,7 +16,6 @@ var root = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		switch length := len(args); {
 		case length == 0:
-			// TODO: if draftByDefaultDisabled ...
 			mainCmd.Run(cmd, args)
 
 		case length == 1:
