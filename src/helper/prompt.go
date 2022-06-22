@@ -1,32 +1,57 @@
 package helper
 
-import (
-	"fmt"
-	"os"
-	"syscall"
+import "github.com/AlecAivazis/survey/v2"
 
-	"golang.org/x/term"
-)
+func Ask(label string) (string, error) {
+	var input string
 
-func Prompt(label string) string {
-	fmt.Fprintln(os.Stdout, label)
+	err := survey.AskOne(&survey.Input{
+		Message: label,
+	}, &input, survey.WithValidator(survey.Required), survey.WithIcons(func(is *survey.IconSet) {
+		is.Question = survey.Icon{
+			Text: "➤",
+		}
+		is.Error = survey.Icon{
+			Text: "⚠",
+		}
+	}))
 
-	var line string
-
-	fmt.Scanln(&line)
-
-	return line
+	return input, err
 }
 
-func PasswordPrompt(label string) (string, error) {
-	fmt.Fprintln(os.Stdout, label)
+func AskWithSuggests(label string, suggestions []string) (string, error) {
+	var input string
 
-	password, err := term.ReadPassword(syscall.Stdin)
-	if err != nil {
-		return "", err
-	}
+	err := survey.AskOne(&survey.Input{
+		Message: label,
+		Suggest: func(toComplete string) []string {
+			return suggestions
+		},
+	}, &input, survey.WithValidator(survey.Required), survey.WithIcons(func(is *survey.IconSet) {
+		is.Question = survey.Icon{
+			Text: "➤",
+		}
+		is.Error = survey.Icon{
+			Text: "⚠",
+		}
+	}))
 
-	fmt.Fprintln(os.Stdout)
+	return input, err
+}
 
-	return string(password), err
+func AskPassword(label string) (string, error) {
+	var input string
+
+	err := survey.AskOne(&survey.Password{
+		Message: label,
+	}, &input, survey.WithValidator(survey.Required), survey.WithIcons(func(is *survey.IconSet) {
+		is.Question = survey.Icon{
+			Text: "➤",
+		}
+		is.Error = survey.Icon{
+			Text: "⚠",
+		}
+	}))
+
+	return input, err
 }

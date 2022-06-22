@@ -1,28 +1,15 @@
 package data
 
-import "time"
+func (d *Data) GetSet(key string) (string, error)
 
-type (
-	Data struct {
-		// Is the key of the set.
-		LastAccess string         `json:"lastSet"`
-		NaoSet     map[string]Set `json:"naoSet"`
-		MainDraft  Set            `json:"mainDraft"`
-	}
+func (d *Data) ModifySet(key string, content string) error
 
-	Set struct {
-		Tag        string    `json:"tag,omitempty"`
-		Content    string    `json:"content"`
-		LastUpdate time.Time `json:"lastUpdate"`
-	}
-)
+func (d *Data) SearchInSets(pattern string) (string, Set, error)
 
-type Window struct {
-	Hash       string
-	Tag        string
-	LastUpdate time.Time
-}
+func (d *Data) ListSets() map[string]Set
 
-func init() {
-	
-}
+func (d *Data) ListSetWithHiddenContent() []Window
+
+func (d *Data) GetMainNote() string
+
+func (d *Data) ModifyMainNote(content string) error
