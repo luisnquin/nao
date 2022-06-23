@@ -35,6 +35,10 @@ var mergeCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
+			if set.Content == "" {
+				continue
+			}
+
 			if !prevent {
 				err = box.DeleteSet(k)
 				if err != nil {
