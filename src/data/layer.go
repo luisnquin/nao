@@ -9,6 +9,7 @@ import (
 
 	"github.com/cip8/autoname"
 	"github.com/google/uuid"
+	"github.com/luisnquin/nao/src/config"
 )
 
 var ErrSetNotFound error = errors.New("set not found")
@@ -34,7 +35,7 @@ func (d *Box) ModifySet(key string, content string) error {
 
 	d.data.NaoSet[key] = set
 
-	return d.updateDataFile()
+	return d.updateFile()
 }
 
 func (d *Box) ModifySetTag(key string, tag string) error {
@@ -49,7 +50,7 @@ func (d *Box) ModifySetTag(key string, tag string) error {
 
 	d.data.NaoSet[key] = set
 
-	return d.updateDataFile()
+	return d.updateFile()
 }
 
 func (d *Box) NewSet(content, contentType string) (string, error) {
@@ -63,7 +64,7 @@ func (d *Box) NewSet(content, contentType string) (string, error) {
 		Version:    1,
 	}
 
-	return key, d.updateDataFile()
+	return key, d.updateFile()
 }
 
 func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
@@ -77,7 +78,7 @@ func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 		Version:    1,
 	}
 
-	return key, d.updateDataFile()
+	return key, d.updateFile()
 }
 
 func (d *Box) SearchSetByKeyPattern(pattern string) (string, Set, error) {
@@ -122,7 +123,7 @@ func (d *Box) DeleteSet(key string) error {
 
 	delete(d.data.NaoSet, key)
 
-	return d.updateDataFile()
+	return d.updateFile()
 }
 
 func (d *Box) GetMainSet() Set {
@@ -134,7 +135,7 @@ func (d *Box) ModifyMainSet(content string) error {
 	d.data.MainSet.LastUpdate = time.Now()
 	d.data.MainSet.Version++
 
-	return d.updateDataFile()
+	return d.updateFile()
 }
 
 func (d *Box) CleanMainSet() error {
@@ -142,7 +143,7 @@ func (d *Box) CleanMainSet() error {
 	d.data.MainSet.LastUpdate = time.Now()
 	d.data.MainSet.Version++
 
-	return d.updateDataFile()
+	return d.updateFile()
 }
 
 func (d *Box) ListSets() []SetView {
@@ -188,22 +189,13 @@ func (d *Box) ListAllKeys() []string {
 	return keys
 }
 
-func (d *Box) updateDataFile() error {
+func (d *Box) updateFile() error {
 	content, err := json.MarshalIndent(d.data, "", "\t")
 	if err != nil {
 		return err
 	}
 
-	/*
-		if d.password != "" {
-			content, err = security.EncryptContent([]byte(d.password), content)
-			if err != nil {
-				return err
-			}
-		}
-	*/
-
-	return ioutil.WriteFile(d.filePath, content, 0644)
+	return ioutil.WriteFile(config.App.Paths.DataFile, content, 0644)
 }
 
 func (d *Box) newKey() string {

@@ -14,7 +14,7 @@ func LoadContentInCache(key, content string) (*os.File, func(), error) {
 		key = strings.ReplaceAll(uuid.NewString(), "-", "")
 	}
 
-	f, remove, err := NewCachedIn(config.App.Dirs.UserCache() + key + ".tmp")
+	f, remove, err := NewCachedIn(config.App.Paths.CacheDir + key + ".tmp")
 	if err != nil {
 		return nil, nil, err
 	}

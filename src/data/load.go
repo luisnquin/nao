@@ -13,9 +13,7 @@ import (
 func NewUserBox() *Box {
 	var box Box
 
-	dataDir := config.App.Dirs.UserData()
-
-	err := os.MkdirAll(dataDir, os.ModePerm)
+	err := os.MkdirAll(config.App.Paths.DataDir, os.ModePerm)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -23,10 +21,10 @@ func NewUserBox() *Box {
 
 	var f *os.File
 
-	if _, err = os.Stat(dataDir + "/data.json"); errors.Is(err, os.ErrNotExist) {
-		f, err = os.Create(dataDir + "/data.json")
+	if _, err = os.Stat(config.App.Paths.DataFile); errors.Is(err, os.ErrNotExist) {
+		f, err = os.Create(config.App.Paths.DataFile)
 	} else {
-		f, err = os.Open(dataDir + "/data.json")
+		f, err = os.Open(config.App.Paths.DataFile)
 	}
 
 	if err != nil {
@@ -41,8 +39,6 @@ func NewUserBox() *Box {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-
-	box.filePath = dataDir + "/data.json"
 
 	if box.data.NaoSet == nil {
 		box.data.NaoSet = make(map[string]Set, 0)

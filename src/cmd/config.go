@@ -18,7 +18,7 @@ var configCmd = &cobra.Command{
 	Example: "nao config",
 	Run: func(cmd *cobra.Command, args []string) {
 		if edit, _ := cmd.Flags().GetBool("edit"); edit {
-			editor := exec.CommandContext(cmd.Context(), "nano", config.App.UserConfig()+"/nao-config.yaml")
+			editor := exec.CommandContext(cmd.Context(), "nano", config.App.Paths.ConfigFile)
 			editor.Stdout = os.Stdout
 			editor.Stderr = os.Stderr
 			editor.Stdin = os.Stdin
@@ -31,7 +31,7 @@ var configCmd = &cobra.Command{
 			return
 		}
 
-		content, err := ioutil.ReadFile(config.App.Dirs.UserConfig() + "/nao-config.yaml")
+		content, err := ioutil.ReadFile(config.App.Paths.ConfigFile)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)

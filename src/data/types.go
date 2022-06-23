@@ -6,7 +6,6 @@ type (
 	Box struct {
 		data     BoxData
 		password string
-		filePath string
 	}
 
 	BoxData struct {

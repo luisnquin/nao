@@ -14,30 +14,34 @@ import (
 var App AppConfig
 
 func init() {
-	App.Dirs = appdir.New(constants.AppName)
+	dirs := appdir.New(constants.AppName)
+	App.Paths.ConfigDir = dirs.UserConfig()
+	App.Paths.CacheDir = dirs.UserCache()
+	App.Paths.DataDir = dirs.UserData()
 
-	file, err := os.Open(App.Dirs.UserConfig() + "/nao-config.yaml")
+	App.Paths.ConfigFile = App.Paths.ConfigDir + "/nao-config.yaml"
+	App.Paths.DataFile = App.Paths.DataDir + "/data.json"
+
+	file, err := os.Open(App.Paths.ConfigFile)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 
-		configDir := App.Dirs.UserConfig()
-
-		err = os.MkdirAll(configDir, os.ModePerm)
+		err = os.MkdirAll(dirs.UserConfig(), os.ModePerm)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 
-		_, err = os.Create(configDir + "/nao-config.yaml")
+		_, err = os.Create(App.Paths.ConfigFile)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 
-		return // There's no need to try to read it again
+		return
 	}
 
 	err = yaml.NewDecoder(file).Decode(&App)

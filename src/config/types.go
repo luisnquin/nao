@@ -1,11 +1,17 @@
 package config
 
-import "github.com/ProtonMail/go-appdir"
-
 type AppConfig struct {
-	Editor      Editor      `json:"editor"`
-	Preferences Preferences `json:"preferences"`
-	appdir.Dirs
+	Editor      Editor      `yaml:"editor"`
+	Preferences Preferences `yaml:"preferences"`
+	Paths       Paths
+}
+
+type Paths struct {
+	ConfigFile string
+	ConfigDir  string
+	DataFile   string
+	DataDir    string
+	CacheDir   string
 }
 
 type Editor struct {
@@ -14,6 +20,6 @@ type Editor struct {
 }
 
 type Preferences struct {
-	RedirectTo     string `json:"redirectTo"`
-	MergeSeparator string `json:"mergeSeparator"`
+	RedirectTo     string `yaml:"redirectTo"`
+	MergeSeparator string `yaml:"mergeSeparator"`
 }
