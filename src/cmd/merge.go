@@ -7,7 +7,6 @@ import (
 
 	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
-	"github.com/luisnquin/nao/src/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +30,7 @@ var mergeCmd = &cobra.Command{
 		for i, arg := range args {
 			k, set, err := box.SearchSetByKeyTagPattern(arg)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "set %s not found", arg)
+				fmt.Fprintf(os.Stderr, "set %s not found\n", arg)
 				os.Exit(1)
 			}
 
@@ -62,7 +61,7 @@ var mergeCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Fprintf(os.Stdout, "%s has been merged to %s\n", utils.PrettyJoin(oldKeys), key[:10])
+		fmt.Fprintf(os.Stdout, "(%s) ⥤ %s\n", strings.Join(oldKeys, ", "), key[:10])
 	},
 }
 

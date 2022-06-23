@@ -4,8 +4,7 @@ import "time"
 
 type (
 	Box struct {
-		data     BoxData
-		password string
+		data BoxData
 	}
 
 	BoxData struct {

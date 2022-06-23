@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 
 	"github.com/luisnquin/nao/src/config"
 	"github.com/luisnquin/nao/src/constants"
+	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
 )
 
@@ -18,17 +18,24 @@ var configCmd = &cobra.Command{
 	Example: "nao config",
 	Run: func(cmd *cobra.Command, args []string) {
 		if edit, _ := cmd.Flags().GetBool("edit"); edit {
-			editor := exec.CommandContext(cmd.Context(), "nano", config.App.Paths.ConfigFile)
-			editor.Stdout = os.Stdout
-			editor.Stderr = os.Stderr
-			editor.Stdin = os.Stdin
+			editor, _ := cmd.Flags().GetString("editor")
 
-			if err := editor.Run(); err != nil {
+			run, err := helper.PrepareToRun(cmd.Context(), helper.EditorOptions{
+				Path:   config.App.Paths.ConfigFile,
+				Editor: editor,
+			})
+
+			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
 
-			return
+			if err = run(); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+
+			os.Exit(0)
 		}
 
 		content, err := ioutil.ReadFile(config.App.Paths.ConfigFile)
@@ -43,4 +50,5 @@ var configCmd = &cobra.Command{
 
 func init() {
 	configCmd.Flags().Bool("edit", false, constants.AppName+" config --edit")
+	configCmd.Flags().String("editor", "", constants.AppName+" config --editor=<?>")
 }

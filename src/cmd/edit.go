@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 
+	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
@@ -15,13 +15,15 @@ var editCmd = &cobra.Command{
 	Use:     "edit",
 	Short:   "Edit almost any file",
 	Long:    `...`,
-	Example: "nao edit <hash>\n\nnao edit 1a9ebab0e5",
+	Example: "nao edit <hash>/<tag>\n\nnao edit 1a9ebab0e5",
 	Args:    cobra.ExactValidArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return data.NewUserBox().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		box := data.NewUserBox()
+
+		editor, _ := cmd.Flags().GetString("editor")
 
 		key, set, err := box.SearchSetByKeyTagPattern(args[0])
 		if err != nil {
@@ -37,12 +39,17 @@ var editCmd = &cobra.Command{
 
 		defer remove()
 
-		editor := exec.CommandContext(cmd.Context(), "nano", f.Name())
-		editor.Stderr = os.Stderr
-		editor.Stdout = os.Stdout
-		editor.Stdin = os.Stdin
+		run, err := helper.PrepareToRun(cmd.Context(), helper.EditorOptions{
+			Path:   f.Name(),
+			Editor: editor,
+		})
 
-		if err = editor.Run(); err != nil {
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+
+		if err = run(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -58,4 +65,9 @@ var editCmd = &cobra.Command{
 			os.Exit(1)
 		}
 	},
+}
+
+func init() {
+	editCmd.PersistentFlags().String("editor", "", constants.AppName+" render --editor=<name>\n\n"+constants.AppName+
+		" render --editor=code\n")
 }

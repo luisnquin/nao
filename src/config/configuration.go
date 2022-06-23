@@ -49,4 +49,9 @@ func init() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+
+	if App.Editor.Name == "" {
+		App.Editor.SubCommands = nil
+		App.Editor.Name = "nano"
+	}
 }

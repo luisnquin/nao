@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 
 	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
@@ -19,6 +18,8 @@ var newCmd = &cobra.Command{ // editor as a flag
 	Run: func(cmd *cobra.Command, args []string) {
 		box := data.NewUserBox()
 
+		from, editor, tag := parseNewCmdFlags(cmd)
+
 		f, remove, err := helper.NewCached()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -27,12 +28,31 @@ var newCmd = &cobra.Command{ // editor as a flag
 
 		defer remove()
 
-		editor := exec.CommandContext(cmd.Context(), "nano", f.Name())
-		editor.Stderr = os.Stderr
-		editor.Stdout = os.Stdout
-		editor.Stdin = os.Stdin
+		if from != "" {
+			_, set, err := box.SearchSetByKeyTagPattern(from)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
 
-		if err := editor.Run(); err != nil {
+			err = ioutil.WriteFile(f.Name(), []byte(set.Content), 0644)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+		}
+
+		run, err := helper.PrepareToRun(cmd.Context(), helper.EditorOptions{
+			Path:   f.Name(),
+			Editor: editor,
+		})
+
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+
+		if err = run(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -48,15 +68,38 @@ var newCmd = &cobra.Command{ // editor as a flag
 			os.Exit(1)
 		}
 
-		_, err = box.NewSet(string(content), constants.TypeDefault)
+		var k string
+
+		if tag != "" {
+			k, err = box.NewSetWithTag(string(content), constants.TypeDefault, tag)
+		} else {
+			k, err = box.NewSet(string(content), constants.TypeDefault)
+		}
+
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+
+		fmt.Fprintln(os.Stdout, k[:10])
 	},
 }
 
 func init() {
-	newCmd.PersistentFlags().String("from", "", constants.AppName+" new --from=<hash>\n\n"+
-		constants.AppName+" new --from=1e2487174d\n") // missing support
+	newCmd.Flags().String("from", "", constants.AppName+" new --from=<hash>\n"+
+		constants.AppName+" new --from=1e2487174d\n")
+
+	newCmd.Flags().String("editor", "", constants.AppName+"new --editor=<?>\n"+
+		constants.AppName+" new --editor=vim\n")
+
+	newCmd.Flags().String("tag", "", constants.AppName+"new --tag=<name>\n"+
+		constants.AppName+" new --tag=lucy\n")
+}
+
+func parseNewCmdFlags(cmd *cobra.Command) (string, string, string) {
+	editor, _ := cmd.Flags().GetString("editor")
+	from, _ := cmd.Flags().GetString("from")
+	tag, _ := cmd.Flags().GetString("tag")
+
+	return from, editor, tag
 }

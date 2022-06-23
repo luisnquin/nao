@@ -1,15 +1,11 @@
 package data
 
 import (
-	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"strings"
 	"time"
 
 	"github.com/cip8/autoname"
-	"github.com/google/uuid"
-	"github.com/luisnquin/nao/src/config"
 )
 
 var ErrSetNotFound error = errors.New("set not found")
@@ -69,6 +65,8 @@ func (d *Box) NewSet(content, contentType string) (string, error) {
 
 func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 	key := d.newKey()
+
+	// Check if there's other with the same tag
 
 	d.data.NaoSet[key] = Set{
 		Tag:        tag,
@@ -187,17 +185,4 @@ func (d *Box) ListAllKeys() []string {
 	}
 
 	return keys
-}
-
-func (d *Box) updateFile() error {
-	content, err := json.MarshalIndent(d.data, "", "\t")
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(config.App.Paths.DataFile, content, 0644)
-}
-
-func (d *Box) newKey() string {
-	return strings.ReplaceAll(uuid.NewString(), "-", "")
 }

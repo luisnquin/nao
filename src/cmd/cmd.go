@@ -14,11 +14,11 @@ var root = &cobra.Command{
 	Use:   constants.AppName,
 	Short: constants.AppName + " is a tool to manage your notes",
 	Long: `A tool to manage your notes or other types of files without
-		worry about the path where it is, agile and safe if you want`,
+		worry about the path where it is`,
 	Run: func(cmd *cobra.Command, args []string) {
 		switch len(args) {
 		case 0:
-			mainCmd.Run(cmd, args)
+			cmd.Usage() // latest by default
 
 		case 1:
 			editCmd.Run(cmd, args)
@@ -38,5 +38,5 @@ func Execute() {
 }
 
 func init() {
-	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, mainCmd, editCmd, rmCmd, configCmd)
+	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd)
 }

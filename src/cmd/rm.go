@@ -33,6 +33,8 @@ var rmCmd = &cobra.Command{
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
+
+			fmt.Fprintln(os.Stdout, key)
 		}
 	},
 }

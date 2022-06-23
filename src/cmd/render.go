@@ -5,7 +5,6 @@ import (
 	"os"
 
 	markdown "github.com/MichaelMure/go-term-markdown"
-	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 	"github.com/spf13/cobra"
 )
@@ -26,9 +25,4 @@ var renderCmd = &cobra.Command{
 
 		fmt.Fprintln(os.Stdout, string(c))
 	},
-}
-
-func init() {
-	renderCmd.PersistentFlags().String("editor", "", constants.AppName+" render --editor=<name>\n\n"+constants.AppName+
-		" render --editor=code\n") // missing support
 }
