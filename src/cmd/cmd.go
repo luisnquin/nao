@@ -10,6 +10,12 @@ import (
 
 // add support for fswatch?
 
+/*
+	expose <hash>/<all> <- ( Ctrl+C or q to exit | -d/--detach)
+	import <dir>/<file> <- (path | 'imported' type)
+
+*/
+
 var root = &cobra.Command{
 	Use:   constants.AppName,
 	Short: constants.AppName + " is a tool to manage your notes",
@@ -38,5 +44,5 @@ func Execute() {
 }
 
 func init() {
-	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd)
+	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd, versionCmd)
 }
