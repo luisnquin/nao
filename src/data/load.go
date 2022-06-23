@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/luisnquin/nao/src/config"
@@ -36,18 +37,16 @@ func NewUserBox() *Box {
 	defer f.Close()
 
 	err = json.NewDecoder(f).Decode(&box.data)
-	if err != nil {
+	if err != nil && !errors.Is(err, io.EOF) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
-	} // Do a recursive call in case that the decoder throws an error due to content file
+	}
 
 	box.filePath = dataDir + "/data.json"
 
 	if box.data.NaoSet == nil {
 		box.data.NaoSet = make(map[string]Set, 0)
 	}
-
-	// helper.AskPassword("Enter your password")
 
 	return &box
 }

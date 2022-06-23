@@ -17,8 +17,10 @@ type (
 
 	Set struct {
 		Tag        string    `json:"tag,omitempty"`
+		Type       string    `json:"type"`
 		Content    string    `json:"content"`
 		LastUpdate time.Time `json:"lastUpdate"`
+		Version    int       `json:"version"`
 	}
 )
 
@@ -32,13 +34,17 @@ type (
 	SetView struct {
 		Tag        string
 		Key        string
+		Type       string
 		Content    string
 		LastUpdate time.Time
+		Version    int
 	}
 
 	SetViewWithoutContent struct {
 		Tag        string
 		Key        string
+		Type       string
 		LastUpdate time.Time
+		Version    int
 	}
 )

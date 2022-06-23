@@ -15,11 +15,11 @@ var lsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		box := data.NewUserBox()
 
-		header := table.Row{"ID", "TAG", "LAST UPDATE"}
+		header := table.Row{"ID", "TAG", "TYPE", "LAST UPDATE", "VERSION"}
 		rows := make([]table.Row, 0)
 
-		for _, item := range box.ListSetWithHiddenContent() {
-			rows = append(rows, table.Row{item.Key[:10], item.Tag, timeago.English.Format(item.LastUpdate)})
+		for _, i := range box.ListSetWithHiddenContent() {
+			rows = append(rows, table.Row{i.Key[:10], i.Tag, i.Type, timeago.English.Format(i.LastUpdate), i.Version})
 		}
 
 		helper.RenderTable(header, rows)

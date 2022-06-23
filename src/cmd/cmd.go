@@ -38,5 +38,5 @@ func Execute() {
 }
 
 func init() {
-	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, mainCmd, editCmd, delCmd, cleanCmd)
+	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, mainCmd, editCmd, rmCmd, configCmd)
 }

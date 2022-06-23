@@ -43,7 +43,12 @@ var newCmd = &cobra.Command{ // editor as a flag
 			os.Exit(1)
 		}
 
-		_, err = box.NewSet(string(content))
+		if len(content) == 0 {
+			fmt.Fprintln(os.Stderr, "Empty content, will not be saved!")
+			os.Exit(1)
+		}
+
+		_, err = box.NewSet(string(content), constants.TypeDefault)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)

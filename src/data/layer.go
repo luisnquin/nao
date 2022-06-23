@@ -30,6 +30,7 @@ func (d *Box) ModifySet(key string, content string) error {
 
 	set.LastUpdate = time.Now()
 	set.Content = content
+	set.Version++
 
 	d.data.NaoSet[key] = set
 
@@ -44,31 +45,36 @@ func (d *Box) ModifySetTag(key string, tag string) error {
 
 	set.LastUpdate = time.Now()
 	set.Tag = tag
+	set.Version++
 
 	d.data.NaoSet[key] = set
 
 	return d.updateDataFile()
 }
 
-func (d *Box) NewSet(content string) (string, error) {
+func (d *Box) NewSet(content, contentType string) (string, error) {
 	key := d.newKey()
 
 	d.data.NaoSet[key] = Set{
 		Tag:        autoname.Generate("-"),
 		Content:    content,
+		Type:       contentType,
 		LastUpdate: time.Now(),
+		Version:    1,
 	}
 
 	return key, d.updateDataFile()
 }
 
-func (d *Box) NewSetWithTag(content, tag string) (string, error) {
+func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 	key := d.newKey()
 
 	d.data.NaoSet[key] = Set{
 		Tag:        tag,
+		Type:       contentType,
 		Content:    content,
 		LastUpdate: time.Now(),
+		Version:    1,
 	}
 
 	return key, d.updateDataFile()
@@ -126,6 +132,7 @@ func (d *Box) GetMainSet() Set {
 func (d *Box) ModifyMainSet(content string) error {
 	d.data.MainSet.Content = content
 	d.data.MainSet.LastUpdate = time.Now()
+	d.data.MainSet.Version++
 
 	return d.updateDataFile()
 }
@@ -133,6 +140,7 @@ func (d *Box) ModifyMainSet(content string) error {
 func (d *Box) CleanMainSet() error {
 	d.data.MainSet.Content = ""
 	d.data.MainSet.LastUpdate = time.Now()
+	d.data.MainSet.Version++
 
 	return d.updateDataFile()
 }
@@ -144,7 +152,9 @@ func (d *Box) ListSets() []SetView {
 		sets = append(sets, SetView{
 			Key:        k,
 			Tag:        v.Tag,
+			Type:       v.Type,
 			Content:    v.Content,
+			Version:    v.Version,
 			LastUpdate: v.LastUpdate,
 		})
 	}
@@ -159,6 +169,8 @@ func (d *Box) ListSetWithHiddenContent() []SetViewWithoutContent {
 		sets = append(sets, SetViewWithoutContent{
 			Key:        k,
 			Tag:        v.Tag,
+			Type:       v.Type,
+			Version:    v.Version,
 			LastUpdate: v.LastUpdate,
 		})
 	}
