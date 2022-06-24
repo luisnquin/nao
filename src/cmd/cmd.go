@@ -14,6 +14,9 @@ import (
 	expose <hash>/<all> <- ( Ctrl+C or q to exit | -d/--detach)
 	import <dir>/<file> <- (path | 'imported' type)
 
+	no more than one main
+
+	lastSet
 */
 
 var root = &cobra.Command{
@@ -44,5 +47,5 @@ func Execute() {
 }
 
 func init() {
-	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd, versionCmd)
+	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd, versionCmd, exposeCmd)
 }

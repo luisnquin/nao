@@ -6,7 +6,8 @@ const (
 )
 
 const (
-	TypeDefault string = "default"
-	TypeMerged  string = "merged"
-	TypeMain    string = "main"
+	TypeImported string = "imported"
+	TypeDefault  string = "default"
+	TypeMerged   string = "merged"
+	TypeMain     string = "main"
 )

@@ -86,14 +86,9 @@ var newCmd = &cobra.Command{ // editor as a flag
 }
 
 func init() {
-	newCmd.Flags().String("from", "", constants.AppName+" new --from=<hash>\n"+
-		constants.AppName+" new --from=1e2487174d\n")
-
-	newCmd.Flags().String("editor", "", constants.AppName+"new --editor=<?>\n"+
-		constants.AppName+" new --editor=vim\n")
-
-	newCmd.Flags().String("tag", "", constants.AppName+"new --tag=<name>\n"+
-		constants.AppName+" new --tag=lucy\n")
+	newCmd.Flags().String("from", "", constants.AppName+" new --from=<hash>")
+	newCmd.Flags().String("editor", "", constants.AppName+"new --editor=<?>")
+	newCmd.Flags().String("tag", "", constants.AppName+"new --tag=<name>")
 }
 
 func parseNewCmdFlags(cmd *cobra.Command) (string, string, string) {
