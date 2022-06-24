@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	keyq keyboard.Key = 113
-	keyQ keyboard.Key = 81
+	q rune = 113
+	Q rune = 81
 )
 
 var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
@@ -75,13 +75,13 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 		fmt.Fprintln(os.Stdout, "Click Q or Ctrl+C to exit")
 
 		for {
-			_, key, err := keyboard.GetKey()
+			char, key, err := keyboard.GetKey()
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
 
-			if key == keyboard.KeyCtrlC || key == keyQ || key == keyq {
+			if key == keyboard.KeyCtrlC || char == Q || char == q {
 				_ = os.RemoveAll(config.App.Paths.CacheDir)
 				_ = os.MkdirAll(config.App.Paths.CacheDir, os.ModePerm)
 
