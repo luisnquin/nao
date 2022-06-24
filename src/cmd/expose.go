@@ -21,7 +21,7 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 	Short: "Exposes all the sets in a directory",
 	Long:  "...",
 	Run: func(cmd *cobra.Command, args []string) {
-		views := data.NewUserBox().ListSets()
+		views := data.New().ListSets()
 
 		detach, _ := cmd.Flags().GetBool("detach")
 		untree, _ := cmd.Flags().GetBool("untree")

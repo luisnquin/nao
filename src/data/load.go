@@ -10,7 +10,7 @@ import (
 	"github.com/luisnquin/nao/src/config"
 )
 
-func NewUserBox() *Box {
+func New() *Box {
 	var box Box
 
 	err := os.MkdirAll(config.App.Paths.DataDir, os.ModePerm)

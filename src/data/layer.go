@@ -82,6 +82,10 @@ func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 func (d *Box) NewFromSet(set Set) (string, error) {
 	key := d.newKey()
 
+	if set.Tag == "" {
+		set.Tag = autoname.Generate("-")
+	}
+
 	set.LastUpdate = time.Now()
 	set.Version = 1
 
@@ -90,7 +94,7 @@ func (d *Box) NewFromSet(set Set) (string, error) {
 	return key, d.updateFile()
 }
 
-func (d *Box) NewsFromManySets(sets []Set) ([]string, error) {
+func (d *Box) NewSetsFromOutside(sets []Set) ([]string, error) {
 	keys := make([]string, 0)
 
 	for _, set := range sets {

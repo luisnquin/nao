@@ -19,7 +19,7 @@ var mergeCmd = &cobra.Command{
 	Example: "nao merge <hash> <hash>\n\nnao merge 54512cc888 8e8390174d",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			box     = data.NewUserBox()
+			box     = data.New()
 			oldKeys = make([]string, 0)
 
 			mergedContent string

@@ -15,7 +15,7 @@ var renderCmd = &cobra.Command{
 	Long:  "...",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		_, set, err := data.NewUserBox().SearchSetByKeyTagPattern(args[0])
+		_, set, err := data.New().SearchSetByKeyTagPattern(args[0])
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)

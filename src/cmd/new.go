@@ -16,7 +16,7 @@ var newCmd = &cobra.Command{ // editor as a flag
 	Short: "Creates a new nao file",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		box := data.NewUserBox()
+		box := data.New()
 
 		from, editor, tag := parseNewCmdFlags(cmd)
 

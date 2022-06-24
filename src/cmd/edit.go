@@ -18,10 +18,10 @@ var editCmd = &cobra.Command{
 	Example: "nao edit <hash>/<tag>\n\nnao edit 1a9ebab0e5",
 	Args:    cobra.ExactValidArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return data.NewUserBox().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
+		return data.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		box := data.NewUserBox()
+		box := data.New()
 
 		editor, _ := cmd.Flags().GetString("editor")
 

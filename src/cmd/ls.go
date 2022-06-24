@@ -13,7 +13,7 @@ var lsCmd = &cobra.Command{
 	Short: "See a list of all available nao files",
 	Long:  "...",
 	Run: func(cmd *cobra.Command, args []string) {
-		box := data.NewUserBox()
+		box := data.New()
 
 		header := table.Row{"ID", "TAG", "TYPE", "LAST UPDATE", "VERSION"}
 		rows := make([]table.Row, 0)

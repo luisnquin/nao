@@ -55,3 +55,21 @@ func AskPassword(label string) (string, error) {
 
 	return input, err
 }
+
+func AskYesOrNot(label string) bool {
+	var input bool
+
+	survey.AskOne(&survey.Confirm{
+		Message: label,
+		Default: false,
+	}, &input, survey.WithIcons(func(is *survey.IconSet) {
+		is.Question = survey.Icon{
+			Text: "➤",
+		}
+		is.Error = survey.Icon{
+			Text: "⚠",
+		}
+	}))
+
+	return input
+}
