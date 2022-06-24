@@ -11,7 +11,6 @@ import (
 // add support for fswatch?
 
 /*
-	expose <hash>/<all> <- ( Ctrl+C or q to exit | -d/--detach)
 	import <dir>/<file> <- (path | 'imported' type)
 
 	no more than one main
@@ -47,5 +46,5 @@ func Execute() {
 }
 
 func init() {
-	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd, versionCmd, exposeCmd)
+	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd, versionCmd, exposeCmd, importCmd)
 }

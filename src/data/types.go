@@ -17,6 +17,7 @@ type (
 		Tag        string    `json:"tag,omitempty"`
 		Type       string    `json:"type"`
 		Content    string    `json:"content"`
+		Extension  string    `json:"extension"`
 		LastUpdate time.Time `json:"lastUpdate"`
 		Version    int       `json:"version"`
 	}
@@ -34,6 +35,7 @@ type (
 		Key        string
 		Type       string
 		Content    string
+		Extension  string
 		LastUpdate time.Time
 		Version    int
 	}
@@ -42,6 +44,7 @@ type (
 		Tag        string
 		Key        string
 		Type       string
+		Extension  string
 		LastUpdate time.Time
 		Version    int
 	}

@@ -79,6 +79,32 @@ func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 	return key, d.updateFile()
 }
 
+func (d *Box) NewFromSet(set Set) (string, error) {
+	key := d.newKey()
+
+	set.LastUpdate = time.Now()
+	set.Version = 1
+
+	d.data.NaoSet[key] = set
+
+	return key, d.updateFile()
+}
+
+func (d *Box) NewsFromManySets(sets []Set) ([]string, error) {
+	keys := make([]string, 0)
+
+	for _, set := range sets {
+		key, err := d.NewFromSet(set)
+		if err != nil {
+			return nil, err
+		}
+
+		keys = append(keys, key)
+	}
+
+	return keys, nil
+}
+
 func (d *Box) SearchSetByKeyPattern(pattern string) (string, Set, error) {
 	set, ok := d.data.NaoSet[pattern]
 	if ok {

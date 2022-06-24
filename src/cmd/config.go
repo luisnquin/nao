@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var configCmd = &cobra.Command{
+var configCmd = &cobra.Command{ // TODO: guided configuration
 	Use:     "config",
 	Short:   "To see the configuration file",
 	Long:    "...",

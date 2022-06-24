@@ -16,7 +16,7 @@ const (
 	keyQ keyboard.Key = 81
 )
 
-var exposeCmd = &cobra.Command{
+var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 	Use:   "expose",
 	Short: "Exposes all the sets in a directory",
 	Long:  "...",
@@ -39,10 +39,10 @@ var exposeCmd = &cobra.Command{
 		for _, v := range views {
 			var f *os.File
 
-			if !untree {
-				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Tag + "-" + v.Key[:5]) // Pending: sufix
+			if untree || v.Type == constants.TypeMain {
+				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Tag + "-" + v.Key[:5]) // TODO: sufix
 			} else {
-				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Tag + "-" + v.Key[:5]) // Pending: sufix
+				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Tag + "-" + v.Key[:5]) // TODO: sufix
 			}
 
 			if err != nil {
