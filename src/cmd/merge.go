@@ -16,7 +16,7 @@ var mergeCmd = &cobra.Command{
 	Long:    "...",
 	Aliases: []string{"mix"},
 	Args:    cobra.MinimumNArgs(2),
-	Example: "nao merge <hash> <hash>\n\nnao merge 54512cc888 8e8390174d",
+	Example: constants.AppName + " merge <hash> <hash> ...",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			box     = data.New()
@@ -40,10 +40,7 @@ var mergeCmd = &cobra.Command{
 
 			if !prevent {
 				err = box.DeleteSet(k)
-				if err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					os.Exit(1)
-				}
+				cobra.CheckErr(err)
 			}
 
 			oldKeys = append(oldKeys, k[:10])
@@ -56,10 +53,7 @@ var mergeCmd = &cobra.Command{
 		}
 
 		key, err := box.NewSet(mergedContent, constants.TypeMerged)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		fmt.Fprintf(os.Stdout, "(%s) ⥤ %s\n", strings.Join(oldKeys, ", "), key[:10])
 	},

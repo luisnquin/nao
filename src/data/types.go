@@ -10,7 +10,6 @@ type (
 	BoxData struct {
 		LastAccess string         `json:"lastSet"`
 		NaoSet     map[string]Set `json:"naoSet"`
-		MainSet    Set            `json:"mainDraft"`
 	}
 
 	Set struct {

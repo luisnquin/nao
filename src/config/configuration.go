@@ -8,6 +8,7 @@ import (
 
 	"github.com/ProtonMail/go-appdir"
 	"github.com/luisnquin/nao/src/constants"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
@@ -30,16 +31,10 @@ func init() {
 		}
 
 		err = os.MkdirAll(dirs.UserConfig(), os.ModePerm)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		_, err = os.Create(App.Paths.ConfigFile)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		return
 	}

@@ -20,6 +20,6 @@ type Editor struct {
 }
 
 type Preferences struct {
-	RedirectTo     string `yaml:"redirectTo"`
-	MergeSeparator string `yaml:"mergeSeparator"`
+	MergeSeparator  string `yaml:"mergeSeparator"`
+	DefaultBehavior string `yaml:"defaultBehavior"` // Options: latest, main
 }

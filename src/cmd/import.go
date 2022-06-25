@@ -30,10 +30,7 @@ var importCmd = &cobra.Command{
 
 			if info.IsDir() {
 				sets, err := helper.SetsFromDir(path)
-				if err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					os.Exit(1)
-				}
+				cobra.CheckErr(err)
 
 				allSets = append(allSets, sets...)
 
@@ -41,10 +38,7 @@ var importCmd = &cobra.Command{
 			}
 
 			set, err := helper.SetFromFile(path)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			cobra.CheckErr(err)
 
 			allSets = append(allSets, set)
 		}
@@ -55,10 +49,7 @@ var importCmd = &cobra.Command{
 		}
 
 		keys, err := data.New().NewSetsFromOutside(allSets)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		if len(keys) <= 10 {
 			for _, k := range keys {

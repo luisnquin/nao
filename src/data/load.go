@@ -8,16 +8,14 @@ import (
 	"os"
 
 	"github.com/luisnquin/nao/src/config"
+	"github.com/spf13/cobra"
 )
 
 func New() *Box {
 	var box Box
 
 	err := os.MkdirAll(config.App.Paths.DataDir, os.ModePerm)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	cobra.CheckErr(err)
 
 	var f *os.File
 
@@ -27,10 +25,7 @@ func New() *Box {
 		f, err = os.Open(config.App.Paths.DataFile)
 	}
 
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	cobra.CheckErr(err)
 
 	defer f.Close()
 

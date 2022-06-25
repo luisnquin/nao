@@ -6,9 +6,13 @@ import (
 	"time"
 
 	"github.com/cip8/autoname"
+	"github.com/luisnquin/nao/src/constants"
 )
 
-var ErrSetNotFound error = errors.New("set not found")
+var (
+	ErrMainSetNotFound error = errors.New("main set not found")
+	ErrSetNotFound     error = errors.New("set not found")
+)
 
 func (d *Box) GetSet(key string) (Set, error) {
 	set, ok := d.data.NaoSet[key]
@@ -16,7 +20,23 @@ func (d *Box) GetSet(key string) (Set, error) {
 		return set, ErrSetNotFound
 	}
 
-	return set, nil
+	d.data.LastAccess = key
+
+	return set, d.updateFile()
+}
+
+func (d *Box) GetLastKey() string {
+	return d.data.LastAccess
+}
+
+func (d *Box) GetMainKey() (string, error) {
+	for k, set := range d.data.NaoSet {
+		if set.Type == constants.TypeMain {
+			return k, nil
+		}
+	}
+
+	return "", ErrMainSetNotFound
 }
 
 func (d *Box) ModifySet(key string, content string) error {
@@ -112,12 +132,14 @@ func (d *Box) NewSetsFromOutside(sets []Set) ([]string, error) {
 func (d *Box) SearchSetByKeyPattern(pattern string) (string, Set, error) {
 	set, ok := d.data.NaoSet[pattern]
 	if ok {
-		return pattern, set, nil
+		d.data.LastAccess = pattern
+		return pattern, set, d.updateFile()
 	}
 
 	for k, set := range d.data.NaoSet {
 		if strings.HasPrefix(k, pattern) {
-			return k, set, nil
+			d.data.LastAccess = k
+			return k, set, d.updateFile()
 		}
 	}
 
@@ -127,16 +149,14 @@ func (d *Box) SearchSetByKeyPattern(pattern string) (string, Set, error) {
 func (d *Box) SearchSetByKeyTagPattern(pattern string) (string, Set, error) {
 	set, ok := d.data.NaoSet[pattern]
 	if ok {
-		return pattern, set, nil
+		d.data.LastAccess = pattern
+		return pattern, set, d.updateFile()
 	}
 
 	for k, set := range d.data.NaoSet {
-		if strings.HasPrefix(k, pattern) {
-			return k, set, nil
-		}
-
-		if strings.HasPrefix(set.Tag, pattern) {
-			return k, set, nil
+		if strings.HasPrefix(k, pattern) || strings.HasPrefix(set.Tag, pattern) {
+			d.data.LastAccess = k
+			return k, set, d.updateFile()
 		}
 	}
 
@@ -150,26 +170,6 @@ func (d *Box) DeleteSet(key string) error {
 	}
 
 	delete(d.data.NaoSet, key)
-
-	return d.updateFile()
-}
-
-func (d *Box) GetMainSet() Set {
-	return d.data.MainSet
-}
-
-func (d *Box) ModifyMainSet(content string) error {
-	d.data.MainSet.Content = content
-	d.data.MainSet.LastUpdate = time.Now()
-	d.data.MainSet.Version++
-
-	return d.updateFile()
-}
-
-func (d *Box) CleanMainSet() error {
-	d.data.MainSet.Content = ""
-	d.data.MainSet.LastUpdate = time.Now()
-	d.data.MainSet.Version++
 
 	return d.updateFile()
 }

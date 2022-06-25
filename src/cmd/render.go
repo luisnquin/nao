@@ -11,7 +11,7 @@ import (
 
 var renderCmd = &cobra.Command{
 	Use:   "render",
-	Short: "Render the file to markdown, customizable",
+	Short: "Render the file to markdown by default",
 	Long:  "...",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {

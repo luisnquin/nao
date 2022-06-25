@@ -25,24 +25,16 @@ var configCmd = &cobra.Command{ // TODO: guided configuration
 				Editor: editor,
 			})
 
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			cobra.CheckErr(err)
 
-			if err = run(); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			err = run()
+			cobra.CheckErr(err)
 
 			os.Exit(0)
 		}
 
 		content, err := ioutil.ReadFile(config.App.Paths.ConfigFile)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		fmt.Fprintln(os.Stdout, string(content))
 	},

@@ -1,13 +1,13 @@
 package helper
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
 	"github.com/ProtonMail/go-appdir"
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/src/constants"
+	"github.com/spf13/cobra"
 )
 
 func NewCached() (*os.File, func(), error) {
@@ -25,16 +25,10 @@ func NewCached() (*os.File, func(), error) {
 
 	return file, func() {
 		err = file.Close()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		err = os.Remove(file.Name())
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 	}, nil
 }
 
@@ -48,15 +42,9 @@ func NewCachedIn(path string) (*os.File, func(), error) {
 
 	return file, func() {
 		err = file.Close()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		err = os.Remove(file.Name())
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 	}, nil
 }

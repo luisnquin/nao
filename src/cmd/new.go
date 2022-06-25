@@ -21,25 +21,16 @@ var newCmd = &cobra.Command{ // editor as a flag
 		from, editor, tag := parseNewCmdFlags(cmd)
 
 		f, remove, err := helper.NewCached()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		defer remove()
 
 		if from != "" {
 			_, set, err := box.SearchSetByKeyTagPattern(from)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			cobra.CheckErr(err)
 
 			err = ioutil.WriteFile(f.Name(), []byte(set.Content), 0644)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			cobra.CheckErr(err)
 		}
 
 		run, err := helper.PrepareToRun(cmd.Context(), helper.EditorOptions{
@@ -47,21 +38,13 @@ var newCmd = &cobra.Command{ // editor as a flag
 			Editor: editor,
 		})
 
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
-		if err = run(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		err = run()
+		cobra.CheckErr(err)
 
 		content, err := ioutil.ReadAll(f)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		if len(content) == 0 {
 			fmt.Fprintln(os.Stderr, "Empty content, will not be saved!")
@@ -76,10 +59,7 @@ var newCmd = &cobra.Command{ // editor as a flag
 			k, err = box.NewSet(string(content), constants.TypeDefault)
 		}
 
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		fmt.Fprintln(os.Stdout, k[:10])
 	},

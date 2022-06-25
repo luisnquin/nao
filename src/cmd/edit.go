@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"fmt"
 	"io/ioutil"
-	"os"
 
 	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
@@ -26,16 +24,10 @@ var editCmd = &cobra.Command{
 		editor, _ := cmd.Flags().GetString("editor")
 
 		key, set, err := box.SearchSetByKeyTagPattern(args[0])
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		f, remove, err := helper.LoadContentInCache(key, set.Content)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
 		defer remove()
 
@@ -44,26 +36,16 @@ var editCmd = &cobra.Command{
 			Editor: editor,
 		})
 
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
-		if err = run(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		err = run()
+		cobra.CheckErr(err)
 
 		content, err := ioutil.ReadAll(f)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(err)
 
-		if err = box.ModifySet(key, string(content)); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		err = box.ModifySet(key, string(content))
+		cobra.CheckErr(err)
 	},
 }
 

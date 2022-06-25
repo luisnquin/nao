@@ -14,7 +14,7 @@ var rmCmd = &cobra.Command{
 	Short:   "Removes a file",
 	Long:    "...",
 	Aliases: []string{"delete", "del", "remove"},
-	Example: constants.AppName + " rm <hash>\n\n" + constants.AppName + " rm 1a9ebab0e5",
+	Example: constants.AppName + " rm <id>",
 	Args:    cobra.MinimumNArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return data.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
@@ -24,17 +24,14 @@ var rmCmd = &cobra.Command{
 
 		for _, arg := range args {
 			key, _, err := box.SearchSetByKeyTagPattern(arg)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			cobra.CheckErr(err)
 
-			if err = box.DeleteSet(key); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			err = box.DeleteSet(key)
+			cobra.CheckErr(err)
 
 			fmt.Fprintln(os.Stdout, key)
 		}
 	},
 }
+
+// after <time> | except <[]string>

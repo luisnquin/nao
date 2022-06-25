@@ -45,16 +45,10 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Tag + "-" + v.Key[:5]) // TODO: sufix
 			}
 
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			cobra.CheckErr(err)
 
 			_, err = f.WriteString(v.Content)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			cobra.CheckErr(err)
 
 			_ = f.Close()
 		}
@@ -65,10 +59,7 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 			os.Exit(0)
 		}
 
-		if err = keyboard.Open(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		cobra.CheckErr(keyboard.Open())
 
 		defer keyboard.Close()
 
@@ -76,10 +67,7 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 
 		for {
 			char, key, err := keyboard.GetKey()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			cobra.CheckErr(err)
 
 			if key == keyboard.KeyCtrlC || char == Q || char == q {
 				_ = os.RemoveAll(config.App.Paths.CacheDir)
