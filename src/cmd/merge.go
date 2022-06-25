@@ -13,10 +13,9 @@ import (
 var mergeCmd = &cobra.Command{
 	Use:     "merge",
 	Short:   "Combine two or more files",
-	Long:    "...",
 	Aliases: []string{"mix"},
 	Args:    cobra.MinimumNArgs(2),
-	Example: constants.AppName + " merge <hash> <hash> ...",
+	Example: constants.AppName + " merge <id> <id> ...",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			box     = data.New()
@@ -60,5 +59,5 @@ var mergeCmd = &cobra.Command{
 }
 
 func init() {
-	mergeCmd.PersistentFlags().Bool("prevent-default", false, "nao merge --prevent-default")
+	mergeCmd.PersistentFlags().BoolP("prevent-default", "p", false, "Prevent file deletion")
 }

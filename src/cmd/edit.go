@@ -3,7 +3,6 @@ package cmd
 import (
 	"io/ioutil"
 
-	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
@@ -12,8 +11,7 @@ import (
 var editCmd = &cobra.Command{
 	Use:     "edit",
 	Short:   "Edit almost any file",
-	Long:    `...`,
-	Example: "nao edit <hash>/<tag>\n\nnao edit 1a9ebab0e5",
+	Example: "nao edit [<id> | <tag>]",
 	Args:    cobra.ExactValidArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return data.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
@@ -50,6 +48,5 @@ var editCmd = &cobra.Command{
 }
 
 func init() {
-	editCmd.PersistentFlags().String("editor", "", constants.AppName+" render --editor=<name>\n\n"+constants.AppName+
-		" render --editor=code\n")
+	editCmd.PersistentFlags().String("editor", "", "Change the default code editor (overriding your configuration)")
 }

@@ -14,7 +14,6 @@ import (
 var newCmd = &cobra.Command{ // editor as a flag
 	Use:   "new",
 	Short: "Creates a new nao file",
-	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		box := data.New()
 
@@ -66,9 +65,9 @@ var newCmd = &cobra.Command{ // editor as a flag
 }
 
 func init() {
-	newCmd.Flags().String("from", "", constants.AppName+" new --from=<hash>")
-	newCmd.Flags().String("editor", "", constants.AppName+"new --editor=<?>")
-	newCmd.Flags().String("tag", "", constants.AppName+"new --tag=<name>")
+	newCmd.Flags().StringP("from", "f", "", "Create a copy of another file by ID or tag to edit on it")
+	newCmd.Flags().String("editor", "", "Change the default code editor (overriding your configuration)")
+	newCmd.Flags().StringP("tag", "t", "", "Assign a tag to the new file")
 }
 
 func parseNewCmdFlags(cmd *cobra.Command) (string, string, string) {

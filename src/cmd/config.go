@@ -14,8 +14,7 @@ import (
 var configCmd = &cobra.Command{ // TODO: guided configuration
 	Use:     "config",
 	Short:   "To see the configuration file",
-	Long:    "...",
-	Example: "nao config",
+	Example: constants.AppName + " config",
 	Run: func(cmd *cobra.Command, args []string) {
 		if edit, _ := cmd.Flags().GetBool("edit"); edit {
 			editor, _ := cmd.Flags().GetString("editor")
@@ -41,6 +40,6 @@ var configCmd = &cobra.Command{ // TODO: guided configuration
 }
 
 func init() {
-	configCmd.Flags().Bool("edit", false, constants.AppName+" config --edit")
-	configCmd.Flags().String("editor", "", constants.AppName+" config --editor=<?>")
+	configCmd.Flags().BoolP("edit", "e", false, "")
+	configCmd.Flags().String("editor", "", "")
 }

@@ -19,7 +19,6 @@ const (
 var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 	Use:   "expose",
 	Short: "Exposes all the sets in a directory",
-	Long:  "...",
 	Run: func(cmd *cobra.Command, args []string) {
 		views := data.New().ListSets()
 
@@ -80,6 +79,7 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 }
 
 func init() {
-	exposeCmd.Flags().Bool("untree", false, constants.AppName+" expose --untree")
-	exposeCmd.Flags().Bool("detach", false, constants.AppName+" expose --detach")
+	exposeCmd.Flags().BoolP("untree", "u", false, "disable default tree file organization depending on types")
+	exposeCmd.Flags().BoolP("detach", "d", false, "")
+	exposeCmd.Flags().BoolP("watch", "w", false, "")
 }

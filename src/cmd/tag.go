@@ -13,8 +13,6 @@ import (
 var tagCmd = &cobra.Command{
 	Use:     "tag",
 	Short:   "Rename the tag of any file",
-	Long:    "...",
-	Aliases: []string{"alias"},
 	Example: constants.AppName + " tag <id> <tag>",
 	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {

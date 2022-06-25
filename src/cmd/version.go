@@ -11,7 +11,6 @@ import (
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the " + constants.AppName + " version number",
-	Long:  "Print the " + constants.AppName + " version number",
 	Args:  cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stdout, constants.Version)

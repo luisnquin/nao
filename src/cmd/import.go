@@ -15,7 +15,6 @@ import (
 var importCmd = &cobra.Command{
 	Use:     "import",
 	Short:   "Import a directory or a file",
-	Long:    "",
 	Example: constants.AppName + " import <path> ...",
 	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
