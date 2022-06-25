@@ -9,20 +9,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// add support for fswatch?
-
-// check changes and update files when the expose subcmd is provided by a flag
-
 /*
-	no more than one main
-
-	lastSet
+TODO:
+- no more than one main
+- no repeated tags
+- check changes and update files when the expose subcmd is provided by a flag
 */
 
 var root = &cobra.Command{
 	Use:   constants.AppName,
 	Short: constants.AppName + " is a tool to manage your notes",
-	Long: `A tool to manage your notes or other types of files without worry about the path where it is`,
+	Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		incomingKeys := make([]string, 0)
 
