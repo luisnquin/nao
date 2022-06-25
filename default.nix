@@ -1,15 +1,16 @@
-{ buildGoPackage, fetchgit, lib }:
+{ buildGoPackage, fetchFromGitHub, lib }:
 
 buildGoPackage rec {
-  name = "vgo2nix-${version}";
+  name = "nao";
   version = "example";
-  # rev = "";
+  rev = "";
 
   goPackagePath = "github.com/luisnquin/nao";
 
-  src = fetchgit {
-    # inherit rev;
-    url = "git@github.com:luisnquin/nao.git";
+  src = fetchFromGitHub {
+    inherit rev;
+    owner = "luisnquin";
+    repo = "nao";
     sha256 = null;
   };
   goDeps = ./deps.nix;
