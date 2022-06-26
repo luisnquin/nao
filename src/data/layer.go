@@ -204,12 +204,13 @@ func (d *Box) ListSets() []SetView {
 
 	for k, v := range d.data.NaoSet {
 		sets = append(sets, SetView{
-			Key:        k,
-			Tag:        v.Tag,
-			Type:       v.Type,
-			Content:    v.Content,
-			Version:    v.Version,
 			LastUpdate: v.LastUpdate,
+			Extension:  v.Extension,
+			Version:    v.Version,
+			Content:    v.Content,
+			Type:       v.Type,
+			Tag:        v.Tag,
+			Key:        k,
 		})
 	}
 
@@ -221,11 +222,12 @@ func (d *Box) ListSetWithHiddenContent() []SetViewWithoutContent {
 
 	for k, v := range d.data.NaoSet {
 		sets = append(sets, SetViewWithoutContent{
-			Key:        k,
-			Tag:        v.Tag,
-			Type:       v.Type,
-			Version:    v.Version,
 			LastUpdate: v.LastUpdate,
+			Extension:  v.Extension,
+			Version:    v.Version,
+			Type:       v.Type,
+			Tag:        v.Tag,
+			Key:        k,
 		})
 	}
 

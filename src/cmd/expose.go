@@ -41,9 +41,11 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 			var f *os.File
 
 			if untree || v.Type == constants.TypeMain {
-				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Tag + "-" + v.Key[:5]) // TODO: sufix
+				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Tag + "-" + v.Key[:5])
+			} else if v.Extension != "" {
+				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Tag + "-" + v.Key[:5] + "." + v.Extension)
 			} else {
-				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Tag + "-" + v.Key[:5]) // TODO: sufix
+				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Tag + "-" + v.Key[:5])
 			}
 
 			cobra.CheckErr(err)
