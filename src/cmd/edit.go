@@ -18,6 +18,7 @@ var editCmd = &cobra.Command{
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return data.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
 	},
+	ValidArgs: data.New().ListAllKeys(),
 	Run: func(cmd *cobra.Command, args []string) {
 		box := data.New()
 
@@ -49,13 +50,13 @@ var editCmd = &cobra.Command{
 
 		cobra.CheckErr(err)
 
-		f, remove, err := helper.LoadContentInCache(key, set.Content)
+		path, err := helper.LoadContentInCache(key, set.Content)
 		cobra.CheckErr(err)
 
-		defer remove()
+		defer os.Remove(path)
 
 		run, err := helper.PrepareToRun(cmd.Context(), helper.EditorOptions{
-			Path:   f.Name(),
+			Path:   path,
 			Editor: editor,
 		})
 
@@ -64,7 +65,7 @@ var editCmd = &cobra.Command{
 		err = run()
 		cobra.CheckErr(err)
 
-		content, err := ioutil.ReadAll(f)
+		content, err := ioutil.ReadFile(path)
 		cobra.CheckErr(err)
 
 		err = box.ModifySet(key, string(content))

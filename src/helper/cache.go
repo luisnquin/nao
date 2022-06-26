@@ -7,44 +7,31 @@ import (
 	"github.com/ProtonMail/go-appdir"
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/src/constants"
-	"github.com/spf13/cobra"
 )
 
-func NewCached() (*os.File, func(), error) {
+func NewCached() (string, error) {
 	cacheDir := appdir.New(constants.AppName).UserCache()
 
 	err := os.MkdirAll(cacheDir, os.ModePerm)
 	if err != nil {
-		return nil, nil, err
+		return "", err
 	}
 
-	file, err := os.Create(cacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
+	f, err := os.Create(cacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
 	if err != nil {
-		return nil, nil, err
+		return "", err
 	}
 
-	return file, func() {
-		err = file.Close()
-		cobra.CheckErr(err)
-
-		err = os.Remove(file.Name())
-		cobra.CheckErr(err)
-	}, nil
+	return f.Name(), f.Close()
 }
 
-func NewCachedIn(path string) (*os.File, func(), error) {
+func NewCachedIn(path string) error {
 	_ = os.MkdirAll(path, os.ModePerm)
 
 	file, err := os.Create(path + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
 
-	return file, func() {
-		err = file.Close()
-		cobra.CheckErr(err)
-
-		err = os.Remove(file.Name())
-		cobra.CheckErr(err)
-	}, nil
+	return file.Close()
 }

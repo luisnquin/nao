@@ -29,22 +29,22 @@ var newCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		f, remove, err := helper.NewCached()
+		fPath, err := helper.NewCached()
 		cobra.CheckErr(err)
 
-		defer remove()
+		defer os.Remove(fPath)
 
 		if from != "" {
 			_, set, err := box.SearchSetByKeyTagPattern(from)
 			cobra.CheckErr(err)
 
-			err = ioutil.WriteFile(f.Name(), []byte(set.Content), 0644)
+			err = ioutil.WriteFile(fPath, []byte(set.Content), 0644)
 			cobra.CheckErr(err)
 		}
 
 		run, err := helper.PrepareToRun(cmd.Context(), helper.EditorOptions{
-			Path:   f.Name(),
 			Editor: editor,
+			Path:   fPath,
 		})
 
 		cobra.CheckErr(err)
@@ -52,12 +52,13 @@ var newCmd = &cobra.Command{
 		err = run()
 		cobra.CheckErr(err)
 
-		content, err := ioutil.ReadAll(f)
+		content, err := ioutil.ReadFile(fPath)
 		cobra.CheckErr(err)
 
 		if len(content) == 0 {
 			fmt.Fprintln(os.Stderr, "Empty content, will not be saved!")
-			os.Exit(1)
+
+			return
 		}
 
 		var k string
