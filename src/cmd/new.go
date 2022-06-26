@@ -11,13 +11,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var newCmd = &cobra.Command{ // editor as a flag
+var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Creates a new nao file",
 	Run: func(cmd *cobra.Command, args []string) {
 		box := data.New()
 
 		from, editor, tag := parseNewCmdFlags(cmd)
+
+		if tag != "" && box.TagAlreadyExists(tag) {
+			cobra.CheckErr(data.ErrTagAlreadyExists)
+		}
 
 		f, remove, err := helper.NewCached()
 		cobra.CheckErr(err)
@@ -66,7 +70,6 @@ var newCmd = &cobra.Command{ // editor as a flag
 
 func init() {
 	newCmd.Flags().StringP("from", "f", "", "Create a copy of another file by ID or tag to edit on it")
-	newCmd.Flags().String("editor", "", "Change the default code editor (overriding your configuration)")
 	newCmd.Flags().StringP("tag", "t", "", "Assign a tag to the new file")
 }
 

@@ -20,6 +20,8 @@ var importCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		allSets := make([]data.Set, 0)
 
+		yes, _ := cmd.Flags().GetBool("yes")
+
 		for _, path := range args {
 			info, err := os.Stat(path)
 			if os.IsNotExist(err) {
@@ -42,9 +44,12 @@ var importCmd = &cobra.Command{
 			allSets = append(allSets, set)
 		}
 
-		if yes := helper.AskYesOrNot(fmt.Sprintf("%d keys will be created, sure?", len(allSets))); !yes {
-			fmt.Fprintln(os.Stdout, "Aborted")
-			os.Exit(0)
+		if !yes {
+			yes = helper.AskYesOrNot(fmt.Sprintf("%d keys will be created, sure?", len(allSets)))
+			if !yes {
+				fmt.Fprintln(os.Stdout, "Aborted")
+				os.Exit(0)
+			}
 		}
 
 		keys, err := data.New().NewSetsFromOutside(allSets)
@@ -58,4 +63,8 @@ var importCmd = &cobra.Command{
 
 		fmt.Fprintf(os.Stdout, "\n%d (key/s) has been created\n", len(keys))
 	},
+}
+
+func init() {
+	importCmd.Flags().BoolP("yes", "y", false, "")
 }

@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	ErrMainSetNotFound error = errors.New("main set not found")
-	ErrSetNotFound     error = errors.New("set not found")
+	ErrMainSetNotFound  error = errors.New("main set not found")
+	ErrTagAlreadyExists error = errors.New("tag already exists")
+	ErrSetNotFound      error = errors.New("set not found")
 )
 
 func (d *Box) GetSet(key string) (Set, error) {
@@ -39,36 +40,6 @@ func (d *Box) GetMainKey() (string, error) {
 	return "", ErrMainSetNotFound
 }
 
-func (d *Box) ModifySet(key string, content string) error {
-	set, ok := d.data.NaoSet[key]
-	if !ok {
-		return ErrSetNotFound
-	}
-
-	set.LastUpdate = time.Now()
-	set.Content = content
-	set.Version++
-
-	d.data.NaoSet[key] = set
-
-	return d.updateFile()
-}
-
-func (d *Box) ModifySetTag(key string, tag string) error {
-	set, ok := d.data.NaoSet[key]
-	if !ok {
-		return ErrSetNotFound
-	}
-
-	set.LastUpdate = time.Now()
-	set.Tag = tag
-	set.Version++
-
-	d.data.NaoSet[key] = set
-
-	return d.updateFile()
-}
-
 func (d *Box) NewSet(content, contentType string) (string, error) {
 	key := d.newKey()
 
@@ -86,7 +57,9 @@ func (d *Box) NewSet(content, contentType string) (string, error) {
 func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 	key := d.newKey()
 
-	// Check if there's other with the same tag
+	if d.TagAlreadyExists(tag) {
+		return "", ErrTagAlreadyExists
+	}
 
 	d.data.NaoSet[key] = Set{
 		Tag:        tag,
@@ -129,6 +102,51 @@ func (d *Box) NewSetsFromOutside(sets []Set) ([]string, error) {
 	return keys, nil
 }
 
+func (d *Box) ModifySet(key string, content string) error {
+	set, ok := d.data.NaoSet[key]
+	if !ok {
+		return ErrSetNotFound
+	}
+
+	set.LastUpdate = time.Now()
+	set.Content = content
+	set.Version++
+
+	d.data.NaoSet[key] = set
+
+	return d.updateFile()
+}
+
+func (d *Box) ModifySetTag(key string, tag string) error {
+	set, ok := d.data.NaoSet[key]
+	if !ok {
+		return ErrSetNotFound
+	}
+
+	if d.TagAlreadyExists(tag) {
+		return ErrTagAlreadyExists
+	}
+
+	set.LastUpdate = time.Now()
+	set.Tag = tag
+	set.Version++
+
+	d.data.NaoSet[key] = set
+
+	return d.updateFile()
+}
+
+func (d *Box) DeleteSet(key string) error {
+	_, ok := d.data.NaoSet[key]
+	if !ok {
+		return ErrSetNotFound
+	}
+
+	delete(d.data.NaoSet, key)
+
+	return d.updateFile()
+}
+
 func (d *Box) SearchSetByKeyPattern(pattern string) (string, Set, error) {
 	set, ok := d.data.NaoSet[pattern]
 	if ok {
@@ -161,17 +179,6 @@ func (d *Box) SearchSetByKeyTagPattern(pattern string) (string, Set, error) {
 	}
 
 	return "", set, ErrSetNotFound
-}
-
-func (d *Box) DeleteSet(key string) error {
-	_, ok := d.data.NaoSet[key]
-	if !ok {
-		return ErrSetNotFound
-	}
-
-	delete(d.data.NaoSet, key)
-
-	return d.updateFile()
 }
 
 func (d *Box) ListSets() []SetView {
@@ -215,4 +222,14 @@ func (d *Box) ListAllKeys() []string {
 	}
 
 	return keys
+}
+
+func (d *Box) TagAlreadyExists(tag string) bool {
+	for _, s := range d.data.NaoSet {
+		if s.Tag == tag {
+			return true
+		}
+	}
+
+	return false
 }

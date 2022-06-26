@@ -44,7 +44,7 @@ var mergeCmd = &cobra.Command{
 
 			oldKeys = append(oldKeys, k[:10])
 
-			mergedContent += set.Content + "\n"
+			mergedContent += "\n" + set.Content + "\n"
 
 			if i != len(args)-1 {
 				mergedContent += strings.Repeat("-", 15)

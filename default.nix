@@ -15,6 +15,8 @@ buildGoPackage rec {
   };
   goDeps = ./deps.nix;
 
+  ldflags = [ "-s" "-w" "-X main.version=${version}" ];
+
   meta = with lib; {
     # description = ""; # TODO
     license = licenses.mit;

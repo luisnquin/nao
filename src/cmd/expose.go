@@ -22,6 +22,8 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 	Run: func(cmd *cobra.Command, args []string) {
 		views := data.New().ListSets()
 
+		// timeout, _ := cmd.Flags().GetInt("timeout")
+		// watch, _ := cmd.Flags().GetBool("watch")
 		detach, _ := cmd.Flags().GetBool("detach")
 		untree, _ := cmd.Flags().GetBool("untree")
 
@@ -69,17 +71,18 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 			cobra.CheckErr(err)
 
 			if key == keyboard.KeyCtrlC || char == Q || char == q {
-				_ = os.RemoveAll(config.App.Paths.CacheDir)
-				_ = os.MkdirAll(config.App.Paths.CacheDir, os.ModePerm)
-
 				break
 			}
 		}
+
+		_ = os.RemoveAll(config.App.Paths.CacheDir)
+		_ = os.MkdirAll(config.App.Paths.CacheDir, os.ModePerm)
 	},
 }
 
 func init() {
 	exposeCmd.Flags().BoolP("untree", "u", false, "disable default tree file organization depending on types")
 	exposeCmd.Flags().BoolP("detach", "d", false, "")
-	exposeCmd.Flags().BoolP("watch", "w", false, "")
+	// exposeCmd.Flags().BoolP("watch", "w", false, "")
+	//	exposeCmd.Flags().IntP("timeout", "t", 0, "set a time limit expresed in seconds for the exposition of files")
 }

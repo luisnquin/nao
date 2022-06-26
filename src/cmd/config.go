@@ -41,5 +41,4 @@ var configCmd = &cobra.Command{ // TODO: guided configuration
 
 func init() {
 	configCmd.Flags().BoolP("edit", "e", false, "")
-	configCmd.Flags().String("editor", "", "")
 }

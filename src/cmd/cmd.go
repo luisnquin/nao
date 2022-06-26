@@ -11,8 +11,6 @@ import (
 
 /*
 TODO:
-- no more than one main
-- no repeated tags
 - check changes and update files when the expose subcmd is provided by a flag
 */
 
@@ -36,13 +34,12 @@ var root = &cobra.Command{
 		case 0:
 			switch config.App.Preferences.DefaultBehavior {
 			case "latest":
-				editCmd.Run(cmd, []string{data.New().GetLastKey()})
+				cmd.Flags().Bool("latest", true, "") // Eh
+				editCmd.Run(cmd, args)
 
 			case "main":
-				k, err := data.New().GetMainKey()
-				cobra.CheckErr(err)
-
-				editCmd.Run(cmd, []string{k})
+				cmd.Flags().Bool("main", true, "")
+				editCmd.Run(cmd, args)
 
 			default:
 				cmd.Usage()
@@ -60,4 +57,5 @@ func Execute() {
 
 func init() {
 	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd, versionCmd, exposeCmd, importCmd, tagCmd)
+	root.PersistentFlags().String("editor", "", "Change the default code editor (ignoring configuration file)")
 }
