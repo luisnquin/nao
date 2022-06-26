@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
@@ -12,7 +13,7 @@ import (
 var editCmd = &cobra.Command{
 	Use:     "edit",
 	Short:   "Edit almost any file",
-	Example: "nao edit [<id> | <tag>]",
+	Example: constants.AppName + " edit [<id> | <tag>]",
 	Args:    cobra.MaximumNArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return data.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
