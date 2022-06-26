@@ -1,4 +1,4 @@
-module github.com/luisnquin/nao/src
+module github.com/luisnquin/nao
 
 go 1.18
 
@@ -10,7 +10,6 @@ require (
 	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203
 	github.com/google/uuid v1.3.0
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
-	github.com/luisnquin/nao v0.0.0
 	github.com/spf13/cobra v1.4.0
 	github.com/xeonx/timeago v1.0.0-rc4
 	gopkg.in/yaml.v3 v3.0.1
