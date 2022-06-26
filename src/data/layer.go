@@ -10,9 +10,11 @@ import (
 )
 
 var (
-	ErrMainSetNotFound  error = errors.New("main set not found")
-	ErrTagAlreadyExists error = errors.New("tag already exists")
-	ErrSetNotFound      error = errors.New("set not found")
+	ErrMainAlreadyExists error = errors.New("main set already exists")
+	ErrMainSetNotFound   error = errors.New("main set not found")
+	ErrTagAlreadyExists  error = errors.New("tag already exists")
+	ErrTagNotProvided    error = errors.New("tag not provided")
+	ErrSetNotFound       error = errors.New("set not found")
 )
 
 func (d *Box) GetSet(key string) (Set, error) {
@@ -43,6 +45,10 @@ func (d *Box) GetMainKey() (string, error) {
 func (d *Box) NewSet(content, contentType string) (string, error) {
 	key := d.newKey()
 
+	if contentType == constants.TypeMain && d.MainAlreadyExists() {
+		return "", ErrMainAlreadyExists
+	}
+
 	d.data.NaoSet[key] = Set{
 		Tag:        autoname.Generate("-"),
 		Content:    content,
@@ -57,8 +63,16 @@ func (d *Box) NewSet(content, contentType string) (string, error) {
 func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 	key := d.newKey()
 
+	if tag == "" {
+		return "", ErrTagNotProvided
+	}
+
 	if d.TagAlreadyExists(tag) {
 		return "", ErrTagAlreadyExists
+	}
+
+	if contentType == constants.TypeMain && d.MainAlreadyExists() {
+		return "", ErrMainAlreadyExists
 	}
 
 	d.data.NaoSet[key] = Set{
@@ -81,6 +95,10 @@ func (d *Box) NewFromSet(set Set) (string, error) {
 
 	set.LastUpdate = time.Now()
 	set.Version = 1
+
+	if set.Type == constants.TypeMain && d.MainAlreadyExists() {
+		return "", ErrMainAlreadyExists
+	}
 
 	d.data.NaoSet[key] = set
 
@@ -227,6 +245,16 @@ func (d *Box) ListAllKeys() []string {
 func (d *Box) TagAlreadyExists(tag string) bool {
 	for _, s := range d.data.NaoSet {
 		if s.Tag == tag {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (d *Box) MainAlreadyExists() bool {
+	for _, s := range d.data.NaoSet {
+		if s.Type == constants.TypeMain {
 			return true
 		}
 	}

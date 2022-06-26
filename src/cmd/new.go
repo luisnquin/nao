@@ -17,10 +17,16 @@ var newCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		box := data.New()
 
-		from, editor, tag := parseNewCmdFlags(cmd)
+		from, editor, tag, main := parseNewCmdFlags(cmd)
+
+		if main && box.MainAlreadyExists() {
+			fmt.Fprintln(os.Stderr, "Error:", data.ErrMainAlreadyExists)
+			os.Exit(1)
+		}
 
 		if tag != "" && box.TagAlreadyExists(tag) {
-			cobra.CheckErr(data.ErrTagAlreadyExists)
+			fmt.Fprintln(os.Stderr, "Error:", data.ErrTagAlreadyExists)
+			os.Exit(1)
 		}
 
 		f, remove, err := helper.NewCached()
@@ -56,10 +62,15 @@ var newCmd = &cobra.Command{
 
 		var k string
 
+		contentType := constants.TypeDefault
+		if main {
+			contentType = constants.TypeMain
+		}
+
 		if tag != "" {
-			k, err = box.NewSetWithTag(string(content), constants.TypeDefault, tag)
+			k, err = box.NewSetWithTag(string(content), contentType, tag)
 		} else {
-			k, err = box.NewSet(string(content), constants.TypeDefault)
+			k, err = box.NewSet(string(content), contentType)
 		}
 
 		cobra.CheckErr(err)
@@ -69,14 +80,16 @@ var newCmd = &cobra.Command{
 }
 
 func init() {
+	newCmd.Flags().BoolP("main", "m", false, "Creates a new main file, throws an error in case that one already exists")
 	newCmd.Flags().StringP("from", "f", "", "Create a copy of another file by ID or tag to edit on it")
 	newCmd.Flags().StringP("tag", "t", "", "Assign a tag to the new file")
 }
 
-func parseNewCmdFlags(cmd *cobra.Command) (string, string, string) {
+func parseNewCmdFlags(cmd *cobra.Command) (string, string, string, bool) {
 	editor, _ := cmd.Flags().GetString("editor")
 	from, _ := cmd.Flags().GetString("from")
 	tag, _ := cmd.Flags().GetString("tag")
+	main, _ := cmd.Flags().GetBool("main")
 
-	return from, editor, tag
+	return from, editor, tag, main
 }
