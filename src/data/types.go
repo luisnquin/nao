@@ -4,7 +4,7 @@ import "time"
 
 type (
 	Box struct {
-		data BoxData
+		box BoxData
 	}
 
 	BoxData struct {
@@ -30,21 +30,21 @@ type Window struct {
 
 type (
 	SetView struct {
-		Tag        string
-		Key        string
-		Type       string
-		Content    string
-		Extension  string
-		LastUpdate time.Time
-		Version    int
+		Tag        string    `json:"tag"`
+		Key        string    `json:"key"`
+		Type       string    `json:"type"`
+		Content    string    `json:"content"`
+		Extension  string    `json:"extension"`
+		LastUpdate time.Time `json:"lastUpdate"`
+		Version    int       `json:"version"`
 	}
 
 	SetViewWithoutContent struct {
-		Tag        string
-		Key        string
-		Type       string
-		Extension  string
-		LastUpdate time.Time
-		Version    int
+		Tag        string    `json:"tag"`
+		Key        string    `json:"key"`
+		Type       string    `json:"type"`
+		Extension  string    `json:"extension"`
+		LastUpdate time.Time `json:"lastUpdate"`
+		Version    int       `json:"version"`
 	}
 )

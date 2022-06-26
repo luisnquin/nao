@@ -3,7 +3,6 @@ package data
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 
@@ -29,15 +28,30 @@ func New() *Box {
 
 	defer f.Close()
 
-	err = json.NewDecoder(f).Decode(&box.data)
+	err = json.NewDecoder(f).Decode(&box.box)
 	if err != nil && !errors.Is(err, io.EOF) {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		panic(err)
 	}
 
-	if box.data.NaoSet == nil {
-		box.data.NaoSet = make(map[string]Set, 0)
+	if box.box.NaoSet == nil {
+		box.box.NaoSet = make(map[string]Set, 0)
 	}
 
 	return &box
+}
+
+func JustLoadBox() BoxData {
+	f, err := os.Open(config.App.Paths.DataFile)
+	if err != nil {
+		panic(err)
+	}
+
+	var data BoxData
+
+	err = json.NewDecoder(f).Decode(&data)
+	if err != nil {
+		panic(err)
+	}
+
+	return data
 }

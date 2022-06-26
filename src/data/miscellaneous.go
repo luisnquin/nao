@@ -10,7 +10,7 @@ import (
 )
 
 func (d *Box) updateFile() error {
-	content, err := json.MarshalIndent(d.data, "", "\t")
+	content, err := json.MarshalIndent(d.box, "", "\t")
 	if err != nil {
 		return err
 	}

@@ -17,23 +17,27 @@ var (
 	ErrSetNotFound       error = errors.New("set not found")
 )
 
+func (d *Box) ModifyBox(box BoxData) {
+	d.box = box
+}
+
 func (d *Box) GetSet(key string) (Set, error) {
-	set, ok := d.data.NaoSet[key]
+	set, ok := d.box.NaoSet[key]
 	if !ok {
 		return set, ErrSetNotFound
 	}
 
-	d.data.LastAccess = key
+	d.box.LastAccess = key
 
 	return set, d.updateFile()
 }
 
 func (d *Box) GetLastKey() string {
-	return d.data.LastAccess
+	return d.box.LastAccess
 }
 
 func (d *Box) GetMainKey() (string, error) {
-	for k, set := range d.data.NaoSet {
+	for k, set := range d.box.NaoSet {
 		if set.Type == constants.TypeMain {
 			return k, nil
 		}
@@ -49,7 +53,7 @@ func (d *Box) NewSet(content, contentType string) (string, error) {
 		return "", ErrMainAlreadyExists
 	}
 
-	d.data.NaoSet[key] = Set{
+	d.box.NaoSet[key] = Set{
 		Tag:        autoname.Generate("-"),
 		Content:    content,
 		Type:       contentType,
@@ -75,7 +79,7 @@ func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 		return "", ErrMainAlreadyExists
 	}
 
-	d.data.NaoSet[key] = Set{
+	d.box.NaoSet[key] = Set{
 		Tag:        tag,
 		Type:       contentType,
 		Content:    content,
@@ -100,7 +104,7 @@ func (d *Box) NewFromSet(set Set) (string, error) {
 		return "", ErrMainAlreadyExists
 	}
 
-	d.data.NaoSet[key] = set
+	d.box.NaoSet[key] = set
 
 	return key, d.updateFile()
 }
@@ -121,7 +125,7 @@ func (d *Box) NewSetsFromOutside(sets []Set) ([]string, error) {
 }
 
 func (d *Box) ModifySet(key string, content string) error {
-	set, ok := d.data.NaoSet[key]
+	set, ok := d.box.NaoSet[key]
 	if !ok {
 		return ErrSetNotFound
 	}
@@ -130,13 +134,13 @@ func (d *Box) ModifySet(key string, content string) error {
 	set.Content = content
 	set.Version++
 
-	d.data.NaoSet[key] = set
+	d.box.NaoSet[key] = set
 
 	return d.updateFile()
 }
 
 func (d *Box) ModifySetTag(key string, tag string) error {
-	set, ok := d.data.NaoSet[key]
+	set, ok := d.box.NaoSet[key]
 	if !ok {
 		return ErrSetNotFound
 	}
@@ -149,32 +153,32 @@ func (d *Box) ModifySetTag(key string, tag string) error {
 	set.Tag = tag
 	set.Version++
 
-	d.data.NaoSet[key] = set
+	d.box.NaoSet[key] = set
 
 	return d.updateFile()
 }
 
 func (d *Box) DeleteSet(key string) error {
-	_, ok := d.data.NaoSet[key]
+	_, ok := d.box.NaoSet[key]
 	if !ok {
 		return ErrSetNotFound
 	}
 
-	delete(d.data.NaoSet, key)
+	delete(d.box.NaoSet, key)
 
 	return d.updateFile()
 }
 
 func (d *Box) SearchSetByKeyPattern(pattern string) (string, Set, error) {
-	set, ok := d.data.NaoSet[pattern]
+	set, ok := d.box.NaoSet[pattern]
 	if ok {
-		d.data.LastAccess = pattern
+		d.box.LastAccess = pattern
 		return pattern, set, d.updateFile()
 	}
 
-	for k, set := range d.data.NaoSet {
+	for k, set := range d.box.NaoSet {
 		if strings.HasPrefix(k, pattern) {
-			d.data.LastAccess = k
+			d.box.LastAccess = k
 			return k, set, d.updateFile()
 		}
 	}
@@ -183,15 +187,15 @@ func (d *Box) SearchSetByKeyPattern(pattern string) (string, Set, error) {
 }
 
 func (d *Box) SearchSetByKeyTagPattern(pattern string) (string, Set, error) {
-	set, ok := d.data.NaoSet[pattern]
+	set, ok := d.box.NaoSet[pattern]
 	if ok {
-		d.data.LastAccess = pattern
+		d.box.LastAccess = pattern
 		return pattern, set, d.updateFile()
 	}
 
-	for k, set := range d.data.NaoSet {
+	for k, set := range d.box.NaoSet {
 		if strings.HasPrefix(k, pattern) || strings.HasPrefix(set.Tag, pattern) {
-			d.data.LastAccess = k
+			d.box.LastAccess = k
 			return k, set, d.updateFile()
 		}
 	}
@@ -202,7 +206,7 @@ func (d *Box) SearchSetByKeyTagPattern(pattern string) (string, Set, error) {
 func (d *Box) ListSets() []SetView {
 	sets := make([]SetView, 0)
 
-	for k, v := range d.data.NaoSet {
+	for k, v := range d.box.NaoSet {
 		sets = append(sets, SetView{
 			LastUpdate: v.LastUpdate,
 			Extension:  v.Extension,
@@ -220,7 +224,7 @@ func (d *Box) ListSets() []SetView {
 func (d *Box) ListSetWithHiddenContent() []SetViewWithoutContent {
 	sets := make([]SetViewWithoutContent, 0)
 
-	for k, v := range d.data.NaoSet {
+	for k, v := range d.box.NaoSet {
 		sets = append(sets, SetViewWithoutContent{
 			LastUpdate: v.LastUpdate,
 			Extension:  v.Extension,
@@ -237,7 +241,7 @@ func (d *Box) ListSetWithHiddenContent() []SetViewWithoutContent {
 func (d *Box) ListAllKeys() []string {
 	keys := make([]string, 0)
 
-	for k := range d.data.NaoSet {
+	for k := range d.box.NaoSet {
 		keys = append(keys, k)
 	}
 
@@ -245,7 +249,7 @@ func (d *Box) ListAllKeys() []string {
 }
 
 func (d *Box) TagAlreadyExists(tag string) bool {
-	for _, s := range d.data.NaoSet {
+	for _, s := range d.box.NaoSet {
 		if s.Tag == tag {
 			return true
 		}
@@ -255,7 +259,7 @@ func (d *Box) TagAlreadyExists(tag string) bool {
 }
 
 func (d *Box) MainAlreadyExists() bool {
-	for _, s := range d.data.NaoSet {
+	for _, s := range d.box.NaoSet {
 		if s.Type == constants.TypeMain {
 			return true
 		}
