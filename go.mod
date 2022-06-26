@@ -1,4 +1,4 @@
-module github.com/luisnquin/nao
+module github.com/luisnquin/nao/src
 
 go 1.18
 
@@ -10,6 +10,7 @@ require (
 	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203
 	github.com/google/uuid v1.3.0
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
+	github.com/luisnquin/nao v0.0.0
 	github.com/spf13/cobra v1.4.0
 	github.com/xeonx/timeago v1.0.0-rc4
 	gopkg.in/yaml.v3 v3.0.1
@@ -40,7 +41,6 @@ require (
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.7.2 // indirect
 	go.mongodb.org/mongo-driver v1.7.5 // indirect
 	golang.org/x/image v0.0.0-20191206065243-da761ea9ff43 // indirect
 	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7 // indirect
