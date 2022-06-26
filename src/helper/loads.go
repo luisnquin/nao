@@ -2,20 +2,10 @@ package helper
 
 import (
 	"io/ioutil"
-	"strings"
-
-	"github.com/google/uuid"
-	"github.com/luisnquin/nao/src/config"
 )
 
 func LoadContentInCache(key, content string) (string, error) {
-	if key == "" {
-		key = strings.ReplaceAll(uuid.NewString(), "-", "")
-	}
-
-	path := config.App.Paths.CacheDir + key + ".tmp"
-
-	err := NewCachedIn(path)
+	path, err := NewCached()
 	if err != nil {
 		return "", err
 	}

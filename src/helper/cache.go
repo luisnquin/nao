@@ -4,20 +4,17 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ProtonMail/go-appdir"
 	"github.com/google/uuid"
-	"github.com/luisnquin/nao/src/constants"
+	"github.com/luisnquin/nao/src/config"
 )
 
 func NewCached() (string, error) {
-	cacheDir := appdir.New(constants.AppName).UserCache()
-
-	err := os.MkdirAll(cacheDir, os.ModePerm)
+	err := os.MkdirAll(config.App.Paths.CacheDir, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
 
-	f, err := os.Create(cacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
+	f, err := os.Create(config.App.Paths.CacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
 	if err != nil {
 		return "", err
 	}
@@ -26,7 +23,7 @@ func NewCached() (string, error) {
 }
 
 func NewCachedIn(path string) error {
-	_ = os.MkdirAll(path, os.ModePerm)
+	_ = os.MkdirAll(config.App.Paths.CacheDir, os.ModePerm)
 
 	file, err := os.Create(path + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
 	if err != nil {
