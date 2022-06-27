@@ -9,6 +9,8 @@ import (
 /*
 TODO:
 - check changes and update files when the expose subcmd is provided by a flag
+- Use RunE instead just Run
+- Fix innecessary content loads in api pkg
 */
 
 var root = &cobra.Command{
@@ -20,7 +22,7 @@ var root = &cobra.Command{
 		case 0:
 			switch config.App.Preferences.DefaultBehavior {
 			case "latest":
-				cmd.Flags().Bool("latest", true, "") // Eh
+				cmd.Flags().Bool("latest", true, "")
 				editCmd.Run(cmd, args)
 
 			case "main":
@@ -41,6 +43,6 @@ func Execute() {
 }
 
 func init() {
-	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd, versionCmd, exposeCmd, importCmd, tagCmd, apiCmd)
+	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd, versionCmd, exposeCmd, importCmd, tagCmd, server)
 	root.PersistentFlags().String("editor", "", "Change the default code editor (ignoring configuration file)")
 }

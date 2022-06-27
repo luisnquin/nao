@@ -14,7 +14,11 @@ type StandardResponse struct {
 	Data    any               `json:"data"`
 }
 
-type Api struct {
+type Server struct {
 	router *mux.Router
 	box    *data.Box
+}
+
+type contentDTO struct {
+	Content string `json:"content"`
 }

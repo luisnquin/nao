@@ -12,21 +12,21 @@ import (
 	"github.com/luisnquin/nao/src/data"
 )
 
-func New() *Api {
-	return &Api{
+func New() *Server {
+	return &Server{
 		router: mux.NewRouter(),
 		box:    data.New(),
 	}
 }
 
-func (a *Api) Start(port string) error {
+func (a *Server) Start(port string) error {
 	go a.listenAndRefreshData()
 	a.mountHandlers()
 
 	return http.ListenAndServe(port, a.router)
 }
 
-func (a *Api) listenAndRefreshData() {
+func (a *Server) listenAndRefreshData() {
 	w := fswatch.NewFileWatcher(config.App.Paths.DataFile, 3)
 	w.Start()
 
@@ -43,13 +43,16 @@ func (a *Api) listenAndRefreshData() {
 	}
 }
 
-func (a *Api) mountHandlers() {
+func (a *Server) mountHandlers() {
 	a.router.HandleFunc("/sets", a.GetSetsHandler()).Methods(http.MethodGet)
-	a.router.HandleFunc("/sets/{id}", a.GetSetHandler()).Methods(http.MethodGet)
 	a.router.HandleFunc("/sets", a.NewSetHandler()).Methods(http.MethodPost)
+	a.router.HandleFunc("/sets/{id}", a.GetSetHandler()).Methods(http.MethodGet)
+	a.router.HandleFunc("/sets/{id}", a.ModifySetHandler()).Methods(http.MethodPut)
+	a.router.HandleFunc("/sets/{id}", a.DeleteSetHandler()).Methods(http.MethodDelete)
+	a.router.HandleFunc("/sets/{id}", a.ModifySetContentHandler()).Methods(http.MethodPatch)
 }
 
-func (a *Api) JSONResponse(w http.ResponseWriter, statusCode int, v any) {
+func (a *Server) JSONResponse(w http.ResponseWriter, statusCode int, v any) {
 	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
 

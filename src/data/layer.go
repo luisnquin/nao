@@ -124,7 +124,18 @@ func (d *Box) NewSetsFromOutside(sets []Set) ([]string, error) {
 	return keys, nil
 }
 
-func (d *Box) ModifySet(key string, content string) error {
+func (d *Box) OverwriteSet(key string, set Set) error {
+	_, ok := d.box.NaoSet[key]
+	if !ok {
+		return ErrSetNotFound
+	}
+
+	d.box.NaoSet[key] = set
+
+	return d.updateFile()
+}
+
+func (d *Box) ModifySetContent(key string, content string) error {
 	set, ok := d.box.NaoSet[key]
 	if !ok {
 		return ErrSetNotFound

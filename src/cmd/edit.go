@@ -68,7 +68,7 @@ var editCmd = &cobra.Command{
 		content, err := ioutil.ReadFile(path)
 		cobra.CheckErr(err)
 
-		err = box.ModifySet(key, string(content))
+		err = box.ModifySetContent(key, string(content))
 		cobra.CheckErr(err)
 	},
 }

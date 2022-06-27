@@ -10,7 +10,7 @@ import (
 	"github.com/luisnquin/nao/src/data"
 )
 
-func (a *Api) GetSetsHandler() http.HandlerFunc {
+func (a *Server) GetSetsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		a.JSONResponse(w, http.StatusOK, StandardResponse{
 			Version: constants.Version,
@@ -21,9 +21,9 @@ func (a *Api) GetSetsHandler() http.HandlerFunc {
 	}
 }
 
-func (a *Api) GetSetHandler() http.HandlerFunc {
+func (a *Server) GetSetHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var params map[string]string = mux.Vars(r)
+		params := mux.Vars(r)
 
 		set, err := a.box.GetSet(params["id"])
 		if err != nil {
@@ -48,7 +48,7 @@ func (a *Api) GetSetHandler() http.HandlerFunc {
 	}
 }
 
-func (a *Api) NewSetHandler() http.HandlerFunc {
+func (a *Server) NewSetHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var set data.Set
 
@@ -76,5 +76,81 @@ func (a *Api) NewSetHandler() http.HandlerFunc {
 				"key": k,
 			},
 		})
+	}
+}
+
+func (a *Server) ModifySetContentHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var (
+			params  map[string]string = mux.Vars(r)
+			request contentDTO
+		)
+
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+
+			return
+		}
+
+		err = a.box.ModifySetContent(params["id"], request.Content)
+		if err != nil {
+			if errors.Is(err, data.ErrSetNotFound) {
+				w.WriteHeader(http.StatusNotFound)
+
+				return
+			}
+
+			w.WriteHeader(http.StatusInternalServerError)
+
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func (a *Server) ModifySetHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var (
+			params  map[string]string = mux.Vars(r)
+			request data.Set
+		)
+
+		err := a.box.OverwriteSet(params["id"], request)
+		if err != nil {
+			if errors.Is(err, data.ErrSetNotFound) {
+				w.WriteHeader(http.StatusNotFound)
+
+				return
+			}
+
+			w.WriteHeader(http.StatusInternalServerError)
+
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func (a *Server) DeleteSetHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+
+		err := a.box.DeleteSet(params["id"])
+		if err != nil {
+			if errors.Is(err, data.ErrSetNotFound) {
+				w.WriteHeader(http.StatusNotFound)
+
+				return
+			}
+
+			w.WriteHeader(http.StatusInternalServerError)
+
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
 	}
 }
