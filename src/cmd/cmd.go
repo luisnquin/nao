@@ -9,12 +9,12 @@ import (
 /*
 TODO:
 - check changes and update files when the expose subcmd is provided by a flag
-- Use RunE instead just Run
 - Fix innecessary content loads in api pkg
 - Guided config
 - Maybe avoid the initialization of the configuration in init function
 */
 
+// Apparently cobra doesn't provide a type for this.
 type scriptor func(cmd *cobra.Command, args []string) error
 
 var root = &cobra.Command{

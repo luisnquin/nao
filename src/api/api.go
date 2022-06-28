@@ -30,7 +30,7 @@ func (a *Server) listenAndRefreshData() {
 	w := fswatch.NewFileWatcher(config.App.Paths.DataFile, 3)
 	w.Start()
 
-	for w.IsRunning() { // This will cause innecessary content loads, we need to comunicate this with the API
+	for w.IsRunning() {
 		select {
 		case <-w.Modified():
 			a.box.ModifyBox(data.JustLoadBox())
@@ -59,5 +59,6 @@ func (a *Server) JSONResponse(w http.ResponseWriter, statusCode int, v any) {
 	err := json.NewEncoder(w).Encode(v)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Del("Content-Type")
 	}
 }
