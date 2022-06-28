@@ -12,6 +12,7 @@ TODO:
 - Fix innecessary content loads in api pkg
 - Guided config
 - Maybe avoid the initialization of the configuration in init function
+- Port to config
 */
 
 // Apparently cobra doesn't provide a type for this.
