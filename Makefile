@@ -7,3 +7,6 @@ run:
 
 nix-build:
 	@nix-build -E 'with import <nixpkgs> { };  callPackage ./default.nix {}' 
+
+vue-dev:
+	@(cd src/web/; npm run dev)                                                                                                                                                                     

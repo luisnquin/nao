@@ -1,4 +1,12 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 
-createApp(App).mount('#app')
+
+document.onkeyup = (e) => {
+	if (e.key === '/') {
+		document.getElementById('search-bar-input').focus()
+	}
+}
+
+const app = createApp(App)
+app.mount('#app')

@@ -1,10 +1,10 @@
 <script setup>
-import Header from './components/Header.vue';
+import PageHeader from './components/PageHeader.vue'
+
 </script>
 
 <template>
-  <Header />
-
+  <PageHeader />
 </template>
 
 <style>

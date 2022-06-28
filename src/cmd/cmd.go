@@ -13,6 +13,7 @@ TODO:
 - Guided config
 - Maybe avoid the initialization of the configuration in init function
 - Port to config
+- Dark/Light from config, maybe also the themes would be customizables
 */
 
 // Apparently cobra doesn't provide a type for this.
