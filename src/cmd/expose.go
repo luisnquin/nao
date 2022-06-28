@@ -16,20 +16,43 @@ const (
 	Q rune = 81
 )
 
-var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
-	Use:   "expose",
-	Short: "Exposes all the sets in a directory",
-	Run: func(cmd *cobra.Command, args []string) {
-		views := data.New().ListSets()
+type exposeComp struct {
+	cmd     *cobra.Command
+	detach  bool
+	untree  bool
+	watch   bool
+	timeout int
+}
 
-		// timeout, _ := cmd.Flags().GetInt("timeout")
-		// watch, _ := cmd.Flags().GetBool("watch")
-		detach, _ := cmd.Flags().GetBool("detach")
-		untree, _ := cmd.Flags().GetBool("untree")
+var expose = buildExpose()
+
+func buildExpose() exposeComp {
+	c := exposeComp{
+		cmd: &cobra.Command{
+			Use:           "expose",
+			Short:         "Exposes all the sets in a directory",
+			SilenceUsage:  true,
+			SilenceErrors: true,
+		},
+	}
+
+	c.cmd.RunE = c.Main()
+
+	c.cmd.Flags().BoolVarP(&c.detach, "detach", "d", false, "")
+	c.cmd.Flags().BoolVarP(&c.untree, "untree", "u", false, "disable default tree file organization depending on types")
+	// c.cmd.Flags().IntVarP(&c.timeout, "timeout", "t", 0, "set a time limit expresed in seconds for the exposition of files")
+	// c.cmd.Flags().BoolVarP(&c.watch, "watch", "w", false, "")
+
+	return c
+}
+
+func (e *exposeComp) Main() scriptor {
+	return func(cmd *cobra.Command, args []string) error {
+		views := data.New().ListSets()
 
 		_ = os.MkdirAll(config.App.Paths.CacheDir, os.ModePerm)
 
-		if !untree {
+		if !e.untree {
 			_ = os.MkdirAll(config.App.Paths.CacheDir+"/"+constants.TypeDefault, os.ModePerm)
 			_ = os.MkdirAll(config.App.Paths.CacheDir+"/"+constants.TypeImported, os.ModePerm)
 			_ = os.MkdirAll(config.App.Paths.CacheDir+"/"+constants.TypeMerged, os.ModePerm)
@@ -40,7 +63,7 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 		for _, v := range views {
 			var f *os.File
 
-			if untree || v.Type == constants.TypeMain {
+			if e.untree || v.Type == constants.TypeMain {
 				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Tag + "-" + v.Key[:5])
 			} else if v.Extension != "" {
 				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Tag + "-" + v.Key[:5] + "." + v.Extension)
@@ -48,21 +71,27 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Tag + "-" + v.Key[:5])
 			}
 
-			cobra.CheckErr(err)
+			if err != nil {
+				return err
+			}
 
 			_, err = f.WriteString(v.Content)
-			cobra.CheckErr(err)
+			if err != nil {
+				return err
+			}
 
 			_ = f.Close()
 		}
 
 		fmt.Fprintln(os.Stdout, "Files exposed on "+config.App.Paths.CacheDir)
 
-		if detach {
-			os.Exit(0)
+		if e.detach {
+			return nil
 		}
 
-		cobra.CheckErr(keyboard.Open())
+		if err = keyboard.Open(); err != nil {
+			return err
+		}
 
 		defer keyboard.Close()
 
@@ -70,7 +99,9 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 
 		for {
 			char, key, err := keyboard.GetKey()
-			cobra.CheckErr(err)
+			if err != nil {
+				return err
+			}
 
 			if key == keyboard.KeyCtrlC || char == Q || char == q {
 				break
@@ -79,12 +110,7 @@ var exposeCmd = &cobra.Command{ // TODO: add support for fswatch
 
 		_ = os.RemoveAll(config.App.Paths.CacheDir)
 		_ = os.MkdirAll(config.App.Paths.CacheDir, os.ModePerm)
-	},
-}
 
-func init() {
-	exposeCmd.Flags().BoolP("untree", "u", false, "disable default tree file organization depending on types")
-	exposeCmd.Flags().BoolP("detach", "d", false, "")
-	// exposeCmd.Flags().BoolP("watch", "w", false, "")
-	//	exposeCmd.Flags().IntP("timeout", "t", 0, "set a time limit expresed in seconds for the exposition of files")
+		return nil
+	}
 }

@@ -10,21 +10,43 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var editCmd = &cobra.Command{
-	Use:     "edit",
-	Short:   "Edit almost any file",
-	Example: constants.AppName + " edit [<id> | <tag>]",
-	Args:    cobra.MaximumNArgs(1),
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return data.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
-	},
-	ValidArgs: data.New().ListAllKeys(),
-	Run: func(cmd *cobra.Command, args []string) {
-		box := data.New()
+type editComp struct {
+	cmd    *cobra.Command
+	latest bool
+	main   bool
+	editor string
+}
 
-		editor, _ := cmd.Flags().GetString("editor")
-		latest, _ := cmd.Flags().GetBool("latest")
-		main, _ := cmd.Flags().GetBool("main")
+var edit = buildEdit()
+
+func buildEdit() editComp {
+	c := editComp{
+		cmd: &cobra.Command{
+			Use:     "edit [id | tag]",
+			Short:   "Edit almost any file",
+			Example: constants.AppName + " edit [<id> | <tag>]",
+			Args:    cobra.MaximumNArgs(1),
+			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+				return data.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
+			},
+			ValidArgs:     data.New().ListAllKeys(),
+			SilenceUsage:  true,
+			SilenceErrors: true,
+		},
+	}
+
+	c.cmd.RunE = c.Main()
+
+	c.cmd.Flags().StringVar(&c.editor, "editor", "", "Change the default code editor (ignoring configuration file)")
+	c.cmd.Flags().BoolVarP(&c.latest, "latest", "l", false, "Access the last modified file")
+	c.cmd.Flags().BoolVarP(&c.main, "main", "m", false, "")
+
+	return c
+}
+
+func (e *editComp) Main() scriptor {
+	return func(cmd *cobra.Command, args []string) error {
+		box := data.New()
 
 		var (
 			key string
@@ -35,45 +57,51 @@ var editCmd = &cobra.Command{
 		switch {
 		case len(args) == 1:
 			key, set, err = box.SearchSetByKeyTagPattern(args[0])
-		case latest:
+		case e.latest:
 			key, set, err = box.SearchSetByKeyPattern(box.GetLastKey())
-		case main:
+		case e.main:
 			k, err := box.GetMainKey()
-			cobra.CheckErr(err)
+			if err != nil {
+				return err
+			}
 
 			key, set, err = box.SearchSetByKeyPattern(k)
 
 		default:
 			cmd.Usage()
-			os.Exit(1)
+
+			return nil
 		}
 
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		path, err := helper.LoadContentInCache(key, set.Content)
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		defer os.Remove(path)
 
 		run, err := helper.PrepareToRun(cmd.Context(), helper.EditorOptions{
 			Path:   path,
-			Editor: editor,
+			Editor: e.editor,
 		})
 
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
-		err = run()
-		cobra.CheckErr(err)
+		if err = run(); err != nil {
+			return err
+		}
 
 		content, err := ioutil.ReadFile(path)
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
-		err = box.ModifySetContent(key, string(content))
-		cobra.CheckErr(err)
-	},
-}
-
-func init() {
-	editCmd.Flags().BoolP("latest", "l", false, "Access the last modified file")
-	editCmd.Flags().BoolP("main", "m", false, "")
+		return box.ModifySetContent(key, string(content))
+	}
 }

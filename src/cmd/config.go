@@ -11,38 +11,59 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var configCmd = &cobra.Command{ // TODO: guided configuration
-	Use:     "config",
-	Short:   "To see the configuration file",
-	Example: constants.AppName + " config",
-	Run: func(cmd *cobra.Command, args []string) {
-		if edit, _ := cmd.Flags().GetBool("edit"); edit {
-			editConfig(cmd)
+type configComp struct { // configComp
+	cmd    *cobra.Command
+	editor string
+	edit   bool
+}
 
-			os.Exit(0)
+var conf = buildConfig()
+
+func buildConfig() configComp {
+	c := configComp{
+		cmd: &cobra.Command{
+			Use:           "config",
+			Short:         "To see the configuration file",
+			Example:       constants.AppName + " config",
+			SilenceUsage:  true,
+			SilenceErrors: true,
+		},
+	}
+
+	c.cmd.Flags().BoolVarP(&c.edit, "edit", "e", false, "")
+	c.cmd.Flags().StringVar(&c.editor, "editor", "", "")
+
+	c.cmd.RunE = c.Main()
+
+	return c
+}
+
+func (c *configComp) Main() scriptor {
+	return func(cmd *cobra.Command, args []string) error {
+		if c.edit {
+			return c.editConf()
 		}
 
 		content, err := ioutil.ReadFile(config.App.Paths.ConfigFile)
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		fmt.Fprintln(os.Stdout, string(content))
-	},
+
+		return nil
+	}
 }
 
-func init() {
-	configCmd.Flags().BoolP("edit", "e", false, "")
-}
-
-func editConfig(cmd *cobra.Command) {
-	editor, _ := cmd.Flags().GetString("editor")
-
-	run, err := helper.PrepareToRun(cmd.Context(), helper.EditorOptions{
+func (c *configComp) editConf() error {
+	run, err := helper.PrepareToRun(c.cmd.Context(), helper.EditorOptions{
 		Path:   config.App.Paths.ConfigFile,
-		Editor: editor,
+		Editor: c.editor,
 	})
 
-	cobra.CheckErr(err)
+	if err != nil {
+		return err
+	}
 
-	err = run()
-	cobra.CheckErr(err)
+	return run()
 }

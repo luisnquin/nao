@@ -9,31 +9,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var renderCmd = &cobra.Command{
-	Use:   "render",
-	Short: "Render the file to markdown by default",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		to, _ := cmd.Flags().GetString("to")
+type renderComp struct {
+	cmd *cobra.Command
+	to  string
+}
 
+var render = buildRender()
+
+func buildRender() renderComp {
+	c := renderComp{
+		cmd: &cobra.Command{
+			Use:           "render",
+			Short:         "Render the file to markdown by default",
+			Args:          cobra.ExactArgs(1),
+			SilenceErrors: true,
+			SilenceUsage:  true,
+		},
+	}
+
+	c.cmd.RunE = c.Main()
+
+	c.cmd.Flags().StringVarP(&c.to, "to", "t", "", "Options: markdown, raw")
+
+	return c
+}
+
+func (r *renderComp) Main() scriptor {
+	return func(cmd *cobra.Command, args []string) error {
 		_, set, err := data.New().SearchSetByKeyTagPattern(args[0])
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			return err
 		}
 
-		if to == "raw" {
+		if r.to == "raw" {
 			fmt.Fprintln(os.Stdout, set.Content)
 
-			os.Exit(0)
+			return nil
 		}
 
 		c := markdown.Render(set.Content, 80, 6)
 
 		fmt.Fprintln(os.Stdout, string(c))
-	},
-}
 
-func init() {
-	renderCmd.Flags().StringP("to", "t", "", "options: markdown and raw")
+		return nil
+	}
 }

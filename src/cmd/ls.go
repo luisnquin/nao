@@ -11,10 +11,32 @@ import (
 	"github.com/xeonx/timeago"
 )
 
-var lsCmd = &cobra.Command{
-	Use:   "ls",
-	Short: "See a list of all available nao files",
-	Run: func(cmd *cobra.Command, args []string) {
+type lsComp struct {
+	cmd   *cobra.Command
+	quiet bool
+}
+
+var ls = buildLs()
+
+func buildLs() lsComp {
+	c := lsComp{
+		cmd: &cobra.Command{
+			Use:           "ls",
+			Short:         "See a list of all available nao files",
+			SilenceUsage:  true,
+			SilenceErrors: true,
+		},
+	}
+
+	c.cmd.RunE = c.Main()
+
+	c.cmd.Flags().BoolVarP(&c.quiet, "quiet", "q", false, "Only display file ID's")
+
+	return c
+}
+
+func (ls *lsComp) Main() scriptor {
+	return func(cmd *cobra.Command, args []string) error {
 		box := data.New()
 
 		quiet, _ := cmd.Flags().GetBool("quiet")
@@ -23,7 +45,7 @@ var lsCmd = &cobra.Command{
 				fmt.Fprintln(os.Stdout, k[:10])
 			}
 
-			os.Exit(0)
+			return nil
 		}
 
 		header := table.Row{"ID", "TAG", "TYPE", "LAST UPDATE", "VERSION"}
@@ -34,9 +56,7 @@ var lsCmd = &cobra.Command{
 		}
 
 		helper.RenderTable(header, rows)
-	},
-}
 
-func init() {
-	lsCmd.Flags().BoolP("quiet", "q", false, "Only display file ID's")
+		return nil
+	}
 }

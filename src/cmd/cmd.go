@@ -11,7 +11,11 @@ TODO:
 - check changes and update files when the expose subcmd is provided by a flag
 - Use RunE instead just Run
 - Fix innecessary content loads in api pkg
+- Guided config
+- Maybe avoid the initialization of the configuration in init function
 */
+
+type scriptor func(cmd *cobra.Command, args []string) error
 
 var root = &cobra.Command{
 	Use:   constants.AppName,
@@ -22,12 +26,12 @@ var root = &cobra.Command{
 		case 0:
 			switch config.App.Preferences.DefaultBehavior {
 			case "latest":
-				cmd.Flags().Bool("latest", true, "")
-				editCmd.Run(cmd, args)
+				edit.latest = true
+				edit.cmd.RunE(cmd, args)
 
 			case "main":
-				cmd.Flags().Bool("main", true, "")
-				editCmd.Run(cmd, args)
+				edit.main = true
+				edit.cmd.RunE(cmd, args)
 			default:
 				cmd.Usage()
 			}
@@ -43,6 +47,5 @@ func Execute() {
 }
 
 func init() {
-	root.AddCommand(newCmd, renderCmd, mergeCmd, lsCmd, editCmd, rmCmd, configCmd, versionCmd, exposeCmd, importCmd, tagCmd, server)
-	root.PersistentFlags().String("editor", "", "Change the default code editor (ignoring configuration file)")
+	root.AddCommand(new.cmd, render.cmd, merge.cmd, ls.cmd, rm.cmd, conf.cmd, version, expose.cmd, importer.cmd, tagCmd, server.cmd, edit.cmd)
 }

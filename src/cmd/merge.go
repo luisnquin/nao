@@ -10,13 +10,35 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var mergeCmd = &cobra.Command{
-	Use:     "merge",
-	Short:   "Combine two or more files",
-	Aliases: []string{"mix"},
-	Args:    cobra.MinimumNArgs(2),
-	Example: constants.AppName + " merge <id> <id> ...",
-	Run: func(cmd *cobra.Command, args []string) {
+type mergeComp struct {
+	cmd    *cobra.Command
+	delete bool
+}
+
+var merge = buildMerge()
+
+func buildMerge() mergeComp {
+	c := mergeComp{
+		cmd: &cobra.Command{
+			Use:           "merge <id> ...",
+			Short:         "Combine two or more files",
+			Aliases:       []string{"mix"},
+			Args:          cobra.MinimumNArgs(2),
+			Example:       constants.AppName + " merge 31f1f3a446 8d98afbd2e eb2c4f6c58 f45302728f",
+			SilenceErrors: true,
+			SilenceUsage:  true,
+		},
+	}
+
+	c.cmd.RunE = c.Main()
+
+	c.cmd.Flags().BoolVarP(&c.delete, "delete", "d", false, "Delete all targets to merge")
+
+	return c
+}
+
+func (m *mergeComp) Main() scriptor {
+	return func(cmd *cobra.Command, args []string) error {
 		var (
 			box     = data.New()
 			oldKeys = make([]string, 0)
@@ -24,22 +46,21 @@ var mergeCmd = &cobra.Command{
 			mergedContent string
 		)
 
-		prevent, _ := cmd.Flags().GetBool("prevent-default")
-
 		for i, arg := range args {
 			k, set, err := box.SearchSetByKeyTagPattern(arg)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "set %s not found\n", arg)
-				os.Exit(1)
+				return err
 			}
 
 			if set.Content == "" {
 				continue
 			}
 
-			if !prevent {
+			if m.delete {
 				err = box.DeleteSet(k)
-				cobra.CheckErr(err)
+				if err != nil {
+					return err
+				}
 			}
 
 			oldKeys = append(oldKeys, k[:10])
@@ -52,12 +73,12 @@ var mergeCmd = &cobra.Command{
 		}
 
 		key, err := box.NewSet(mergedContent, constants.TypeMerged)
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		fmt.Fprintf(os.Stdout, "(%s) ⥤ %s\n", strings.Join(oldKeys, ", "), key[:10])
-	},
-}
 
-func init() {
-	mergeCmd.PersistentFlags().BoolP("prevent-default", "p", false, "Prevent file deletion")
+		return nil
+	}
 }

@@ -11,86 +11,109 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var newCmd = &cobra.Command{
-	Use:   "new",
-	Short: "Creates a new nao file",
-	Run: func(cmd *cobra.Command, args []string) {
+type newComp struct {
+	cmd    *cobra.Command
+	editor string
+	from   string
+	tag    string
+	main   bool
+}
+
+var new = buildNew()
+
+func buildNew() newComp {
+	c := newComp{
+		cmd: &cobra.Command{
+			Use:           "new",
+			Short:         "Creates a new nao file",
+			SilenceErrors: true,
+			SilenceUsage:  true,
+		},
+	}
+
+	c.cmd.RunE = c.Main()
+
+	c.cmd.Flags().StringVar(&c.editor, "editor", "", "Change the default code editor (ignoring configuration file)")
+	c.cmd.Flags().StringVarP(&c.tag, "tag", "t", "", "Assign a tag to the new file")
+	c.cmd.Flags().StringVarP(&c.from, "from", "f", "", "Create a copy of another file by ID or tag to edit on it")
+	c.cmd.Flags().BoolVarP(&c.main, "main", "m", false, "Creates a new main file, throws an error in case that one already exists")
+
+	return c
+}
+
+func (n *newComp) Main() scriptor {
+	return func(cmd *cobra.Command, args []string) error {
 		box := data.New()
 
-		from, editor, tag, main := parseNewCmdFlags(cmd)
-
-		if main && box.MainAlreadyExists() {
-			fmt.Fprintln(os.Stderr, "Error:", data.ErrMainAlreadyExists)
-			os.Exit(1)
+		if n.main && box.MainAlreadyExists() {
+			return data.ErrMainAlreadyExists
 		}
 
-		if tag != "" && box.TagAlreadyExists(tag) {
-			fmt.Fprintln(os.Stderr, "Error:", data.ErrTagAlreadyExists)
-			os.Exit(1)
+		if n.tag != "" && box.TagAlreadyExists(n.tag) {
+			return data.ErrTagAlreadyExists
 		}
 
 		fPath, err := helper.NewCached()
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		defer os.Remove(fPath)
 
-		if from != "" {
-			_, set, err := box.SearchSetByKeyTagPattern(from)
-			cobra.CheckErr(err)
+		if n.from != "" {
+			_, set, err := box.SearchSetByKeyTagPattern(n.from)
+			if err != nil {
+				return err
+			}
 
 			err = ioutil.WriteFile(fPath, []byte(set.Content), 0644)
-			cobra.CheckErr(err)
+			if err != nil {
+				return err
+			}
 		}
 
 		run, err := helper.PrepareToRun(cmd.Context(), helper.EditorOptions{
-			Editor: editor,
+			Editor: n.editor,
 			Path:   fPath,
 		})
 
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		err = run()
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		content, err := ioutil.ReadFile(fPath)
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		if len(content) == 0 {
-			fmt.Fprintln(os.Stderr, "Empty content, will not be saved!")
-
-			return
+			return fmt.Errorf("Empty content, will not be saved")
 		}
 
 		var k string
 
 		contentType := constants.TypeDefault
-		if main {
+		if n.main {
 			contentType = constants.TypeMain
 		}
 
-		if tag != "" {
-			k, err = box.NewSetWithTag(string(content), contentType, tag)
+		if n.tag != "" {
+			k, err = box.NewSetWithTag(string(content), contentType, n.tag)
 		} else {
 			k, err = box.NewSet(string(content), contentType)
 		}
 
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		fmt.Fprintln(os.Stdout, k[:10])
-	},
-}
 
-func init() {
-	newCmd.Flags().BoolP("main", "m", false, "Creates a new main file, throws an error in case that one already exists")
-	newCmd.Flags().StringP("from", "f", "", "Create a copy of another file by ID or tag to edit on it")
-	newCmd.Flags().StringP("tag", "t", "", "Assign a tag to the new file")
-}
-
-func parseNewCmdFlags(cmd *cobra.Command) (string, string, string, bool) {
-	editor, _ := cmd.Flags().GetString("editor")
-	from, _ := cmd.Flags().GetString("from")
-	tag, _ := cmd.Flags().GetString("tag")
-	main, _ := cmd.Flags().GetBool("main")
-
-	return from, editor, tag, main
+		return nil
+	}
 }

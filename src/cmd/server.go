@@ -8,18 +8,34 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var server = &cobra.Command{
-	Use:   "server",
-	Short: "Serve content via REST server",
-	Run: func(cmd *cobra.Command, args []string) {
-		port, _ := cmd.Flags().GetString("port")
-
-		color.New(color.FgHiGreen).Fprintln(os.Stdout, "Listen on http://localhost"+port+"\n")
-
-		cobra.CheckErr(api.New().Start(port))
-	},
+type serverComp struct {
+	cmd  *cobra.Command
+	port string
 }
 
-func init() {
-	server.Flags().StringP("port", "p", ":3000", "Port to listen (e.g.: \":XXXX\")")
+var server = buildServer()
+
+func buildServer() serverComp {
+	c := serverComp{
+		cmd: &cobra.Command{
+			Use:           "server",
+			Short:         "Serve content via REST server",
+			SilenceUsage:  true,
+			SilenceErrors: true,
+		},
+	}
+
+	c.cmd.RunE = c.Main()
+
+	c.cmd.Flags().StringVarP(&c.port, "port", "p", ":3000", "Port to listen (e.g.: \":XXXX\")")
+
+	return c
+}
+
+func (s *serverComp) Main() scriptor {
+	return func(cmd *cobra.Command, args []string) error {
+		color.New(color.FgHiGreen).Fprintln(os.Stdout, "Listen on http://localhost"+s.port+"\n")
+
+		return api.New().Start(s.port)
+	}
 }

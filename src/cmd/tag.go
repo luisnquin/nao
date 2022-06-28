@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
@@ -11,22 +10,24 @@ import (
 )
 
 var tagCmd = &cobra.Command{
-	Use:     "tag",
-	Short:   "Rename the tag of any file",
-	Example: constants.AppName + " tag <id> <tag>",
-	Args:    cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	Use:           "tag [<id> | <tag>]",
+	Short:         "Rename the tag of any file",
+	Example:       constants.AppName + " tag 9f0876faf5 battery_threshold",
+	Args:          cobra.ExactArgs(2),
+	SilenceUsage:  true,
+	SilenceErrors: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if ok := helper.EnsureTagIsValid(args[1]); !ok {
-			fmt.Fprintln(os.Stderr, args[1]+" is not a valid tag")
-			os.Exit(1)
+			return fmt.Errorf(args[1] + " is not a valid tag")
 		}
 
 		box := data.New()
 
 		key, _, err := box.SearchSetByKeyPattern(args[0])
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
-		err = box.ModifySetTag(key, args[1])
-		cobra.CheckErr(err)
+		return box.ModifySetTag(key, args[1])
 	},
 }

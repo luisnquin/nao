@@ -10,28 +10,49 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ⸙
+type importComp struct {
+	cmd *cobra.Command
+	yes bool
+}
 
-var importCmd = &cobra.Command{
-	Use:     "import",
-	Short:   "Import a directory or a file",
-	Example: constants.AppName + " import <path> ...",
-	Args:    cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+var importer = buildImport()
+
+func buildImport() importComp {
+	c := importComp{
+		cmd: &cobra.Command{
+			Use:           "import",
+			Short:         "Import a directory or a file",
+			Example:       constants.AppName + " import <path> ...",
+			Args:          cobra.MinimumNArgs(1),
+			SilenceUsage:  true,
+			SilenceErrors: true,
+		},
+	}
+
+	c.cmd.RunE = c.Main()
+
+	c.cmd.Flags().BoolVarP(&c.yes, "yes", "y", false, "")
+
+	return c
+}
+
+func (i *importComp) Main() scriptor {
+	return func(cmd *cobra.Command, args []string) error {
 		allSets := make([]data.Set, 0)
 
 		yes, _ := cmd.Flags().GetBool("yes")
 
 		for _, path := range args {
 			info, err := os.Stat(path)
-			if os.IsNotExist(err) {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
+			if err != nil {
+				return err
 			}
 
 			if info.IsDir() {
 				sets, err := helper.SetsFromDir(path)
-				cobra.CheckErr(err)
+				if err != nil {
+					return err
+				}
 
 				allSets = append(allSets, sets...)
 
@@ -39,7 +60,9 @@ var importCmd = &cobra.Command{
 			}
 
 			set, err := helper.SetFromFile(path)
-			cobra.CheckErr(err)
+			if err != nil {
+				return err
+			}
 
 			allSets = append(allSets, set)
 		}
@@ -48,12 +71,15 @@ var importCmd = &cobra.Command{
 			yes = helper.AskYesOrNot(fmt.Sprintf("%d keys will be created, sure?", len(allSets)))
 			if !yes {
 				fmt.Fprintln(os.Stdout, "Aborted")
-				os.Exit(0)
+
+				return nil
 			}
 		}
 
 		keys, err := data.New().NewSetsFromOutside(allSets)
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		if len(keys) <= 10 {
 			for _, k := range keys {
@@ -62,9 +88,7 @@ var importCmd = &cobra.Command{
 		}
 
 		fmt.Fprintf(os.Stdout, "\n%d (key/s) has been created\n", len(keys))
-	},
-}
 
-func init() {
-	importCmd.Flags().BoolP("yes", "y", false, "")
+		return nil
+	}
 }
