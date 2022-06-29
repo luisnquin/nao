@@ -1,12 +1,28 @@
 <script>
 export default {
 	name: 'SearchBar',
+	data: () => {
+		return {
+			sets: null
+		}
+	},
+	async created() {
+		const res = await fetch('http://localhost:5000/sets', { method: 'GET' })
+		const sets = await res.json()
+		this.sets = sets.data
+	}
 }
 </script>
 <template>
 	<div id="search-bar">
-		<input id="search-bar-input" type="text" placeholder="Search something here..." />
+		<input id="search-bar-input" type="search" list="search-bar-options" placeholder="Search something here..."
+			autocomplete="off" />
 		<span>/</span>
+
+		<datalist id="search-bar-options">
+			<option v-for="set in sets" v-bind:key="set">{{ set.tag }}</option>
+			<option v-for="set in sets" v-bind:key="set">{{ set.key }}</option>
+		</datalist>
 	</div>
 </template>
 

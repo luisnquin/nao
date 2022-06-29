@@ -7,16 +7,21 @@ import (
 
 	"github.com/andreaskoch/go-fswatch"
 	"github.com/fatih/color"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/luisnquin/nao/src/config"
 	"github.com/luisnquin/nao/src/data"
 )
 
 func New() *Server {
-	return &Server{
-		router: mux.NewRouter(),
+	s := &Server{
+		router: echo.New(),
 		box:    data.New(),
 	}
+
+	s.router.Use(middleware.CORS())
+
+	return s
 }
 
 func (a *Server) Start(port string) error {
@@ -44,12 +49,13 @@ func (a *Server) listenAndRefreshData() {
 }
 
 func (a *Server) mountHandlers() {
-	a.router.HandleFunc("/sets", a.GetSetsHandler()).Methods(http.MethodGet)
-	a.router.HandleFunc("/sets", a.NewSetHandler()).Methods(http.MethodPost)
-	a.router.HandleFunc("/sets/{id}", a.GetSetHandler()).Methods(http.MethodGet)
-	a.router.HandleFunc("/sets/{id}", a.ModifySetHandler()).Methods(http.MethodPut)
-	a.router.HandleFunc("/sets/{id}", a.DeleteSetHandler()).Methods(http.MethodDelete)
-	a.router.HandleFunc("/sets/{id}", a.ModifySetContentHandler()).Methods(http.MethodPatch)
+	sets := a.router.Group("/sets")
+	sets.GET("", a.GetSetsHandler())
+	sets.POST("", a.NewSetHandler())
+	sets.GET("/:id", a.GetSetHandler())
+	sets.PUT("/:id", a.ModifySetHandler())
+	sets.DELETE("/:id", a.DeleteSetHandler())
+	sets.PATCH("/:id", a.ModifySetContentHandler())
 }
 
 func (a *Server) JSONResponse(w http.ResponseWriter, statusCode int, v any) {

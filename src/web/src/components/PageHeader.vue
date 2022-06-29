@@ -30,10 +30,10 @@ export default {
 
 <style>
 header {
-	background-color: #4f46e5;
+	background-color: #4c43c4;
 	position: sticky;
 	top: 0;
-	padding: 1rem;
+	padding: 0.5rem 1rem;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;

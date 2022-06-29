@@ -1,156 +1,123 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 )
 
-func (a *Server) GetSetsHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		a.JSONResponse(w, http.StatusOK, StandardResponse{
+func (a *Server) GetSetsHandler() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.JSON(http.StatusOK, StandardResponse{
 			Version: constants.Version,
-			Method:  r.Method,
+			Method:  c.Request().Method,
 			Context: "sets",
 			Data:    a.box.ListSets(),
 		})
 	}
 }
 
-func (a *Server) GetSetHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		params := mux.Vars(r)
-
-		set, err := a.box.GetSet(params["id"])
+func (a *Server) GetSetHandler() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		set, err := a.box.GetSet(c.Param("id"))
 		if err != nil {
 			if errors.Is(err, data.ErrSetNotFound) {
-				w.WriteHeader(http.StatusNotFound)
-
-				return
+				return echo.ErrNotFound
 			}
 
-			w.WriteHeader(http.StatusInternalServerError)
-
-			return
+			return echo.ErrInternalServerError
 		}
 
-		a.JSONResponse(w, http.StatusOK, StandardResponse{
+		return c.JSON(http.StatusOK, StandardResponse{
 			Version: constants.Version,
-			Method:  r.Method,
+			Method:  c.Request().Method,
 			Context: "sets",
-			Params:  params,
-			Data:    set,
+			Params: params{
+				"id": c.Param("id"),
+			},
+			Data: set,
 		})
 	}
 }
 
-func (a *Server) NewSetHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var set data.Set
+func (a *Server) NewSetHandler() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var request data.Set
 
-		err := json.NewDecoder(r.Body).Decode(&set)
+		err := c.Bind(&request)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-
-			return
+			return echo.ErrBadRequest
 		}
 
-		_ = r.Body.Close()
-
-		k, err := a.box.NewFromSet(set)
+		k, err := a.box.NewFromSet(request)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-
-			return
+			return echo.ErrInternalServerError
 		}
 
-		a.JSONResponse(w, http.StatusCreated, StandardResponse{
+		return c.JSON(http.StatusCreated, StandardResponse{
 			Version: constants.Version,
-			Method:  r.Method,
+			Method:  c.Request().Method,
 			Context: "sets",
-			Data: map[string]string{
+			Data: echo.Map{
 				"key": k,
 			},
 		})
 	}
 }
 
-func (a *Server) ModifySetContentHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var (
-			params  map[string]string = mux.Vars(r)
-			request contentDTO
-		)
+func (a *Server) ModifySetContentHandler() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var request contentDTO
 
-		err := json.NewDecoder(r.Body).Decode(&request)
+		err := c.Bind(&request)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-
-			return
+			return echo.ErrBadRequest
 		}
 
-		err = a.box.ModifySetContent(params["id"], request.Content)
+		err = a.box.ModifySetContent(c.Param("id"), request.Content)
 		if err != nil {
 			if errors.Is(err, data.ErrSetNotFound) {
-				w.WriteHeader(http.StatusNotFound)
-
-				return
+				return echo.ErrNotFound
 			}
 
-			w.WriteHeader(http.StatusInternalServerError)
-
-			return
+			return echo.ErrInternalServerError
 		}
 
-		w.WriteHeader(http.StatusOK)
+		return c.NoContent(http.StatusOK)
 	}
 }
 
-func (a *Server) ModifySetHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var (
-			params  map[string]string = mux.Vars(r)
-			request data.Set
-		)
+func (a *Server) ModifySetHandler() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var request data.Set
 
-		err := a.box.OverwriteSet(params["id"], request)
+		err := a.box.OverwriteSet(c.Param("id"), request)
 		if err != nil {
 			if errors.Is(err, data.ErrSetNotFound) {
-				w.WriteHeader(http.StatusNotFound)
-
-				return
+				return echo.ErrNotFound
 			}
 
-			w.WriteHeader(http.StatusInternalServerError)
-
-			return
+			return echo.ErrInternalServerError
 		}
 
-		w.WriteHeader(http.StatusOK)
+		return c.NoContent(http.StatusOK)
 	}
 }
 
-func (a *Server) DeleteSetHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		params := mux.Vars(r)
-
-		err := a.box.DeleteSet(params["id"])
+func (a *Server) DeleteSetHandler() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		err := a.box.DeleteSet(c.Param("id"))
 		if err != nil {
 			if errors.Is(err, data.ErrSetNotFound) {
-				w.WriteHeader(http.StatusNotFound)
-
-				return
+				return echo.ErrNotFound
 			}
 
-			w.WriteHeader(http.StatusInternalServerError)
-
-			return
+			return echo.ErrInternalServerError
 		}
 
-		w.WriteHeader(http.StatusOK)
+		return c.NoContent(http.StatusOK)
 	}
 }

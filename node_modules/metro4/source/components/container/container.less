@@ -1,0 +1,66 @@
+@import (once) "../../include/vars";
+@import (once) "../../include/mixins";
+
+.container, .container-fluid, section, header, footer, aside {
+    margin: 0 auto;
+    position: relative;
+    .clear();
+}
+
+.container {
+    width: 100%;
+    padding-right: 12px;
+    padding-left: 12px;
+}
+
+.container-fluid {
+    width: 100%;
+    max-width: none;
+    padding-right: 12px;
+    padding-left: 12px;
+}
+
+section {
+
+}
+
+@media (min-width: 576px) {
+    .container {
+        max-width: 98%;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 95%;
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+@media (min-width: 1452px) {
+    .container {
+        max-width: 1360px;
+    }
+}
+
+.generate-container-media-options(@mediaBreakpointListMobileLength);
+.generate-container-media-options(@name, @i: 1) when (@i <= @mediaBreakpointListMobileLength) {
+    @m: extract(@mediaBreakpointListMobile, @i);
+
+        .container-@{m} {
+            max-width: @@m!important;
+        }
+
+    .generate-container-media-options(@name, @i + 1);
+}
