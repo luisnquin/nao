@@ -14,11 +14,7 @@ import (
 )
 
 func New() *Server {
-	s := &Server{
-		router: echo.New(),
-		box:    data.New(),
-	}
-
+	s := &Server{router: echo.New(), box: data.New()}
 	s.router.Use(middleware.CORS())
 
 	return s
