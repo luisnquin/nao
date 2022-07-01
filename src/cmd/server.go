@@ -27,14 +27,18 @@ func buildServer() serverComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().StringVarP(&c.port, "port", "p", ":3000", "Port to listen (e.g.: \":XXXX\")")
+	c.cmd.Flags().StringVarP(&c.port, "port", "p", ":3000", "Port to listen (e.g.: \"XXXX\")")
 
 	return c
 }
 
 func (s *serverComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		color.New(color.FgHiGreen).Fprintln(os.Stdout, "Listen on http://localhost"+s.port+"\n")
+		if len(s.port) > 0 && string([]rune(s.port)[0]) != ":" {
+			s.port = ":" + s.port
+		}
+
+		color.New(color.FgHiGreen).Fprintln(os.Stdout, "Listening on http://localhost"+s.port+"\n")
 
 		return api.New().Start(s.port)
 	}

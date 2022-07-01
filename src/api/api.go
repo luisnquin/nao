@@ -31,11 +31,16 @@ func (a *Server) listenAndRefreshData() {
 	w := fswatch.NewFileWatcher(config.App.Paths.DataFile, 3)
 	w.Start()
 
+	color.New(color.FgHiCyan).Fprintln(os.Stdout, "👀  Watching "+config.App.Paths.DataFile+"\n")
+
+	var timesMod int
+
 	for w.IsRunning() {
 		select {
 		case <-w.Modified():
+			timesMod++
 			a.box.ModifyBox(data.JustLoadBox())
-			color.New(color.FgHiBlue).Fprintln(os.Stdout, "Data refreshed")
+			color.New(color.FgHiBlue).Fprintf(os.Stdout, "\rData refreshed(x%d)", timesMod)
 
 		case <-w.Moved():
 			color.New(color.FgHiRed).Fprintln(os.Stderr, "Error: Unable to find data file, apparently moved")
@@ -55,6 +60,7 @@ func (a *Server) mountHandlers() {
 }
 
 func (a *Server) JSONResponse(w http.ResponseWriter, statusCode int, v any) {
+
 	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
 
