@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 	"os"
 
@@ -14,21 +13,21 @@ import (
 )
 
 func New() *Server {
-	s := &Server{router: echo.New(), box: data.New()}
+	s := &Server{router: echo.New(), box: data.New(), itWasMe: make(chan bool)}
 	s.router.Use(middleware.CORS())
 
 	return s
 }
 
 func (a *Server) Start(port string) error {
-	go a.listenAndRefreshData()
+	go a.watchAndRefreshData()
 	a.mountHandlers()
 
 	return http.ListenAndServe(port, a.router)
 }
 
-func (a *Server) listenAndRefreshData() {
-	w := fswatch.NewFileWatcher(config.App.Paths.DataFile, 3)
+func (a *Server) watchAndRefreshData() {
+	w := fswatch.NewFileWatcher(config.App.Paths.DataFile, 1)
 	w.Start()
 
 	color.New(color.FgHiCyan).Fprintln(os.Stdout, "👀  Watching "+config.App.Paths.DataFile+"\n")
@@ -38,9 +37,15 @@ func (a *Server) listenAndRefreshData() {
 	for w.IsRunning() {
 		select {
 		case <-w.Modified():
-			timesMod++
-			a.box.ModifyBox(data.JustLoadBox())
-			color.New(color.FgHiBlue).Fprintf(os.Stdout, "\rData refreshed(x%d)", timesMod)
+			select {
+			case <-a.itWasMe:
+				continue
+
+			default:
+				timesMod++
+				a.box.ModifyBox(data.JustLoadBox())
+				color.New(color.FgHiBlue).Fprintf(os.Stdout, "\rData refreshed(x%d)", timesMod)
+			}
 
 		case <-w.Moved():
 			color.New(color.FgHiRed).Fprintln(os.Stderr, "Error: Unable to find data file, apparently moved")
@@ -57,16 +62,4 @@ func (a *Server) mountHandlers() {
 	sets.PUT("/:id", a.ModifySetHandler())
 	sets.DELETE("/:id", a.DeleteSetHandler())
 	sets.PATCH("/:id", a.ModifySetContentHandler())
-}
-
-func (a *Server) JSONResponse(w http.ResponseWriter, statusCode int, v any) {
-
-	w.WriteHeader(statusCode)
-	w.Header().Set("Content-Type", "application/json")
-
-	err := json.NewEncoder(w).Encode(v)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Header().Del("Content-Type")
-	}
 }
