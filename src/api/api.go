@@ -12,20 +12,29 @@ import (
 	"github.com/luisnquin/nao/src/data"
 )
 
-func New() *Server {
-	s := &Server{router: echo.New(), box: data.New(), itWasMe: make(chan bool)}
+func New(port string, quiet, verbose bool) *Server {
+	s := &Server{
+		itWasMyFault: make(chan bool),
+		router:       echo.New(),
+		box:          data.New(),
+		quiet:        quiet,
+		port:         port,
+	}
+
+	if verbose {
+		s.router.Use(middleware.Logger())
+	}
+
 	s.router.Use(middleware.CORS())
 
 	return s
 }
 
-func (a *Server) Start(port string, quiet bool) error {
+func (a *Server) Start() error {
 	go a.watchAndRefreshData()
 	a.mountHandlers()
 
-	a.quiet = quiet
-
-	return http.ListenAndServe(port, a.router)
+	return http.ListenAndServe(a.port, a.router)
 }
 
 func (a *Server) watchAndRefreshData() {
@@ -42,7 +51,7 @@ func (a *Server) watchAndRefreshData() {
 		select {
 		case <-w.Modified():
 			select {
-			case <-a.itWasMe:
+			case <-a.itWasMyFault:
 				continue
 
 			default:

@@ -14,6 +14,7 @@ TODO:
 - Flutter and syncer
 - 'view' subcmd, consider merge with 'render'
 - Backup with timeout, giving more logic to 'rm' and a --force -f, maybe, this for remove also in the backup
+- Fix breakline due to verbose in 'server'
 */
 
 // Apparently cobra doesn't provide a type for this.

@@ -9,9 +9,10 @@ import (
 )
 
 type serverComp struct {
-	cmd   *cobra.Command
-	port  string
-	quiet bool
+	cmd     *cobra.Command
+	port    string
+	quiet   bool
+	verbose bool
 }
 
 var server = buildServer()
@@ -30,6 +31,7 @@ func buildServer() serverComp {
 
 	c.cmd.Flags().StringVarP(&c.port, "port", "p", ":3000", "port to listen (e.g.: \"XXXX\")")
 	c.cmd.Flags().BoolVarP(&c.quiet, "quiet", "q", false, "keep the server quiet except in case of an exception")
+	c.cmd.Flags().BoolVarP(&c.verbose, "verbose", "v", false, "start the server with a logger")
 
 	return c
 }
@@ -44,6 +46,6 @@ func (s *serverComp) Main() scriptor {
 			color.New(color.FgHiGreen).Fprintln(os.Stdout, "Listening on http://localhost"+s.port+"\n")
 		}
 
-		return api.New().Start(s.port, s.quiet)
+		return api.New(s.port, s.quiet, s.verbose).Start()
 	}
 }

@@ -15,10 +15,11 @@ type StandardResponse struct {
 }
 
 type Server struct {
-	router  *echo.Echo
-	box     *data.Box
-	itWasMe chan bool
-	quiet   bool
+	router       *echo.Echo
+	box          *data.Box
+	itWasMyFault chan bool
+	port         string
+	quiet        bool
 }
 
 type contentDTO struct {

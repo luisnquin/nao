@@ -57,7 +57,7 @@ func (a *Server) NewSetHandler() echo.HandlerFunc {
 			return echo.ErrInternalServerError
 		}
 
-		a.itWasMe <- true
+		a.itWasMyFault <- true
 
 		return c.JSON(http.StatusCreated, StandardResponse{
 			Version: constants.Version,
@@ -88,7 +88,7 @@ func (a *Server) ModifySetContentHandler() echo.HandlerFunc {
 			return echo.ErrInternalServerError
 		}
 
-		a.itWasMe <- true
+		a.itWasMyFault <- true
 
 		return c.NoContent(http.StatusOK)
 	}
@@ -107,7 +107,7 @@ func (a *Server) ModifySetHandler() echo.HandlerFunc {
 			return echo.ErrInternalServerError
 		}
 
-		a.itWasMe <- true
+		a.itWasMyFault <- true
 
 		return c.NoContent(http.StatusOK)
 	}
@@ -124,7 +124,7 @@ func (a *Server) DeleteSetHandler() echo.HandlerFunc {
 			return echo.ErrInternalServerError
 		}
 
-		a.itWasMe <- true
+		a.itWasMyFault <- true
 
 		return c.NoContent(http.StatusOK)
 	}
