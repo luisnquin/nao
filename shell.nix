@@ -1,5 +1,4 @@
-with import <nixpkgs> { };
-
-pkgs.mkShell {
-  buildInput = [ pkgs.go pkgs.gcc ];
-}
+with import <nixpkgs> {};
+  pkgs.mkShell {
+    buildInput = [pkgs.go pkgs.gcc];
+  }
