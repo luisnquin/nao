@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 
 document.onkeyup = (e) => {
-	if (e.key === '/') {
+	if (e.key === '/' && e.target.tagName != 'TEXTAREA') {
 		document.getElementById('search-bar-input').focus()
 	}
 }

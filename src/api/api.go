@@ -19,9 +19,11 @@ func New() *Server {
 	return s
 }
 
-func (a *Server) Start(port string) error {
+func (a *Server) Start(port string, quiet bool) error {
 	go a.watchAndRefreshData()
 	a.mountHandlers()
+
+	a.quiet = quiet
 
 	return http.ListenAndServe(port, a.router)
 }
@@ -30,7 +32,9 @@ func (a *Server) watchAndRefreshData() {
 	w := fswatch.NewFileWatcher(config.App.Paths.DataFile, 1)
 	w.Start()
 
-	color.New(color.FgHiCyan).Fprintln(os.Stdout, "👀  Watching "+config.App.Paths.DataFile+"\n")
+	if !a.quiet {
+		color.New(color.FgHiCyan).Fprintln(os.Stdout, "👀  Watching "+config.App.Paths.DataFile+"\n")
+	}
 
 	var timesMod int
 
@@ -44,7 +48,10 @@ func (a *Server) watchAndRefreshData() {
 			default:
 				timesMod++
 				a.box.ModifyBox(data.JustLoadBox())
-				color.New(color.FgHiBlue).Fprintf(os.Stdout, "\rData refreshed(x%d)", timesMod)
+
+				if !a.quiet {
+					color.New(color.FgHiBlue).Fprintf(os.Stdout, "\rData refreshed(x%d)", timesMod)
+				}
 			}
 
 		case <-w.Moved():

@@ -8,5 +8,5 @@ run:
 nix-build:
 	@nix-build -E 'with import <nixpkgs> { };  callPackage ./default.nix {}' 
 
-vue-dev:
-	@(cd client; npm run dev)
+vue-dev: build
+	@(cd client; npm run dev) & ./build/nao server -q -p=5000

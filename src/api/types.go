@@ -18,6 +18,7 @@ type Server struct {
 	router  *echo.Echo
 	box     *data.Box
 	itWasMe chan bool
+	quiet   bool
 }
 
 type contentDTO struct {
