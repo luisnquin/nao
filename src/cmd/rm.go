@@ -36,8 +36,8 @@ func buildRm() rmComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().StringVarP(&c.before, "before", "b", "", "Removes all the files before a determinated date or time")
-	c.cmd.Flags().StringVarP(&c.after, "after", "a", "", "Removes all the files after a determinated date or time")
+	c.cmd.Flags().StringVarP(&c.before, "before", "b", "", "removes all the files before a determinated date or time")
+	c.cmd.Flags().StringVarP(&c.after, "after", "a", "", "removes all the files after a determinated date or time")
 	c.cmd.Flags().StringVarP(&c.except, "except", "e", "", "")
 
 	return c

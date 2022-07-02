@@ -12,11 +12,13 @@ import (
 )
 
 type newComp struct {
-	cmd    *cobra.Command
-	editor string
-	from   string
-	tag    string
-	main   bool
+	cmd       *cobra.Command
+	editor    string
+	from      string
+	tag       string
+	extension string
+	title     string
+	main      bool
 }
 
 var new = buildNew()
@@ -33,10 +35,12 @@ func buildNew() newComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().StringVar(&c.editor, "editor", "", "Change the default code editor (ignoring configuration file)")
-	c.cmd.Flags().StringVarP(&c.tag, "tag", "t", "", "Assign a tag to the new file")
-	c.cmd.Flags().StringVarP(&c.from, "from", "f", "", "Create a copy of another file by ID or tag to edit on it")
-	c.cmd.Flags().BoolVarP(&c.main, "main", "m", false, "Creates a new main file, throws an error in case that one already exists")
+	c.cmd.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
+	c.cmd.Flags().StringVarP(&c.tag, "tag", "t", "", "assigns a tag to the new file")
+	c.cmd.Flags().StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
+	c.cmd.Flags().BoolVarP(&c.main, "main", "m", false, "creates a new main file, throws an error in case that one already exists")
+	c.cmd.Flags().StringVarP(&c.extension, "extension", "e", "", "assigns a extension to the file")
+	c.cmd.Flags().StringVar(&c.title, "title", "", "assigns a title to the file")
 
 	return c
 }
@@ -95,19 +99,17 @@ func (n *newComp) Main() scriptor {
 			return fmt.Errorf("Empty content, will not be saved")
 		}
 
-		var k string
-
 		contentType := constants.TypeDefault
 		if n.main {
 			contentType = constants.TypeMain
 		}
 
-		if n.tag != "" {
-			k, err = box.NewSetWithTag(string(content), contentType, n.tag)
-		} else {
-			k, err = box.NewSet(string(content), contentType)
-		}
-
+		k, err := box.NewFromSet(data.Set{
+			Content:   string(content),
+			Type:      contentType,
+			Tag:       n.tag,
+			Extension: n.extension,
+		})
 		if err != nil {
 			return err
 		}

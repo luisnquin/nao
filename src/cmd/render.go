@@ -29,7 +29,7 @@ func buildRender() renderComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().StringVarP(&c.to, "to", "t", "", "Options: markdown, raw")
+	c.cmd.Flags().StringVarP(&c.to, "to", "t", "", "options: markdown, raw")
 
 	return c
 }

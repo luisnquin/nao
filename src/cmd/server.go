@@ -27,7 +27,7 @@ func buildServer() serverComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().StringVarP(&c.port, "port", "p", ":3000", "Port to listen (e.g.: \"XXXX\")")
+	c.cmd.Flags().StringVarP(&c.port, "port", "p", ":3000", "port to listen (e.g.: \"XXXX\")")
 
 	return c
 }

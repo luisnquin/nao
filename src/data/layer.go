@@ -95,6 +95,8 @@ func (d *Box) NewFromSet(set Set) (string, error) {
 
 	if set.Tag == "" {
 		set.Tag = autoname.Generate("-")
+	} else if d.TagAlreadyExists(set.Tag) {
+		return "", ErrTagAlreadyExists
 	}
 
 	set.LastUpdate = time.Now()

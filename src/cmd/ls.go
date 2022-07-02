@@ -30,7 +30,7 @@ func buildLs() lsComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().BoolVarP(&c.quiet, "quiet", "q", false, "Only display file ID's")
+	c.cmd.Flags().BoolVarP(&c.quiet, "quiet", "q", false, "only display file ID's")
 
 	return c
 }

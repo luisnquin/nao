@@ -9,12 +9,11 @@ import (
 /*
 TODO:
 - check changes and update files when the expose subcmd is provided by a flag
-- Fix innecessary content loads in api pkg
-- Guided config
-- Maybe avoid the initialization of the configuration in init function
-- Port to config
 - Dark/Light from config, maybe also the themes would be customizables
 - Default behaviours are failing
+- Flutter and syncer
+- 'view' subcmd, consider merge with 'render'
+- Backup with timeout, giving more logic to 'rm' and a --force -f, maybe, this for remove also in the backup
 */
 
 // Apparently cobra doesn't provide a type for this.

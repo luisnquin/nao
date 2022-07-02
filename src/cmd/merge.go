@@ -32,7 +32,7 @@ func buildMerge() mergeComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().BoolVarP(&c.delete, "delete", "d", false, "Delete all targets to merge")
+	c.cmd.Flags().BoolVarP(&c.delete, "delete", "d", false, "delete all targets to merge")
 
 	return c
 }

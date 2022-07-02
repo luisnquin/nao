@@ -2,7 +2,7 @@ package constants
 
 const (
 	AppName string = "nao"
-	Version string = "v0.4.1"
+	Version string = "v0.5.0"
 )
 
 const (

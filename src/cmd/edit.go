@@ -37,8 +37,8 @@ func buildEdit() editComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().StringVar(&c.editor, "editor", "", "Change the default code editor (ignoring configuration file)")
-	c.cmd.Flags().BoolVarP(&c.latest, "latest", "l", false, "Access the last modified file")
+	c.cmd.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
+	c.cmd.Flags().BoolVarP(&c.latest, "latest", "l", false, "access the last modified file")
 	c.cmd.Flags().BoolVarP(&c.main, "main", "m", false, "")
 
 	return c
