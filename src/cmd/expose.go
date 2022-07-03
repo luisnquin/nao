@@ -159,7 +159,7 @@ func (e *exposeComp) watchFile(originalPath string, d data.ContentModifier) {
 					panic(err)
 				}
 			}
-		case <-w.Moved(): // TODO: Fix this, the path is replaced but it's being taked!
+		case <-w.Moved(): // TODO: see new content type through new dir
 			var resolvedPath string
 
 			_ = filepath.WalkDir(config.App.Paths.CacheDir, func(p string, d fs.DirEntry, err error) error {
@@ -171,11 +171,7 @@ func (e *exposeComp) watchFile(originalPath string, d data.ContentModifier) {
 			})
 
 			if resolvedPath != "" {
-				w.SetFile(resolvedPath)
-				w.Stop() // Consider delete this two
-				w.Start()
-			} else {
-				w.Stop()
+				e.watchFile(resolvedPath, d) // x
 			}
 		}
 
