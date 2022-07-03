@@ -48,3 +48,7 @@ type (
 		Version    int       `json:"version"`
 	}
 )
+
+type ContentModifier interface {
+	ModifySetContent(key string, content string) error
+}

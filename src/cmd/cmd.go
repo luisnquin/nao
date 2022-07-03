@@ -14,9 +14,9 @@ TODO:
 - Flutter and syncer
 - 'view' subcmd, consider merge with 'render'
 - Backup with timeout, giving more logic to 'rm' and a --force -f, maybe, this for remove also in the backup
-- Fix breakline due to verbose in 'server'
 - Fix little bug in note rendering, this fixes automatically when the textarea is modified, so, maybe this textarea need a first refresh for the first content
 of the textarea
+- Fix ineffectual pathFile replacement in 'expose' when a move event is throwed, apparently it's a third party problem
 */
 
 // Apparently cobra doesn't provide a type for this.

@@ -1,10 +1,16 @@
 package cmd
 
 import (
-	"fmt"
+	"io/fs"
+	"io/ioutil"
 	"os"
+	"path"
+	"path/filepath"
+	"strings"
 
+	"github.com/andreaskoch/go-fswatch"
 	"github.com/eiannone/keyboard"
+	"github.com/fatih/color"
 	"github.com/luisnquin/nao/src/config"
 	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
@@ -17,11 +23,10 @@ const (
 )
 
 type exposeComp struct {
-	cmd     *cobra.Command
-	detach  bool
-	untree  bool
-	watch   bool
-	timeout int
+	cmd    *cobra.Command
+	detach bool
+	untree bool
+	watch  bool
 }
 
 var expose = buildExpose()
@@ -38,17 +43,17 @@ func buildExpose() exposeComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().BoolVarP(&c.detach, "detach", "d", false, "")
+	c.cmd.Flags().BoolVarP(&c.detach, "detach", "d", false, "leaves the program without remove the files")
 	c.cmd.Flags().BoolVarP(&c.untree, "untree", "u", false, "disable default tree file organization depending on types")
-	// c.cmd.Flags().IntVarP(&c.timeout, "timeout", "t", 0, "set a time limit expresed in seconds for the exposition of files")
-	// c.cmd.Flags().BoolVarP(&c.watch, "watch", "w", false, "")
+	c.cmd.Flags().BoolVarP(&c.watch, "watch", "w", false, "start watching for changes")
 
 	return c
 }
 
 func (e *exposeComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		views := data.New().ListSets()
+		box := data.New()
+		views := box.ListSets()
 
 		_ = os.MkdirAll(config.App.Paths.CacheDir, os.ModePerm)
 
@@ -64,11 +69,11 @@ func (e *exposeComp) Main() scriptor {
 			var f *os.File
 
 			if e.untree || v.Type == constants.TypeMain {
-				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Tag + "-" + v.Key[:5])
+				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Key + "-" + v.Tag)
 			} else if v.Extension != "" {
-				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Tag + "-" + v.Key[:5] + "." + v.Extension)
+				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Key + "-" + v.Tag + "." + v.Extension)
 			} else {
-				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Tag + "-" + v.Key[:5])
+				f, err = os.Create(config.App.Paths.CacheDir + "/" + v.Type + "/" + v.Key + "-" + v.Tag)
 			}
 
 			if err != nil {
@@ -83,7 +88,7 @@ func (e *exposeComp) Main() scriptor {
 			_ = f.Close()
 		}
 
-		fmt.Fprintln(os.Stdout, "Files exposed on "+config.App.Paths.CacheDir)
+		color.New(color.FgHiMagenta).Fprintln(os.Stdout, "Files exposed on "+config.App.Paths.CacheDir)
 
 		if e.detach {
 			return nil
@@ -95,7 +100,17 @@ func (e *exposeComp) Main() scriptor {
 
 		defer keyboard.Close()
 
-		fmt.Fprintln(os.Stdout, "Click Q or Ctrl+C to exit")
+		color.New(color.FgHiBlack).Fprintln(os.Stdout, "Click Q or Ctrl+C to exit")
+
+		if e.watch {
+			_ = filepath.WalkDir(config.App.Paths.CacheDir, func(path string, d fs.DirEntry, err error) error {
+				if !d.IsDir() {
+					go e.watchFile(path, box)
+				}
+
+				return err
+			})
+		}
 
 		for {
 			char, key, err := keyboard.GetKey()
@@ -112,5 +127,58 @@ func (e *exposeComp) Main() scriptor {
 		_ = os.MkdirAll(config.App.Paths.CacheDir, os.ModePerm)
 
 		return nil
+	}
+}
+
+func (e *exposeComp) watchFile(originalPath string, d data.ContentModifier) {
+	w := fswatch.NewFileWatcher(originalPath, 1)
+	w.Start()
+
+	counter := 0
+
+	for w.IsRunning() {
+		select {
+		case <-w.Modified():
+			if counter > 0 {
+				key, _, found := strings.Cut(path.Base(originalPath), "-")
+				if !found {
+					w.Stop()
+
+					break
+				}
+
+				content, err := ioutil.ReadFile(originalPath)
+				if err != nil {
+					w.Stop()
+
+					break
+				}
+
+				err = d.ModifySetContent(key, string(content))
+				if err != nil {
+					panic(err)
+				}
+			}
+		case <-w.Moved(): // TODO: Fix this, the path is replaced but it's being taked!
+			var resolvedPath string
+
+			_ = filepath.WalkDir(config.App.Paths.CacheDir, func(p string, d fs.DirEntry, err error) error {
+				if !d.IsDir() && d.Name() == path.Base(originalPath) {
+					resolvedPath = p
+				}
+
+				return err
+			})
+
+			if resolvedPath != "" {
+				w.SetFile(resolvedPath)
+				w.Stop() // Consider delete this two
+				w.Start()
+			} else {
+				w.Stop()
+			}
+		}
+
+		counter++
 	}
 }
