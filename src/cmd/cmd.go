@@ -10,7 +10,6 @@ import (
 TODO:
 - check changes and update files when the expose subcmd is provided by a flag
 - Dark/Light from config, maybe also the themes would be customizables
-- Default behaviours are failing
 - Flutter and syncer
 - 'view' subcmd, consider merge with 'render'
 - Backup with timeout, giving more logic to 'rm' and a --force -f, maybe, this for remove also in the backup
@@ -31,11 +30,11 @@ var root = &cobra.Command{
 		case 0:
 			switch config.App.Preferences.DefaultBehavior {
 			case "latest":
-				edit.latest = true
+				edit.cmd.Flag("latest").Value.Set("true")
 				edit.cmd.RunE(cmd, args)
 
 			case "main":
-				edit.main = true
+				edit.cmd.Flag("main").Value.Set("true")
 				edit.cmd.RunE(cmd, args)
 			default:
 				cmd.Usage()
