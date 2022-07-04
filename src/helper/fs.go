@@ -13,8 +13,8 @@ import (
 	"github.com/luisnquin/nao/src/data"
 )
 
-func SetsFromDir(path string) ([]data.Set, error) {
-	sets := make([]data.Set, 0)
+func SetsFromDir(path string) ([]data.Note, error) {
+	sets := make([]data.Note, 0)
 
 	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -23,7 +23,7 @@ func SetsFromDir(path string) ([]data.Set, error) {
 				return err
 			}
 
-			set := data.Set{
+			set := data.Note{
 				Content: string(content),
 				Type:    constants.TypeImported,
 			}
@@ -46,8 +46,8 @@ func SetsFromDir(path string) ([]data.Set, error) {
 	return sets, nil
 }
 
-func SetFromFile(filePath string) (data.Set, error) {
-	var set data.Set
+func SetFromFile(filePath string) (data.Note, error) {
+	var set data.Note
 
 	content, err := os.ReadFile(filePath)
 	if err != nil && !errors.Is(err, io.EOF) {

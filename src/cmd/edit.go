@@ -52,7 +52,7 @@ func (e *editComp) Main() scriptor {
 
 		var (
 			key string
-			set data.Set
+			set data.Note
 			err error
 		)
 

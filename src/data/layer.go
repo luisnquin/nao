@@ -11,19 +11,21 @@ import (
 )
 
 var (
-	ErrMainAlreadyExists error = errors.New("main set already exists")
-	ErrMainSetNotFound   error = errors.New("main set not found")
-	ErrTagAlreadyExists  error = errors.New("tag already exists")
-	ErrTagNotProvided    error = errors.New("tag not provided")
-	ErrInvalidSetType    error = errors.New("invalid set type")
-	ErrSetNotFound       error = errors.New("set not found")
+	ErrMainAlreadyExists  error = errors.New("main set already exists")
+	ErrGroupAlreadyExists error = errors.New("group already exists")
+	ErrMainSetNotFound    error = errors.New("main set not found")
+	ErrTagAlreadyExists   error = errors.New("tag already exists")
+	ErrGroupNotFound      error = errors.New("group not found")
+	ErrTagNotProvided     error = errors.New("tag not provided")
+	ErrInvalidSetType     error = errors.New("invalid set type")
+	ErrSetNotFound        error = errors.New("set not found")
 )
 
 func (d *Box) ModifyBox(box BoxData) {
 	d.box = box
 }
 
-func (d *Box) GetSet(key string) (Set, error) {
+func (d *Box) GetSet(key string) (Note, error) {
 	set, ok := d.box.NaoSet[key]
 	if !ok {
 		return set, ErrSetNotFound
@@ -32,6 +34,10 @@ func (d *Box) GetSet(key string) (Set, error) {
 	d.box.LastAccess = key
 
 	return set, d.updateFile()
+}
+
+func (d *Box) GetGroups() []string {
+	return d.box.Groups
 }
 
 func (d *Box) GetLastKey() string {
@@ -48,6 +54,18 @@ func (d *Box) GetMainKey() (string, error) {
 	return "", ErrMainSetNotFound
 }
 
+func (d *Box) NewGroup(name string) error {
+	for _, group := range d.box.Groups {
+		if group == name {
+			return ErrGroupAlreadyExists
+		}
+	}
+
+	d.box.Groups = append(d.box.Groups, name)
+
+	return d.updateFile()
+}
+
 func (d *Box) NewSet(content, contentType string) (string, error) {
 	key := d.newKey()
 
@@ -55,7 +73,7 @@ func (d *Box) NewSet(content, contentType string) (string, error) {
 		return "", ErrMainAlreadyExists
 	}
 
-	d.box.NaoSet[key] = Set{
+	d.box.NaoSet[key] = Note{
 		Tag:        autoname.Generate("-"),
 		Content:    content,
 		Type:       contentType,
@@ -81,7 +99,7 @@ func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 		return "", ErrMainAlreadyExists
 	}
 
-	d.box.NaoSet[key] = Set{
+	d.box.NaoSet[key] = Note{
 		Tag:        tag,
 		Type:       contentType,
 		Content:    content,
@@ -92,7 +110,7 @@ func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 	return key, d.updateFile()
 }
 
-func (d *Box) NewFromSet(set Set) (string, error) {
+func (d *Box) NewFromSet(set Note) (string, error) {
 	key := d.newKey()
 
 	if set.Tag == "" {
@@ -113,7 +131,7 @@ func (d *Box) NewFromSet(set Set) (string, error) {
 	return key, d.updateFile()
 }
 
-func (d *Box) NewSetsFromOutside(sets []Set) ([]string, error) {
+func (d *Box) NewSetsFromOutside(sets []Note) ([]string, error) {
 	keys := make([]string, 0)
 
 	for _, set := range sets {
@@ -128,7 +146,7 @@ func (d *Box) NewSetsFromOutside(sets []Set) ([]string, error) {
 	return keys, nil
 }
 
-func (d *Box) OverwriteSet(key string, set Set) error {
+func (d *Box) OverwriteSet(key string, set Note) error {
 	_, ok := d.box.NaoSet[key]
 	if !ok {
 		return ErrSetNotFound
@@ -201,6 +219,63 @@ func (d *Box) ModifySetTag(key string, tag string) error {
 	return d.updateFile()
 }
 
+func (d *Box) ModifyGroupName(oldName, newName string) error {
+	for i, group := range d.box.Groups {
+		if group == oldName {
+			d.box.Groups[i] = newName
+
+			for k, set := range d.box.NaoSet {
+				if set.Group == oldName {
+					set.Group = newName
+
+					d.box.NaoSet[k] = set
+				}
+			}
+
+			return d.updateFile()
+		}
+	}
+
+	return ErrGroupNotFound
+}
+
+func (d *Box) DeleteGroupWithRelated(name string) error {
+	for i, group := range d.box.Groups {
+		if group == name {
+			d.box.Groups = append(d.box.Groups[:i], d.box.Groups[i+1:]...)
+
+			for k, set := range d.box.NaoSet {
+				if set.Group == name {
+					delete(d.box.NaoSet, k)
+				}
+			}
+
+			return d.updateFile()
+		}
+	}
+
+	return ErrGroupNotFound
+}
+
+func (d *Box) DeleteGroup(name string) error {
+	for i, group := range d.box.Groups {
+		if group == name {
+			d.box.Groups = append(d.box.Groups[:i], d.box.Groups[i+1:]...)
+
+			for k, set := range d.box.NaoSet {
+				if set.Group == name {
+					set.Group = ""
+					d.box.NaoSet[k] = set
+				}
+			}
+
+			return d.updateFile()
+		}
+	}
+
+	return ErrGroupNotFound
+}
+
 func (d *Box) DeleteSet(key string) error {
 	_, ok := d.box.NaoSet[key]
 	if !ok {
@@ -212,7 +287,7 @@ func (d *Box) DeleteSet(key string) error {
 	return d.updateFile()
 }
 
-func (d *Box) SearchSetByKeyPattern(pattern string) (string, Set, error) {
+func (d *Box) SearchSetByKeyPattern(pattern string) (string, Note, error) {
 	set, ok := d.box.NaoSet[pattern]
 	if ok {
 		d.box.LastAccess = pattern
@@ -229,7 +304,7 @@ func (d *Box) SearchSetByKeyPattern(pattern string) (string, Set, error) {
 	return "", set, ErrSetNotFound
 }
 
-func (d *Box) SearchSetByKeyTagPattern(pattern string) (string, Set, error) {
+func (d *Box) SearchSetByKeyTagPattern(pattern string) (string, Note, error) {
 	set, ok := d.box.NaoSet[pattern]
 	if ok {
 		d.box.LastAccess = pattern

@@ -104,7 +104,7 @@ func (n *newComp) Main() scriptor {
 			contentType = constants.TypeMain
 		}
 
-		k, err := box.NewFromSet(data.Set{
+		k, err := box.NewFromSet(data.Note{
 			Content:   string(content),
 			Extension: n.extension,
 			Type:      contentType,

@@ -45,7 +45,7 @@ func (a *Server) GetSetHandler() echo.HandlerFunc {
 
 func (a *Server) NewSetHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var request data.Set
+		var request data.Note
 
 		err := c.Bind(&request)
 		if err != nil {
@@ -96,7 +96,7 @@ func (a *Server) ModifySetContentHandler() echo.HandlerFunc {
 
 func (a *Server) ModifySetHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var request data.Set
+		var request data.Note
 
 		err := a.box.OverwriteSet(c.Param("id"), request)
 		if err != nil {

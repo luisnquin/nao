@@ -34,7 +34,7 @@ func New() *Box {
 	}
 
 	if box.box.NaoSet == nil {
-		box.box.NaoSet = make(map[string]Set, 0)
+		box.box.NaoSet = make(map[string]Note, 0)
 	}
 
 	return &box

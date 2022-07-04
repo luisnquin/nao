@@ -8,15 +8,23 @@ type (
 	}
 
 	BoxData struct {
-		LastAccess string         `json:"lastSet"`
-		NaoSet     map[string]Set `json:"naoSet"`
+		LastAccess string          `json:"lastSet"`
+		NaoSet     map[string]Note `json:"naoSet"`
+		Groups     []string        `json:"groups"`
 	}
 
-	Set struct {
+	Changes struct {
+		Content   string    `json:"content"`
+		Timestamp time.Time `json:"timestamp"`
+	}
+
+	Note struct {
 		Tag        string    `json:"tag,omitempty"`
 		Type       string    `json:"type"`
+		Group      string    `json:"group"`
 		Content    string    `json:"content"`
 		Extension  string    `json:"extension,omitempty"`
+		Changes    Changes    `json:"changes"`
 		Title      string    `json:"title,omitempty"`
 		LastUpdate time.Time `json:"lastUpdate"`
 		Version    int       `json:"version"`

@@ -38,7 +38,7 @@ func buildImport() importComp {
 
 func (i *importComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		allSets := make([]data.Set, 0)
+		allSets := make([]data.Note, 0)
 
 		yes, _ := cmd.Flags().GetBool("yes")
 
