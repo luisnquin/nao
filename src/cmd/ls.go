@@ -53,14 +53,22 @@ func (c *lsComp) Main() scriptor {
 			return nil
 		}
 
-		header := table.Row{"ID", "TAG", "TYPE", "LAST UPDATE", "VERSION"}
-		rows := make([]table.Row, 0)
+		var (
+			rows   = make([]table.Row, 0)
+			header table.Row
+		)
+
+		if c.long {
+			header = table.Row{"ID", "TITLE", "TAG", "TYPE", "LAST UPDATE", "VERSION"}
+		} else {
+			header = table.Row{"ID", "TAG", "TYPE", "LAST UPDATE", "VERSION"}
+		}
 
 		for _, i := range box.ListSetWithHiddenContent() {
 			row := table.Row{i.Tag, i.Type, timeago.English.Format(i.LastUpdate), i.Version}
 
 			if c.long {
-				row = append(table.Row{i.Key}, row...)
+				row = append(table.Row{i.Key, i.Title}, row...)
 			} else {
 				row = append(table.Row{i.Key[:10]}, row...)
 			}

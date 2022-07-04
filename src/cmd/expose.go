@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"io/fs"
 	"io/ioutil"
 	"os"
@@ -130,7 +131,7 @@ func (e *exposeComp) Main() scriptor {
 	}
 }
 
-func (e *exposeComp) watchFile(originalPath string, d data.ContentModifier) {
+func (e *exposeComp) watchFile(originalPath string, d data.SetModifier) {
 	w := fswatch.NewFileWatcher(originalPath, 1)
 	w.Start()
 
@@ -159,7 +160,7 @@ func (e *exposeComp) watchFile(originalPath string, d data.ContentModifier) {
 					panic(err)
 				}
 			}
-		case <-w.Moved(): // TODO: see new content type through new dir
+		case <-w.Moved():
 			var resolvedPath string
 
 			_ = filepath.WalkDir(config.App.Paths.CacheDir, func(p string, d fs.DirEntry, err error) error {
@@ -170,9 +171,33 @@ func (e *exposeComp) watchFile(originalPath string, d data.ContentModifier) {
 				return err
 			})
 
-			if resolvedPath != "" {
-				e.watchFile(resolvedPath, d) // x
+			w.Stop()
+
+			if resolvedPath == "" {
+				color.New(color.FgHiYellow).Fprintln(os.Stderr, "Error: "+originalPath+" file is untrackable, unfollowed")
+
+				return
 			}
+
+			sType := path.Base(path.Dir(resolvedPath))
+			key, _, _ := strings.Cut(path.Base(resolvedPath), "-")
+
+			if constants.AppName == sType {
+				sType = constants.TypeMain
+			}
+
+			err := d.ModifySetType(key, sType)
+			if err != nil {
+				if errors.Is(err, data.ErrMainAlreadyExists) || errors.Is(err, data.ErrInvalidSetType) {
+					color.New(color.FgHiYellow).Fprintf(os.Stderr, "Error: %v, the file type cannot be updated but it's still being watched\n", err)
+				} else if errors.Is(err, data.ErrSetNotFound) {
+					color.New(color.FgHiYellow).Fprintf(os.Stderr, "Error: %v, it means that is untrackable, out of sight\n", err)
+				} else {
+					panic(err)
+				}
+			}
+
+			e.watchFile(resolvedPath, d)
 		}
 
 		counter++

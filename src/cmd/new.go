@@ -106,9 +106,10 @@ func (n *newComp) Main() scriptor {
 
 		k, err := box.NewFromSet(data.Set{
 			Content:   string(content),
-			Type:      contentType,
-			Tag:       n.tag,
 			Extension: n.extension,
+			Type:      contentType,
+			Title:     n.title,
+			Tag:       n.tag,
 		})
 		if err != nil {
 			return err

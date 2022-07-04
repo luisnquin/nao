@@ -7,6 +7,7 @@ import (
 
 	"github.com/cip8/autoname"
 	"github.com/luisnquin/nao/src/constants"
+	"github.com/luisnquin/nao/src/utils"
 )
 
 var (
@@ -14,6 +15,7 @@ var (
 	ErrMainSetNotFound   error = errors.New("main set not found")
 	ErrTagAlreadyExists  error = errors.New("tag already exists")
 	ErrTagNotProvided    error = errors.New("tag not provided")
+	ErrInvalidSetType    error = errors.New("invalid set type")
 	ErrSetNotFound       error = errors.New("set not found")
 )
 
@@ -152,6 +154,34 @@ func (d *Box) ModifySetContent(key string, content string) error {
 	return d.updateFile()
 }
 
+func (d *Box) ModifySetType(key string, sType string) error {
+	validTypes := []string{
+		constants.TypeDefault,
+		constants.TypeImported,
+		constants.TypeMain,
+		constants.TypeMerged,
+	}
+
+	if sType == constants.TypeMain && d.MainAlreadyExists() {
+		return ErrMainAlreadyExists
+	}
+
+	if !utils.Contains(validTypes, sType) {
+		return ErrInvalidSetType
+	}
+
+	set, ok := d.box.NaoSet[key]
+	if !ok {
+		return ErrSetNotFound
+	}
+
+	set.Type = sType
+
+	d.box.NaoSet[key] = set
+
+	return d.updateFile()
+}
+
 func (d *Box) ModifySetTag(key string, tag string) error {
 	set, ok := d.box.NaoSet[key]
 	if !ok {
@@ -225,6 +255,7 @@ func (d *Box) ListSets() []SetView {
 			Extension:  v.Extension,
 			Version:    v.Version,
 			Content:    v.Content,
+			Title:      v.Title,
 			Type:       v.Type,
 			Tag:        v.Tag,
 			Key:        k,
@@ -242,6 +273,7 @@ func (d *Box) ListSetWithHiddenContent() []SetViewWithoutContent {
 			LastUpdate: v.LastUpdate,
 			Extension:  v.Extension,
 			Version:    v.Version,
+			Title:      v.Title,
 			Type:       v.Type,
 			Tag:        v.Tag,
 			Key:        k,
