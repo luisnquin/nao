@@ -10,3 +10,6 @@ nix-build:
 
 vue-dev: build
 	@(cd client; npm run dev) & ./build/nao server -q -p=5000
+
+sync:
+	@bash ./tag-syncer.sh

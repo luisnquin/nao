@@ -12,6 +12,6 @@ do
     fi
 done < ./src/constants/app.go
 
-echo "$content" > ./src/constants/app.go
+printf "$content" > ./src/constants/app.go
 
 gofmt -w ./src/constants/app.go
