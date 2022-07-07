@@ -1,6 +1,8 @@
+last_tag_released=$(shell git tag | tail -n 1)
+
 .PHONY: build
 build:
-	@go build -ldflags "-s -w" -o ./build/nao ./main.go
+	@go build -ldflags "-s -w" -o ./build/nao ./src/cmd/nao/main.go
 
 run:
 	@./build/nao
@@ -13,3 +15,9 @@ vue-dev: build
 
 sync:
 	@bash ./tag-syncer.sh
+
+install:
+	@go install ./src/cmd/nao
+
+install-remote:
+	@go install github.com/luisnquin/nao/cmd/nao@$(last_tag_released)
