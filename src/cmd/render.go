@@ -14,8 +14,6 @@ type renderComp struct {
 	to  string
 }
 
-var render = buildRender()
-
 func buildRender() renderComp {
 	c := renderComp{
 		cmd: &cobra.Command{
@@ -36,7 +34,7 @@ func buildRender() renderComp {
 
 func (r *renderComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		_, set, err := data.New().SearchSetByKeyTagPattern(args[0])
+		_, set, err := data.New().SearchByKeyTagPattern(args[0])
 		if err != nil {
 			return err
 		}

@@ -8,17 +8,16 @@ import (
 )
 
 type groupComp struct {
-	cmd    *cobra.Command
-	delete bool
-	ensure bool
+	cmd       *cobra.Command
+	deleteAll bool
+	delete    bool
+	ensure    bool
 }
-
-var group = buildGroup()
 
 func buildGroup() groupComp {
 	g := groupComp{
 		cmd: &cobra.Command{
-			Use:           "group",
+			Use:           "group [<name>|<old-name> <new-name>]",
 			Short:         "Creates a new group",
 			Args:          cobra.MaximumNArgs(2),
 			SilenceUsage:  true,
@@ -28,6 +27,7 @@ func buildGroup() groupComp {
 
 	g.cmd.Flags().BoolVarP(&g.delete, "delete", "d", false, "deletes a group but not the related notes")
 	g.cmd.Flags().BoolVarP(&g.ensure, "ensure", "e", false, "ensure to do an action but caotic")
+	g.cmd.Flags().BoolVarP(&g.deleteAll, "delete-all", "a", false, "deletes all the groups")
 
 	g.cmd.RunE = g.Main()
 
@@ -40,10 +40,12 @@ func (g *groupComp) Main() scriptor {
 
 		switch len(args) {
 		case 1:
-			if g.ensure && g.delete {
-				return box.DeleteGroupWithRelated(args[0])
-			} else if g.delete {
-				return box.DeleteGroup(args[0])
+			if g.delete {
+				if g.ensure {
+					return box.DeleteGroupWithRelated(args[0])
+				} else {
+					return box.DeleteGroup(args[0])
+				}
 			}
 
 			return box.NewGroup(args[0])
@@ -51,10 +53,28 @@ func (g *groupComp) Main() scriptor {
 			return box.ModifyGroupName(args[0], args[1])
 
 		default:
-			rows := make([]table.Row, 0)
+			groups := box.GetGroups()
 
-			for _, group := range box.GetGroups() {
-				rows = append(rows, table.Row{group})
+			if g.deleteAll {
+				var err error
+
+				for _, group := range groups {
+					if g.ensure {
+						err = box.DeleteGroupWithRelated(group)
+					} else {
+						err = box.DeleteGroup(group)
+					}
+
+					if err != nil {
+						return err
+					}
+				}
+			}
+
+			var rows []table.Row
+
+			for _, g := range groups {
+				rows = append(rows, table.Row{g})
 			}
 
 			helper.RenderTable(table.Row{"GROUPS"}, rows)

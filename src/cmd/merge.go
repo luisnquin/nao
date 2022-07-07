@@ -15,8 +15,6 @@ type mergeComp struct {
 	delete bool
 }
 
-var merge = buildMerge()
-
 func buildMerge() mergeComp {
 	c := mergeComp{
 		cmd: &cobra.Command{
@@ -47,7 +45,7 @@ func (m *mergeComp) Main() scriptor {
 		)
 
 		for i, arg := range args {
-			k, set, err := box.SearchSetByKeyTagPattern(arg)
+			k, set, err := box.SearchByKeyTagPattern(arg)
 			if err != nil {
 				return err
 			}
@@ -57,7 +55,7 @@ func (m *mergeComp) Main() scriptor {
 			}
 
 			if m.delete {
-				err = box.DeleteSet(k)
+				err = box.Delete(k)
 				if err != nil {
 					return err
 				}
@@ -72,7 +70,7 @@ func (m *mergeComp) Main() scriptor {
 			}
 		}
 
-		key, err := box.NewSet(mergedContent, constants.TypeMerged)
+		key, err := box.New(mergedContent, constants.TypeMerged)
 		if err != nil {
 			return err
 		}

@@ -15,8 +15,6 @@ type serverComp struct {
 	verbose bool
 }
 
-var server = buildServer()
-
 func buildServer() serverComp {
 	c := serverComp{
 		cmd: &cobra.Command{

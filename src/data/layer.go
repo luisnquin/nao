@@ -15,17 +15,14 @@ var (
 	ErrGroupAlreadyExists error = errors.New("group already exists")
 	ErrMainSetNotFound    error = errors.New("main set not found")
 	ErrTagAlreadyExists   error = errors.New("tag already exists")
-	ErrGroupNotFound      error = errors.New("group not found")
 	ErrTagNotProvided     error = errors.New("tag not provided")
 	ErrInvalidSetType     error = errors.New("invalid set type")
+	ErrGroupNotFound      error = errors.New("group not found")
+	ErrKeyNotFound        error = errors.New("key not found")
 	ErrSetNotFound        error = errors.New("set not found")
 )
 
-func (d *Box) ModifyBox(box BoxData) {
-	d.box = box
-}
-
-func (d *Box) GetSet(key string) (Note, error) {
+func (d *Box) Get(key string) (Note, error) {
 	set, ok := d.box.NaoSet[key]
 	if !ok {
 		return set, ErrSetNotFound
@@ -36,37 +33,7 @@ func (d *Box) GetSet(key string) (Note, error) {
 	return set, d.updateFile()
 }
 
-func (d *Box) GetGroups() []string {
-	return d.box.Groups
-}
-
-func (d *Box) GetLastKey() string {
-	return d.box.LastAccess
-}
-
-func (d *Box) GetMainKey() (string, error) {
-	for k, set := range d.box.NaoSet {
-		if set.Type == constants.TypeMain {
-			return k, nil
-		}
-	}
-
-	return "", ErrMainSetNotFound
-}
-
-func (d *Box) NewGroup(name string) error {
-	for _, group := range d.box.Groups {
-		if group == name {
-			return ErrGroupAlreadyExists
-		}
-	}
-
-	d.box.Groups = append(d.box.Groups, name)
-
-	return d.updateFile()
-}
-
-func (d *Box) NewSet(content, contentType string) (string, error) {
+func (d *Box) New(content, contentType string) (string, error) {
 	key := d.newKey()
 
 	if contentType == constants.TypeMain && d.MainAlreadyExists() {
@@ -84,7 +51,7 @@ func (d *Box) NewSet(content, contentType string) (string, error) {
 	return key, d.updateFile()
 }
 
-func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
+func (d *Box) NewWithTag(content, contentType, tag string) (string, error) {
 	key := d.newKey()
 
 	if tag == "" {
@@ -110,13 +77,31 @@ func (d *Box) NewSetWithTag(content, contentType, tag string) (string, error) {
 	return key, d.updateFile()
 }
 
-func (d *Box) NewFromSet(set Note) (string, error) {
+func (d *Box) GetLastKey() string {
+	return d.box.LastAccess
+}
+
+func (d *Box) GetMainKey() (string, error) {
+	for k, set := range d.box.NaoSet {
+		if set.Type == constants.TypeMain {
+			return k, nil
+		}
+	}
+
+	return "", ErrMainSetNotFound
+}
+
+func (d *Box) NewFrom(set Note) (string, error) {
 	key := d.newKey()
 
 	if set.Tag == "" {
 		set.Tag = autoname.Generate("-")
 	} else if d.TagAlreadyExists(set.Tag) {
 		return "", ErrTagAlreadyExists
+	}
+
+	if set.Group != "" && !d.GroupExists(set.Group) {
+		return "", ErrGroupNotFound
 	}
 
 	set.LastUpdate = time.Now()
@@ -131,11 +116,11 @@ func (d *Box) NewFromSet(set Note) (string, error) {
 	return key, d.updateFile()
 }
 
-func (d *Box) NewSetsFromOutside(sets []Note) ([]string, error) {
+func (d *Box) ManyNewFrom(sets []Note) ([]string, error) {
 	keys := make([]string, 0)
 
 	for _, set := range sets {
-		key, err := d.NewFromSet(set)
+		key, err := d.NewFrom(set)
 		if err != nil {
 			return nil, err
 		}
@@ -146,7 +131,7 @@ func (d *Box) NewSetsFromOutside(sets []Note) ([]string, error) {
 	return keys, nil
 }
 
-func (d *Box) OverwriteSet(key string, set Note) error {
+func (d *Box) Overwrite(key string, set Note) error {
 	_, ok := d.box.NaoSet[key]
 	if !ok {
 		return ErrSetNotFound
@@ -157,13 +142,22 @@ func (d *Box) OverwriteSet(key string, set Note) error {
 	return d.updateFile()
 }
 
-func (d *Box) ModifySetContent(key string, content string) error {
+func (d *Box) ReplaceBox(box BoxData) {
+	d.box = box
+}
+
+func (d *Box) ModifyContent(key string, content string) error {
 	set, ok := d.box.NaoSet[key]
 	if !ok {
 		return ErrSetNotFound
 	}
 
 	set.LastUpdate = time.Now()
+	set.History = append(set.History, Change{
+		Key:       d.newKey(),
+		Content:   set.Content,
+		Timestamp: time.Now(),
+	})
 	set.Content = content
 	set.Version++
 
@@ -172,7 +166,7 @@ func (d *Box) ModifySetContent(key string, content string) error {
 	return d.updateFile()
 }
 
-func (d *Box) ModifySetType(key string, sType string) error {
+func (d *Box) ModifyType(key string, sType string) error {
 	validTypes := []string{
 		constants.TypeDefault,
 		constants.TypeImported,
@@ -200,7 +194,7 @@ func (d *Box) ModifySetType(key string, sType string) error {
 	return d.updateFile()
 }
 
-func (d *Box) ModifySetTag(key string, tag string) error {
+func (d *Box) ModifyTag(key string, tag string) error {
 	set, ok := d.box.NaoSet[key]
 	if !ok {
 		return ErrSetNotFound
@@ -219,64 +213,7 @@ func (d *Box) ModifySetTag(key string, tag string) error {
 	return d.updateFile()
 }
 
-func (d *Box) ModifyGroupName(oldName, newName string) error {
-	for i, group := range d.box.Groups {
-		if group == oldName {
-			d.box.Groups[i] = newName
-
-			for k, set := range d.box.NaoSet {
-				if set.Group == oldName {
-					set.Group = newName
-
-					d.box.NaoSet[k] = set
-				}
-			}
-
-			return d.updateFile()
-		}
-	}
-
-	return ErrGroupNotFound
-}
-
-func (d *Box) DeleteGroupWithRelated(name string) error {
-	for i, group := range d.box.Groups {
-		if group == name {
-			d.box.Groups = append(d.box.Groups[:i], d.box.Groups[i+1:]...)
-
-			for k, set := range d.box.NaoSet {
-				if set.Group == name {
-					delete(d.box.NaoSet, k)
-				}
-			}
-
-			return d.updateFile()
-		}
-	}
-
-	return ErrGroupNotFound
-}
-
-func (d *Box) DeleteGroup(name string) error {
-	for i, group := range d.box.Groups {
-		if group == name {
-			d.box.Groups = append(d.box.Groups[:i], d.box.Groups[i+1:]...)
-
-			for k, set := range d.box.NaoSet {
-				if set.Group == name {
-					set.Group = ""
-					d.box.NaoSet[k] = set
-				}
-			}
-
-			return d.updateFile()
-		}
-	}
-
-	return ErrGroupNotFound
-}
-
-func (d *Box) DeleteSet(key string) error {
+func (d *Box) Delete(key string) error {
 	_, ok := d.box.NaoSet[key]
 	if !ok {
 		return ErrSetNotFound
@@ -287,7 +224,67 @@ func (d *Box) DeleteSet(key string) error {
 	return d.updateFile()
 }
 
-func (d *Box) SearchSetByKeyPattern(pattern string) (string, Note, error) {
+func (d *Box) ResetToBefore(key string) error {
+	s := d.box.NaoSet[key]
+
+	if len(s.History) > 0 {
+		s.Content = s.History[0].Content
+		d.box.NaoSet[key] = s
+
+		return d.updateFile()
+	}
+
+	return ErrKeyNotFound
+}
+
+func (d *Box) ResetTo(key, subKey string) error {
+	s := d.box.NaoSet[key]
+
+	for _, c := range s.History {
+		if c.Key == subKey {
+			s.Content = c.Content
+			d.box.NaoSet[key] = s
+
+			return d.updateFile()
+		}
+	}
+
+	return ErrKeyNotFound
+}
+
+func (d *Box) ResetToWithDeletions(key, subKey string) error {
+	var (
+		s = d.box.NaoSet[key]
+		t *time.Time
+	)
+
+	for _, c := range s.History {
+		if c.Key == subKey {
+			s.Content = c.Content
+			d.box.NaoSet[key] = s
+
+			t = &c.Timestamp
+
+			break
+		}
+	}
+
+	if t == nil {
+		return ErrKeyNotFound
+	}
+
+	for i, c := range s.History {
+		if c.Timestamp.After(*t) {
+			s.History = append(s.History[:i], s.History[i+1:]...)
+		}
+	}
+
+	d.box.NaoSet[key] = s
+
+	return d.updateFile()
+}
+
+func (d *Box) SearchByKeyPattern(pattern string) (string, Note, error) {
 	set, ok := d.box.NaoSet[pattern]
 	if ok {
 		d.box.LastAccess = pattern
@@ -304,7 +301,7 @@ func (d *Box) SearchSetByKeyPattern(pattern string) (string, Note, error) {
 	return "", set, ErrSetNotFound
 }
 
-func (d *Box) SearchSetByKeyTagPattern(pattern string) (string, Note, error) {
+func (d *Box) SearchByKeyTagPattern(pattern string) (string, Note, error) {
 	set, ok := d.box.NaoSet[pattern]
 	if ok {
 		d.box.LastAccess = pattern
@@ -321,7 +318,7 @@ func (d *Box) SearchSetByKeyTagPattern(pattern string) (string, Note, error) {
 	return "", set, ErrSetNotFound
 }
 
-func (d *Box) ListSets() []SetView {
+func (d *Box) List() []SetView {
 	sets := make([]SetView, 0)
 
 	for k, v := range d.box.NaoSet {
@@ -330,6 +327,7 @@ func (d *Box) ListSets() []SetView {
 			Extension:  v.Extension,
 			Version:    v.Version,
 			Content:    v.Content,
+			Group:      v.Group,
 			Title:      v.Title,
 			Type:       v.Type,
 			Tag:        v.Tag,
@@ -340,7 +338,7 @@ func (d *Box) ListSets() []SetView {
 	return sets
 }
 
-func (d *Box) ListSetWithHiddenContent() []SetViewWithoutContent {
+func (d *Box) ListWithHiddenContent() []SetViewWithoutContent {
 	sets := make([]SetViewWithoutContent, 0)
 
 	for k, v := range d.box.NaoSet {
@@ -349,6 +347,7 @@ func (d *Box) ListSetWithHiddenContent() []SetViewWithoutContent {
 			Extension:  v.Extension,
 			Version:    v.Version,
 			Title:      v.Title,
+			Group:      v.Group,
 			Type:       v.Type,
 			Tag:        v.Tag,
 			Key:        k,

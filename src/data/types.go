@@ -13,7 +13,8 @@ type (
 		Groups     []string        `json:"groups"`
 	}
 
-	Changes struct {
+	Change struct {
+		Key       string    `json:"key"`
 		Content   string    `json:"content"`
 		Timestamp time.Time `json:"timestamp"`
 	}
@@ -21,10 +22,11 @@ type (
 	Note struct {
 		Tag        string    `json:"tag,omitempty"`
 		Type       string    `json:"type"`
+		ShadowType string    `json:"shadowType"` // TODO: main could be a mark
 		Group      string    `json:"group"`
 		Content    string    `json:"content"`
 		Extension  string    `json:"extension,omitempty"`
-		Changes    Changes    `json:"changes"`
+		History    []Change  `json:"history"`
 		Title      string    `json:"title,omitempty"`
 		LastUpdate time.Time `json:"lastUpdate"`
 		Version    int       `json:"version"`
@@ -43,6 +45,7 @@ type (
 		Key        string    `json:"key"`
 		Type       string    `json:"type"`
 		Content    string    `json:"content"`
+		Group      string    `json:"group"`
 		Title      string    `json:"title"`
 		Extension  string    `json:"extension"`
 		LastUpdate time.Time `json:"lastUpdate"`
@@ -53,6 +56,7 @@ type (
 		Tag        string    `json:"tag"`
 		Key        string    `json:"key"`
 		Title      string    `json:"title"`
+		Group      string    `json:"group"`
 		Type       string    `json:"type"`
 		Extension  string    `json:"extension"`
 		LastUpdate time.Time `json:"lastUpdate"`
@@ -61,6 +65,6 @@ type (
 )
 
 type SetModifier interface {
-	ModifySetContent(key string, content string) error
-	ModifySetType(key string, sType string) error
+	ModifyContent(key string, content string) error
+	ModifyType(key string, sType string) error
 }

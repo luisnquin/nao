@@ -18,12 +18,12 @@ var root = &cobra.Command{
 		case 0:
 			switch config.App.Preferences.DefaultBehavior {
 			case "latest":
-				edit.cmd.Flag("latest").Value.Set("true")
-				edit.cmd.RunE(cmd, args)
+				mod.cmd.Flag("latest").Value.Set("true")
+				mod.cmd.RunE(cmd, args)
 
 			case "main":
-				edit.cmd.Flag("main").Value.Set("true")
-				edit.cmd.RunE(cmd, args)
+				mod.cmd.Flag("main").Value.Set("true")
+				mod.cmd.RunE(cmd, args)
 			default:
 				cmd.Usage()
 			}
@@ -39,5 +39,22 @@ func Execute() {
 }
 
 func init() {
-	root.AddCommand(new.cmd, render.cmd, merge.cmd, ls.cmd, rm.cmd, conf.cmd, version, expose.cmd, importer.cmd, tagCmd, server.cmd, edit.cmd, group.cmd)
+	root.AddCommand(expose.cmd, importer.cmd, tagCmd, server.cmd, mod.cmd, group.cmd, reset.cmd)
+	root.AddCommand(new.cmd, render.cmd, merge.cmd, ls.cmd, rm.cmd, conf.cmd, hs.cmd, version)
 }
+
+var (
+	expose   = buildExpose()
+	conf     = buildConfig()
+	server   = buildServer()
+	importer = buildImport()
+	render   = buildRender()
+	merge    = buildMerge()
+	group    = buildGroup()
+	reset    = buildReset()
+	mod      = buildMod()
+	new      = buildNew()
+	hs       = buildHs()
+	ls       = buildLs()
+	rm       = buildRm()
+)

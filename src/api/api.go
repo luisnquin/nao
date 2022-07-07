@@ -56,7 +56,7 @@ func (a *Server) watchAndRefreshData() {
 
 			default:
 				timesMod++
-				a.box.ModifyBox(data.JustLoadBox())
+				a.box.ReplaceBox(data.JustLoadBox())
 
 				if !a.quiet {
 					color.New(color.FgHiBlue).Fprintf(os.Stdout, "\rData refreshed(x%d)", timesMod)

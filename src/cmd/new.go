@@ -15,13 +15,12 @@ type newComp struct {
 	cmd       *cobra.Command
 	editor    string
 	from      string
+	group     string
 	tag       string
 	extension string
 	title     string
 	main      bool
 }
-
-var new = buildNew()
 
 func buildNew() newComp {
 	c := newComp{
@@ -35,12 +34,13 @@ func buildNew() newComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
-	c.cmd.Flags().StringVarP(&c.tag, "tag", "t", "", "assigns a tag to the new file")
-	c.cmd.Flags().StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
 	c.cmd.Flags().BoolVarP(&c.main, "main", "m", false, "creates a new main file, throws an error in case that one already exists")
+	c.cmd.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
+	c.cmd.Flags().StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
 	c.cmd.Flags().StringVarP(&c.extension, "extension", "e", "", "assigns a extension to the file")
+	c.cmd.Flags().StringVarP(&c.tag, "tag", "t", "", "assigns a tag to the new file")
 	c.cmd.Flags().StringVar(&c.title, "title", "", "assigns a title to the file")
+	c.cmd.Flags().StringVarP(&c.group, "group", "g", "", "assigns a group")
 
 	return c
 }
@@ -57,6 +57,10 @@ func (n *newComp) Main() scriptor {
 			return data.ErrTagAlreadyExists
 		}
 
+		if n.group != "" && !box.GroupExists(n.group) {
+			return data.ErrGroupNotFound
+		}
+
 		fPath, err := helper.NewCached()
 		if err != nil {
 			return err
@@ -65,7 +69,7 @@ func (n *newComp) Main() scriptor {
 		defer os.Remove(fPath)
 
 		if n.from != "" {
-			_, set, err := box.SearchSetByKeyTagPattern(n.from)
+			_, set, err := box.SearchByKeyTagPattern(n.from)
 			if err != nil {
 				return err
 			}
@@ -104,10 +108,11 @@ func (n *newComp) Main() scriptor {
 			contentType = constants.TypeMain
 		}
 
-		k, err := box.NewFromSet(data.Note{
+		k, err := box.NewFrom(data.Note{
 			Content:   string(content),
 			Extension: n.extension,
 			Type:      contentType,
+			Group:     n.group,
 			Title:     n.title,
 			Tag:       n.tag,
 		})

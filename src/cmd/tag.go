@@ -23,11 +23,11 @@ var tagCmd = &cobra.Command{
 
 		box := data.New()
 
-		key, _, err := box.SearchSetByKeyPattern(args[0])
+		key, _, err := box.SearchByKeyTagPattern(args[0])
 		if err != nil {
 			return err
 		}
 
-		return box.ModifySetTag(key, args[1])
+		return box.ModifyTag(key, args[1])
 	},
 }

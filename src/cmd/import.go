@@ -11,11 +11,11 @@ import (
 )
 
 type importComp struct {
-	cmd *cobra.Command
-	yes bool
+	cmd   *cobra.Command
+	group string
+	yes   bool
 }
 
-var importer = buildImport()
 
 func buildImport() importComp {
 	c := importComp{
@@ -32,15 +32,14 @@ func buildImport() importComp {
 	c.cmd.RunE = c.Main()
 
 	c.cmd.Flags().BoolVarP(&c.yes, "yes", "y", false, "")
+	c.cmd.Flags().StringVarP(&c.group, "group", "g", "", "all imported files in a group")
 
 	return c
 }
 
-func (i *importComp) Main() scriptor {
+func (c *importComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		allSets := make([]data.Note, 0)
-
-		yes, _ := cmd.Flags().GetBool("yes")
+		all := make([]data.Note, 0)
 
 		for _, path := range args {
 			info, err := os.Stat(path)
@@ -54,7 +53,7 @@ func (i *importComp) Main() scriptor {
 					return err
 				}
 
-				allSets = append(allSets, sets...)
+				all = append(all, sets...)
 
 				continue
 			}
@@ -64,19 +63,31 @@ func (i *importComp) Main() scriptor {
 				return err
 			}
 
-			allSets = append(allSets, set)
+			all = append(all, set)
 		}
 
-		if !yes {
-			yes = helper.AskYesOrNot(fmt.Sprintf("%d keys will be created, sure?", len(allSets)))
-			if !yes {
+		box := data.New()
+
+		if c.group != "" {
+			if !box.GroupExists(c.group) {
+				return data.ErrGroupNotFound
+			}
+
+			for i := range all {
+				all[i].Group = c.group
+			}
+		}
+
+		if !c.yes {
+			c.yes = helper.AskYesOrNot(fmt.Sprintf("%d keys will be created, sure?", len(all)))
+			if !c.yes {
 				fmt.Fprintln(os.Stdout, "Aborted")
 
 				return nil
 			}
 		}
 
-		keys, err := data.New().NewSetsFromOutside(allSets)
+		keys, err := box.ManyNewFrom(all)
 		if err != nil {
 			return err
 		}

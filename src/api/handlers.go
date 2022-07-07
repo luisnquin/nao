@@ -15,14 +15,14 @@ func (a *Server) GetSetsHandler() echo.HandlerFunc {
 			Version: constants.Version,
 			Method:  c.Request().Method,
 			Context: "sets",
-			Data:    a.box.ListSets(),
+			Data:    a.box.List(),
 		})
 	}
 }
 
 func (a *Server) GetSetHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		set, err := a.box.GetSet(c.Param("id"))
+		set, err := a.box.Get(c.Param("id"))
 		if err != nil {
 			if errors.Is(err, data.ErrSetNotFound) {
 				return echo.ErrNotFound
@@ -52,7 +52,7 @@ func (a *Server) NewSetHandler() echo.HandlerFunc {
 			return echo.ErrBadRequest
 		}
 
-		k, err := a.box.NewFromSet(request)
+		k, err := a.box.NewFrom(request)
 		if err != nil {
 			return echo.ErrInternalServerError
 		}
@@ -79,7 +79,7 @@ func (a *Server) ModifySetContentHandler() echo.HandlerFunc {
 			return echo.ErrBadRequest
 		}
 
-		err = a.box.ModifySetContent(c.Param("id"), request.Content)
+		err = a.box.ModifyContent(c.Param("id"), request.Content)
 		if err != nil {
 			if errors.Is(err, data.ErrSetNotFound) {
 				return echo.ErrNotFound
@@ -98,7 +98,7 @@ func (a *Server) ModifySetHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var request data.Note
 
-		err := a.box.OverwriteSet(c.Param("id"), request)
+		err := a.box.Overwrite(c.Param("id"), request)
 		if err != nil {
 			if errors.Is(err, data.ErrSetNotFound) {
 				return echo.ErrNotFound
@@ -115,7 +115,7 @@ func (a *Server) ModifySetHandler() echo.HandlerFunc {
 
 func (a *Server) DeleteSetHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		err := a.box.DeleteSet(c.Param("id"))
+		err := a.box.Delete(c.Param("id"))
 		if err != nil {
 			if errors.Is(err, data.ErrSetNotFound) {
 				return echo.ErrNotFound

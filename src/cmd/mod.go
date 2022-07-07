@@ -4,28 +4,24 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
 )
 
-type editComp struct {
+type modComp struct {
 	cmd    *cobra.Command
 	latest bool
 	main   bool
 	editor string
 }
 
-var edit = buildEdit()
-
-func buildEdit() editComp {
-	c := editComp{
+func buildMod() modComp {
+	c := modComp{
 		cmd: &cobra.Command{
-			Use:     "edit [id | tag]",
-			Short:   "Edit almost any file",
-			Example: constants.AppName + " edit [<id> | <tag>]",
-			Args:    cobra.MaximumNArgs(1),
+			Use:   "mod [<id> | <tag>]",
+			Short: "Edit almost any file",
+			Args:  cobra.MaximumNArgs(1),
 			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 				return data.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
 			},
@@ -46,7 +42,7 @@ func buildEdit() editComp {
 	return c
 }
 
-func (e *editComp) Main() scriptor {
+func (e *modComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		box := data.New()
 
@@ -58,16 +54,16 @@ func (e *editComp) Main() scriptor {
 
 		switch {
 		case len(args) == 1:
-			key, set, err = box.SearchSetByKeyTagPattern(args[0])
+			key, set, err = box.SearchByKeyTagPattern(args[0])
 		case e.latest:
-			key, set, err = box.SearchSetByKeyPattern(box.GetLastKey())
+			key, set, err = box.SearchByKeyPattern(box.GetLastKey())
 		case e.main:
 			k, err := box.GetMainKey()
 			if err != nil {
 				return err
 			}
 
-			key, set, err = box.SearchSetByKeyPattern(k)
+			key, set, err = box.SearchByKeyPattern(k)
 
 		default:
 			cmd.Usage()
@@ -104,6 +100,6 @@ func (e *editComp) Main() scriptor {
 			return err
 		}
 
-		return box.ModifySetContent(key, string(content))
+		return box.ModifyContent(key, string(content))
 	}
 }

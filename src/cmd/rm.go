@@ -16,8 +16,6 @@ type rmComp struct {
 	except string
 }
 
-var rm = buildRm()
-
 func buildRm() rmComp {
 	c := rmComp{
 		cmd: &cobra.Command{
@@ -48,12 +46,12 @@ func (r *rmComp) Main() scriptor {
 		box := data.New()
 
 		for _, arg := range args {
-			key, _, err := box.SearchSetByKeyTagPattern(arg)
+			key, _, err := box.SearchByKeyTagPattern(arg)
 			if err != nil {
 				return err
 			}
 
-			err = box.DeleteSet(key)
+			err = box.Delete(key)
 			if err != nil {
 				return err
 			}

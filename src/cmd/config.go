@@ -5,20 +5,17 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/luisnquin/nao/src/config"
 	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
 )
 
-type configComp struct { // configComp
+type configComp struct {
 	cmd    *cobra.Command
 	editor string
 	edit   bool
 }
-
-var conf = buildConfig()
 
 func buildConfig() configComp {
 	c := configComp{
@@ -67,60 +64,4 @@ func (c *configComp) editConf() error {
 	}
 
 	return run()
-}
-
-func (c *configComp) tour() {
-
-	type configDTO struct {
-		Editor          string `json:"editor"`
-		SubCmds         string `json:"subCmds"`
-		DefaultBehavior string `json:"defaultBehavior"`
-		MergeSeparator  string `json:"mergeSeparator"`
-	}
-
-	var dto configDTO
-
-	questions := []*survey.Question{
-		{
-			Name: "editor",
-			Prompt: &survey.Select{
-				Message: "Select a default editor",
-				Options: []string{"nano", "nvim", "vim"},
-				Default: "nano",
-			},
-		},
-		{
-			Name: "subCmds",
-			Prompt: &survey.Input{
-				Message: "Do you want to add some subcommands at the start of the selected editor?\nSeparate each subcommand with spaces: ",
-				Default: "",
-			},
-		},
-		{
-			Name: "defaultBehavior",
-			Prompt: &survey.Select{
-				Message: "What do you to do if you only type 'nao'?",
-				Default: "",
-				Options: []string{"main", "latest"},
-			},
-		},
-		{
-			Name: "mergeSeparator",
-			Prompt: &survey.Select{
-				Message: "Merge separator?",
-				Default: "-",
-				Options: []string{"-", ".", "_", "#", "°"},
-			},
-		},
-	}
-
-	err := survey.Ask(questions, &dto, survey.WithIcons(func(is *survey.IconSet) {
-		is.Question = survey.Icon{
-			Text:   "",
-			Format: "",
-		}
-	}))
-	cobra.CheckErr(err)
-
-	fmt.Println(dto)
 }
