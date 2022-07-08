@@ -4,5 +4,5 @@
 
 ## Installation
 ```
-    go install github.com/luisnquin/nao/cmd/nao@latest
+    go install github.com/luisnquin/nao@latest
 ```
