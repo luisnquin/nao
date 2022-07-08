@@ -24,9 +24,9 @@ func buildLs() lsComp {
 		cmd: &cobra.Command{
 			Use:           "ls",
 			Short:         "See a list of all available nao files",
+			Args:          cobra.NoArgs,
 			SilenceUsage:  true,
 			SilenceErrors: true,
-			Args:          cobra.NoArgs,
 		},
 	}
 
@@ -34,7 +34,7 @@ func buildLs() lsComp {
 
 	c.cmd.Flags().BoolVarP(&c.long, "long", "l", false, "display the content as long as possible")
 	c.cmd.Flags().BoolVarP(&c.quiet, "quiet", "q", false, "only display file ID's")
-	c.cmd.Flags().StringVarP(&c.group, "group", "g", "", "filter by group")
+	c.cmd.Flags().StringVarP(&c.group, "group", "g", "", "filter by group, ineffective if combined with --quiet")
 
 	return c
 }
@@ -55,6 +55,10 @@ func (c *lsComp) Main() scriptor {
 			return nil
 		}
 
+		if c.group != "" && !box.GroupExists(c.group) {
+			return data.ErrGroupNotFound
+		}
+
 		var (
 			rows   = make([]table.Row, 0)
 			header table.Row
@@ -66,19 +70,23 @@ func (c *lsComp) Main() scriptor {
 			header = table.Row{"ID", "TAG", "GROUP", "TYPE", "LAST UPDATE", "VERSION"}
 		}
 
-		all := box.ListWithHiddenContent()
+		notes := box.ListWithHiddenContent()
 
-		sort.SliceStable(all, func(i, j int) bool {
-			return all[i].LastUpdate.After(all[j].LastUpdate)
+		sort.SliceStable(notes, func(i, j int) bool {
+			return notes[i].LastUpdate.After(notes[j].LastUpdate)
 		})
 
-		for _, i := range all {
-			row := table.Row{i.Tag, i.Group, i.Type, timeago.English.Format(i.LastUpdate), i.Version}
+		for _, n := range notes {
+			if c.group != "" && n.Group != c.group {
+				continue
+			}
+
+			row := table.Row{n.Tag, n.Group, n.Type, timeago.English.Format(n.LastUpdate), n.Version}
 
 			if c.long {
-				row = append(table.Row{i.Key, i.Title}, row...)
+				row = append(table.Row{n.Key, n.Title}, row...)
 			} else {
-				row = append(table.Row{i.Key[:10]}, row...)
+				row = append(table.Row{n.Key[:10]}, row...)
 			}
 
 			rows = append(rows, row)

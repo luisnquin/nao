@@ -35,7 +35,8 @@ func buildExpose() exposeComp {
 	c := exposeComp{
 		cmd: &cobra.Command{
 			Use:           "expose",
-			Short:         "Exposes all the sets in a directory",
+			Short:         "Exposes all the notes in a directory",
+			Args:          cobra.NoArgs,
 			SilenceUsage:  true,
 			SilenceErrors: true,
 		},
@@ -202,9 +203,9 @@ func (e *exposeComp) watchFile(originalPath string, d data.SetModifier) {
 
 			err := d.ModifyType(key, sType)
 			if err != nil {
-				if errors.Is(err, data.ErrMainAlreadyExists) || errors.Is(err, data.ErrInvalidSetType) {
+				if errors.Is(err, data.ErrMainAlreadyExists) || errors.Is(err, data.ErrInvalidNoteType) {
 					color.New(color.FgHiYellow).Fprintf(os.Stderr, "Error: %v, the file type cannot be updated but it's still being watched\n", err)
-				} else if errors.Is(err, data.ErrSetNotFound) {
+				} else if errors.Is(err, data.ErrNoteNotFound) {
 					color.New(color.FgHiYellow).Fprintf(os.Stderr, "Error: %v, it means that is untrackable, out of sight\n", err)
 				} else {
 					panic(err)

@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/luisnquin/nao/src/config"
-	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
 )
@@ -22,7 +21,7 @@ func buildConfig() configComp {
 		cmd: &cobra.Command{
 			Use:           "config",
 			Short:         "To see the configuration file",
-			Example:       constants.AppName + " config",
+			Args:          cobra.NoArgs,
 			SilenceUsage:  true,
 			SilenceErrors: true,
 		},

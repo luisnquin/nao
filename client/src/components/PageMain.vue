@@ -13,17 +13,17 @@ export default {
 		PageNote
 	},
 	async mounted() {
-		axios.get('http://localhost:5000/sets')
+		axios.get('http://localhost:5000/notes')
 			.then(res => this.data = res.data.data)
 			.catch(err => console.error(err))
 	}
-	
+
 }
 </script>
 
 <template>
 	<main>
-		<PageNote :content="data[0].content" />
+		<PageNote :content.sync="data[0].content" :id.sync="data[0].key" />
 	</main>
 </template>
 

@@ -17,7 +17,7 @@ type renderComp struct {
 func buildRender() renderComp {
 	c := renderComp{
 		cmd: &cobra.Command{
-			Use:           "render",
+			Use:           "render [<id> | <tag>]",
 			Short:         "Render the file to markdown by default",
 			Args:          cobra.ExactArgs(1),
 			SilenceErrors: true,
@@ -34,18 +34,18 @@ func buildRender() renderComp {
 
 func (r *renderComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		_, set, err := data.New().SearchByKeyTagPattern(args[0])
+		_, note, err := data.New().SearchByKeyTagPattern(args[0])
 		if err != nil {
 			return err
 		}
 
 		if r.to == "raw" {
-			fmt.Fprintln(os.Stdout, set.Content)
+			fmt.Fprintln(os.Stdout, note.Content)
 
 			return nil
 		}
 
-		c := markdown.Render(set.Content, 80, 6)
+		c := markdown.Render(note.Content, 80, 6)
 
 		fmt.Fprintln(os.Stdout, string(c))
 

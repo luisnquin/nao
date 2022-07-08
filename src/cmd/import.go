@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
@@ -16,13 +15,11 @@ type importComp struct {
 	yes   bool
 }
 
-
 func buildImport() importComp {
 	c := importComp{
 		cmd: &cobra.Command{
-			Use:           "import",
+			Use:           "import <path>",
 			Short:         "Import a directory or a file",
-			Example:       constants.AppName + " import <path> ...",
 			Args:          cobra.MinimumNArgs(1),
 			SilenceUsage:  true,
 			SilenceErrors: true,
@@ -48,22 +45,22 @@ func (c *importComp) Main() scriptor {
 			}
 
 			if info.IsDir() {
-				sets, err := helper.SetsFromDir(path)
+				notes, err := helper.SetsFromDir(path)
 				if err != nil {
 					return err
 				}
 
-				all = append(all, sets...)
+				all = append(all, notes...)
 
 				continue
 			}
 
-			set, err := helper.SetFromFile(path)
+			note, err := helper.NoteFromFile(path)
 			if err != nil {
 				return err
 			}
 
-			all = append(all, set)
+			all = append(all, note)
 		}
 
 		box := data.New()

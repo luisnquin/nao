@@ -11,7 +11,7 @@ import (
 var version = &cobra.Command{
 	Use:   "version",
 	Short: "Print the " + constants.AppName + " version number",
-	Args:  cobra.MaximumNArgs(0),
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		color.New(color.FgHiMagenta).Fprintln(os.Stdout, constants.AppName+" "+constants.Version)
 	},

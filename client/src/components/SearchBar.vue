@@ -3,13 +3,13 @@ export default {
 	name: 'SearchBar',
 	data: () => {
 		return {
-			sets: null
+			notes: null
 		}
 	},
 	async created() {
-		const res = await fetch('http://localhost:5000/sets', { method: 'GET' })
-		const sets = await res.json()
-		this.sets = sets.data
+		const res = await fetch('http://localhost:5000/notes', { method: 'GET' })
+		const notes = await res.json()
+		this.notes = notes.data
 	}
 }
 </script>
@@ -20,8 +20,8 @@ export default {
 		<span>/</span>
 
 		<datalist id="search-bar-options">
-			<option v-for="set in sets" v-bind:key="set">{{ set.tag }}</option>
-			<option v-for="set in sets" v-bind:key="set">{{ set.key }}</option>
+			<option v-for="set in notes" v-bind:key="set">{{ set.tag }}</option>
+			<option v-for="set in notes" v-bind:key="set">{{ set.key }}</option>
 		</datalist>
 	</div>
 </template>

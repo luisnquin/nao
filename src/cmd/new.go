@@ -27,6 +27,7 @@ func buildNew() newComp {
 		cmd: &cobra.Command{
 			Use:           "new",
 			Short:         "Creates a new nao file",
+			Args:          cobra.NoArgs,
 			SilenceErrors: true,
 			SilenceUsage:  true,
 		},
@@ -53,8 +54,9 @@ func (n *newComp) Main() scriptor {
 			return data.ErrMainAlreadyExists
 		}
 
-		if n.tag != "" && box.TagAlreadyExists(n.tag) {
-			return data.ErrTagAlreadyExists
+		err := box.TagIsValid(n.tag)
+		if err != nil {
+			return err
 		}
 
 		if n.group != "" && !box.GroupExists(n.group) {
@@ -69,12 +71,12 @@ func (n *newComp) Main() scriptor {
 		defer os.Remove(fPath)
 
 		if n.from != "" {
-			_, set, err := box.SearchByKeyTagPattern(n.from)
+			_, note, err := box.SearchByKeyTagPattern(n.from)
 			if err != nil {
 				return err
 			}
 
-			err = ioutil.WriteFile(fPath, []byte(set.Content), 0644)
+			err = ioutil.WriteFile(fPath, []byte(note.Content), 0644)
 			if err != nil {
 				return err
 			}

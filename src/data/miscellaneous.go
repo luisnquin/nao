@@ -3,13 +3,14 @@ package data
 import (
 	"encoding/json"
 	"io/ioutil"
+	"regexp"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/src/config"
 )
 
-func (d *Box) updateFile() error {
+func (d *Box) updateBoxFile() error {
 	content, err := json.MarshalIndent(d.box, "", "\t")
 	if err != nil {
 		return err
@@ -20,4 +21,16 @@ func (d *Box) updateFile() error {
 
 func (d *Box) newKey() string {
 	return strings.ReplaceAll(uuid.NewString(), "-", "")
+}
+
+func (d *Box) TagIsValid(tag string) error {
+	if tag != "" && !regexp.MustCompile(`^[A-z\_\-\@0-9]+$`).MatchString(tag) {
+		return ErrTagInvalid
+	}
+
+	if ok := d.TagAlreadyExists(tag); ok {
+		return ErrTagAlreadyExists
+	}
+
+	return nil
 }

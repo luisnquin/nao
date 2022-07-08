@@ -9,22 +9,22 @@ import (
 	"github.com/luisnquin/nao/src/data"
 )
 
-func (a *Server) GetSetsHandler() echo.HandlerFunc {
+func (a *Server) GetNotesHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		return c.JSON(http.StatusOK, StandardResponse{
 			Version: constants.Version,
 			Method:  c.Request().Method,
-			Context: "sets",
+			Context: "notes",
 			Data:    a.box.List(),
 		})
 	}
 }
 
-func (a *Server) GetSetHandler() echo.HandlerFunc {
+func (a *Server) GetNoteHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		set, err := a.box.Get(c.Param("id"))
+		note, err := a.box.Get(c.Param("id"))
 		if err != nil {
-			if errors.Is(err, data.ErrSetNotFound) {
+			if errors.Is(err, data.ErrNoteNotFound) {
 				return echo.ErrNotFound
 			}
 
@@ -34,16 +34,16 @@ func (a *Server) GetSetHandler() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, StandardResponse{
 			Version: constants.Version,
 			Method:  c.Request().Method,
-			Context: "sets",
+			Context: "notes",
 			Params: params{
 				"id": c.Param("id"),
 			},
-			Data: set,
+			Data: note,
 		})
 	}
 }
 
-func (a *Server) NewSetHandler() echo.HandlerFunc {
+func (a *Server) NewNoteHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var request data.Note
 
@@ -62,7 +62,7 @@ func (a *Server) NewSetHandler() echo.HandlerFunc {
 		return c.JSON(http.StatusCreated, StandardResponse{
 			Version: constants.Version,
 			Method:  c.Request().Method,
-			Context: "sets",
+			Context: "notes",
 			Data: echo.Map{
 				"key": k,
 			},
@@ -70,7 +70,7 @@ func (a *Server) NewSetHandler() echo.HandlerFunc {
 	}
 }
 
-func (a *Server) ModifySetContentHandler() echo.HandlerFunc {
+func (a *Server) ModifyNoteContentHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var request contentDTO
 
@@ -81,7 +81,7 @@ func (a *Server) ModifySetContentHandler() echo.HandlerFunc {
 
 		err = a.box.ModifyContent(c.Param("id"), request.Content)
 		if err != nil {
-			if errors.Is(err, data.ErrSetNotFound) {
+			if errors.Is(err, data.ErrNoteNotFound) {
 				return echo.ErrNotFound
 			}
 
@@ -94,13 +94,13 @@ func (a *Server) ModifySetContentHandler() echo.HandlerFunc {
 	}
 }
 
-func (a *Server) ModifySetHandler() echo.HandlerFunc {
+func (a *Server) ModifyNoteHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var request data.Note
 
-		err := a.box.Overwrite(c.Param("id"), request)
+		err := a.box.Replace(c.Param("id"), request)
 		if err != nil {
-			if errors.Is(err, data.ErrSetNotFound) {
+			if errors.Is(err, data.ErrNoteNotFound) {
 				return echo.ErrNotFound
 			}
 
@@ -113,11 +113,11 @@ func (a *Server) ModifySetHandler() echo.HandlerFunc {
 	}
 }
 
-func (a *Server) DeleteSetHandler() echo.HandlerFunc {
+func (a *Server) DeleteNoteHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		err := a.box.Delete(c.Param("id"))
 		if err != nil {
-			if errors.Is(err, data.ErrSetNotFound) {
+			if errors.Is(err, data.ErrNoteNotFound) {
 				return echo.ErrNotFound
 			}
 

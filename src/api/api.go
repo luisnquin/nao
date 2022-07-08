@@ -71,11 +71,11 @@ func (a *Server) watchAndRefreshData() {
 }
 
 func (a *Server) mountHandlers() {
-	sets := a.router.Group("/sets")
-	sets.GET("", a.GetSetsHandler())
-	sets.POST("", a.NewSetHandler())
-	sets.GET("/:id", a.GetSetHandler())
-	sets.PUT("/:id", a.ModifySetHandler())
-	sets.DELETE("/:id", a.DeleteSetHandler())
-	sets.PATCH("/:id", a.ModifySetContentHandler())
+	notes := a.router.Group("/notes")
+	notes.GET("", a.GetNotesHandler())
+	notes.POST("", a.NewNoteHandler())
+	notes.GET("/:id", a.GetNoteHandler())
+	notes.PUT("/:id", a.ModifyNoteHandler())
+	notes.DELETE("/:id", a.DeleteNoteHandler())
+	notes.PATCH("/:id", a.ModifyNoteContentHandler())
 }

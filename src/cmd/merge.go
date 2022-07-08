@@ -18,11 +18,10 @@ type mergeComp struct {
 func buildMerge() mergeComp {
 	c := mergeComp{
 		cmd: &cobra.Command{
-			Use:           "merge <id> ...",
+			Use:           "merge <id>...",
 			Short:         "Combine two or more files",
 			Aliases:       []string{"mix"},
 			Args:          cobra.MinimumNArgs(2),
-			Example:       constants.AppName + " merge 31f1f3a446 8d98afbd2e eb2c4f6c58 f45302728f",
 			SilenceErrors: true,
 			SilenceUsage:  true,
 		},
@@ -45,12 +44,12 @@ func (m *mergeComp) Main() scriptor {
 		)
 
 		for i, arg := range args {
-			k, set, err := box.SearchByKeyTagPattern(arg)
+			k, note, err := box.SearchByKeyTagPattern(arg)
 			if err != nil {
 				return err
 			}
 
-			if set.Content == "" {
+			if note.Content == "" {
 				continue
 			}
 
@@ -63,7 +62,7 @@ func (m *mergeComp) Main() scriptor {
 
 			oldKeys = append(oldKeys, k[:10])
 
-			mergedContent += "\n" + set.Content + "\n"
+			mergedContent += "\n" + note.Content + "\n"
 
 			if i != len(args)-1 {
 				mergedContent += strings.Repeat("-", 15)

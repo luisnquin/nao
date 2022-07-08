@@ -14,7 +14,7 @@ type resetComp struct {
 func buildReset() resetComp {
 	c := resetComp{
 		cmd: &cobra.Command{
-			Use:           "reset <id> [ <sub-id> ]",
+			Use:           "reset <id> [ <hs-id> ]",
 			Args:          cobra.MaximumNArgs(2),
 			Short:         "Reset something to one point in the history",
 			SilenceErrors: true,

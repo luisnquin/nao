@@ -3,16 +3,14 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
 )
 
 var tagCmd = &cobra.Command{
-	Use:           "tag [<id> | <tag>]",
+	Use:           "tag <old> <new>",
 	Short:         "Rename the tag of any file",
-	Example:       constants.AppName + " tag 9f0876faf5 battery_threshold",
 	Args:          cobra.ExactArgs(2),
 	SilenceUsage:  true,
 	SilenceErrors: true,

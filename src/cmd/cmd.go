@@ -13,22 +13,22 @@ var root = &cobra.Command{
 	Use:   constants.AppName,
 	Short: constants.AppName + " is a tool to manage your notes",
 	Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		switch len(args) {
 		case 0:
 			switch config.App.Preferences.DefaultBehavior {
 			case "latest":
 				mod.cmd.Flag("latest").Value.Set("true")
-				mod.cmd.RunE(cmd, args)
+				return mod.cmd.RunE(cmd, args)
 
 			case "main":
 				mod.cmd.Flag("main").Value.Set("true")
-				mod.cmd.RunE(cmd, args)
+				return mod.cmd.RunE(cmd, args)
 			default:
-				cmd.Usage()
+				return cmd.Usage()
 			}
 		default:
-			cmd.Usage()
+			return cmd.Usage()
 		}
 	},
 	TraverseChildren: false,

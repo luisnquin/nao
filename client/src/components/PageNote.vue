@@ -3,9 +3,17 @@ import * as indentation from 'indent-textarea'
 
 export default {
 	name: 'PageNote',
-	props: ['content'],
+	props: {
+		content: {
+			required: true,
+		},
+		id: {
+			required: true
+		}
+	},
 	data() {
 		return {
+			mutableContent: JSON.parse(JSON.stringify(this.content))
 		}
 	},
 	async mounted() {
@@ -24,29 +32,29 @@ export default {
 		save(e) {
 			if (e.key == 's' && e.ctrlKey) {
 				e.preventDefault()
-			}
 
-			console.log(this.content)
+				console.log(this.content)
+				console.log(this.newContent)
+
+				fetch('http://localhost:5000/notes/' + this.id, {
+					method: 'PATCH',
+					body: JSON.stringify({ content: this.content }),
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				})
+					.then(res => console.log(res))
+					.catch(err => console.error(err))
+			}
 		}
 	},
-	computed: {
-		contentMut: {
-			get: function () {
-				return this.content
-			},
-			set: function (content) {
-				this.$emit('update:content', content)
-			}
-		}
-
-	}
 }
 </script>
 
 <template>
 	<article class="annotation-container">
 		<textarea class="annotation" spellcheck="false" placeholder="Write something here..." @keydown="save"
-			v-model="contentMut"></textarea>
+			v-model="mutableContent"></textarea>
 	</article>
 </template>
 

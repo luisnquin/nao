@@ -11,26 +11,27 @@ import (
 )
 
 var (
-	ErrMainAlreadyExists  error = errors.New("main set already exists")
+	ErrMainAlreadyExists  error = errors.New("main note already exists")
 	ErrGroupAlreadyExists error = errors.New("group already exists")
-	ErrMainSetNotFound    error = errors.New("main set not found")
+	ErrMainSetNotFound    error = errors.New("main note not found")
 	ErrTagAlreadyExists   error = errors.New("tag already exists")
+	ErrInvalidNoteType    error = errors.New("invalid note type")
 	ErrTagNotProvided     error = errors.New("tag not provided")
-	ErrInvalidSetType     error = errors.New("invalid set type")
 	ErrGroupNotFound      error = errors.New("group not found")
+	ErrNoteNotFound       error = errors.New("note not found")
 	ErrKeyNotFound        error = errors.New("key not found")
-	ErrSetNotFound        error = errors.New("set not found")
+	ErrTagInvalid         error = errors.New("tag invalid")
 )
 
 func (d *Box) Get(key string) (Note, error) {
-	set, ok := d.box.NaoSet[key]
+	note, ok := d.box.NaoSet[key]
 	if !ok {
-		return set, ErrSetNotFound
+		return note, ErrNoteNotFound
 	}
 
 	d.box.LastAccess = key
 
-	return set, d.updateFile()
+	return note, d.updateBoxFile()
 }
 
 func (d *Box) New(content, contentType string) (string, error) {
@@ -48,7 +49,7 @@ func (d *Box) New(content, contentType string) (string, error) {
 		Version:    1,
 	}
 
-	return key, d.updateFile()
+	return key, d.updateBoxFile()
 }
 
 func (d *Box) NewWithTag(content, contentType, tag string) (string, error) {
@@ -56,10 +57,8 @@ func (d *Box) NewWithTag(content, contentType, tag string) (string, error) {
 
 	if tag == "" {
 		return "", ErrTagNotProvided
-	}
-
-	if d.TagAlreadyExists(tag) {
-		return "", ErrTagAlreadyExists
+	} else if err := d.TagIsValid(tag); err != nil {
+		return "", err
 	}
 
 	if contentType == constants.TypeMain && d.MainAlreadyExists() {
@@ -74,7 +73,7 @@ func (d *Box) NewWithTag(content, contentType, tag string) (string, error) {
 		Version:    1,
 	}
 
-	return key, d.updateFile()
+	return key, d.updateBoxFile()
 }
 
 func (d *Box) GetLastKey() string {
@@ -82,8 +81,8 @@ func (d *Box) GetLastKey() string {
 }
 
 func (d *Box) GetMainKey() (string, error) {
-	for k, set := range d.box.NaoSet {
-		if set.Type == constants.TypeMain {
+	for k, note := range d.box.NaoSet {
+		if note.Type == constants.TypeMain {
 			return k, nil
 		}
 	}
@@ -91,36 +90,36 @@ func (d *Box) GetMainKey() (string, error) {
 	return "", ErrMainSetNotFound
 }
 
-func (d *Box) NewFrom(set Note) (string, error) {
+func (d *Box) NewFrom(note Note) (string, error) {
 	key := d.newKey()
 
-	if set.Tag == "" {
-		set.Tag = autoname.Generate("-")
-	} else if d.TagAlreadyExists(set.Tag) {
-		return "", ErrTagAlreadyExists
+	if note.Tag == "" {
+		note.Tag = autoname.Generate("-")
+	} else if err := d.TagIsValid(note.Tag); err != nil {
+		return "", err
 	}
 
-	if set.Group != "" && !d.GroupExists(set.Group) {
+	if note.Group != "" && !d.GroupExists(note.Group) {
 		return "", ErrGroupNotFound
 	}
 
-	set.LastUpdate = time.Now()
-	set.Version = 1
+	note.LastUpdate = time.Now()
+	note.Version = 1
 
-	if set.Type == constants.TypeMain && d.MainAlreadyExists() {
+	if note.Type == constants.TypeMain && d.MainAlreadyExists() {
 		return "", ErrMainAlreadyExists
 	}
 
-	d.box.NaoSet[key] = set
+	d.box.NaoSet[key] = note
 
-	return key, d.updateFile()
+	return key, d.updateBoxFile()
 }
 
-func (d *Box) ManyNewFrom(sets []Note) ([]string, error) {
+func (d *Box) ManyNewFrom(notes []Note) ([]string, error) {
 	keys := make([]string, 0)
 
-	for _, set := range sets {
-		key, err := d.NewFrom(set)
+	for _, note := range notes {
+		key, err := d.NewFrom(note)
 		if err != nil {
 			return nil, err
 		}
@@ -131,15 +130,15 @@ func (d *Box) ManyNewFrom(sets []Note) ([]string, error) {
 	return keys, nil
 }
 
-func (d *Box) Overwrite(key string, set Note) error {
+func (d *Box) Replace(key string, note Note) error {
 	_, ok := d.box.NaoSet[key]
 	if !ok {
-		return ErrSetNotFound
+		return ErrNoteNotFound
 	}
 
-	d.box.NaoSet[key] = set
+	d.box.NaoSet[key] = note
 
-	return d.updateFile()
+	return d.updateBoxFile()
 }
 
 func (d *Box) ReplaceBox(box BoxData) {
@@ -147,23 +146,23 @@ func (d *Box) ReplaceBox(box BoxData) {
 }
 
 func (d *Box) ModifyContent(key string, content string) error {
-	set, ok := d.box.NaoSet[key]
+	note, ok := d.box.NaoSet[key]
 	if !ok {
-		return ErrSetNotFound
+		return ErrNoteNotFound
 	}
 
-	set.LastUpdate = time.Now()
-	set.History = append(set.History, Change{
+	note.LastUpdate = time.Now()
+	note.History = append(note.History, Change{
 		Key:       d.newKey(),
-		Content:   set.Content,
+		Content:   note.Content,
 		Timestamp: time.Now(),
 	})
-	set.Content = content
-	set.Version++
+	note.Content = content
+	note.Version++
 
-	d.box.NaoSet[key] = set
+	d.box.NaoSet[key] = note
 
-	return d.updateFile()
+	return d.updateBoxFile()
 }
 
 func (d *Box) ModifyType(key string, sType string) error {
@@ -179,49 +178,49 @@ func (d *Box) ModifyType(key string, sType string) error {
 	}
 
 	if !utils.Contains(validTypes, sType) {
-		return ErrInvalidSetType
+		return ErrInvalidNoteType
 	}
 
-	set, ok := d.box.NaoSet[key]
+	note, ok := d.box.NaoSet[key]
 	if !ok {
-		return ErrSetNotFound
+		return ErrNoteNotFound
 	}
 
-	set.Type = sType
+	note.Type = sType
 
-	d.box.NaoSet[key] = set
+	d.box.NaoSet[key] = note
 
-	return d.updateFile()
+	return d.updateBoxFile()
 }
 
 func (d *Box) ModifyTag(key string, tag string) error {
-	set, ok := d.box.NaoSet[key]
+	note, ok := d.box.NaoSet[key]
 	if !ok {
-		return ErrSetNotFound
+		return ErrNoteNotFound
 	}
 
-	if d.TagAlreadyExists(tag) {
-		return ErrTagAlreadyExists
+	if err := d.TagIsValid(tag); err != nil {
+		return err
 	}
 
-	set.LastUpdate = time.Now()
-	set.Tag = tag
-	set.Version++
+	note.LastUpdate = time.Now()
+	note.Tag = tag
+	note.Version++
 
-	d.box.NaoSet[key] = set
+	d.box.NaoSet[key] = note
 
-	return d.updateFile()
+	return d.updateBoxFile()
 }
 
 func (d *Box) Delete(key string) error {
 	_, ok := d.box.NaoSet[key]
 	if !ok {
-		return ErrSetNotFound
+		return ErrNoteNotFound
 	}
 
 	delete(d.box.NaoSet, key)
 
-	return d.updateFile()
+	return d.updateBoxFile()
 }
 
 func (d *Box) ResetToBefore(key string) error {
@@ -231,7 +230,7 @@ func (d *Box) ResetToBefore(key string) error {
 		s.Content = s.History[0].Content
 		d.box.NaoSet[key] = s
 
-		return d.updateFile()
+		return d.updateBoxFile()
 	}
 
 	return ErrKeyNotFound
@@ -245,7 +244,7 @@ func (d *Box) ResetTo(key, subKey string) error {
 			s.Content = c.Content
 			d.box.NaoSet[key] = s
 
-			return d.updateFile()
+			return d.updateBoxFile()
 		}
 	}
 
@@ -281,48 +280,48 @@ func (d *Box) ResetToWithDeletions(key, subKey string) error {
 
 	d.box.NaoSet[key] = s
 
-	return d.updateFile()
+	return d.updateBoxFile()
 }
 
 func (d *Box) SearchByKeyPattern(pattern string) (string, Note, error) {
-	set, ok := d.box.NaoSet[pattern]
+	note, ok := d.box.NaoSet[pattern]
 	if ok {
 		d.box.LastAccess = pattern
-		return pattern, set, d.updateFile()
+		return pattern, note, d.updateBoxFile()
 	}
 
-	for k, set := range d.box.NaoSet {
+	for k, Note := range d.box.NaoSet {
 		if strings.HasPrefix(k, pattern) {
 			d.box.LastAccess = k
-			return k, set, d.updateFile()
+			return k, Note, d.updateBoxFile()
 		}
 	}
 
-	return "", set, ErrSetNotFound
+	return "", note, ErrNoteNotFound
 }
 
 func (d *Box) SearchByKeyTagPattern(pattern string) (string, Note, error) {
-	set, ok := d.box.NaoSet[pattern]
+	note, ok := d.box.NaoSet[pattern]
 	if ok {
 		d.box.LastAccess = pattern
-		return pattern, set, d.updateFile()
+		return pattern, note, d.updateBoxFile()
 	}
 
-	for k, set := range d.box.NaoSet {
-		if strings.HasPrefix(k, pattern) || strings.HasPrefix(set.Tag, pattern) {
+	for k, note := range d.box.NaoSet {
+		if strings.HasPrefix(k, pattern) || strings.HasPrefix(note.Tag, pattern) {
 			d.box.LastAccess = k
-			return k, set, d.updateFile()
+			return k, note, d.updateBoxFile()
 		}
 	}
 
-	return "", set, ErrSetNotFound
+	return "", note, ErrNoteNotFound
 }
 
-func (d *Box) List() []SetView {
-	sets := make([]SetView, 0)
+func (d *Box) List() []NoteView {
+	notes := make([]NoteView, 0)
 
 	for k, v := range d.box.NaoSet {
-		sets = append(sets, SetView{
+		notes = append(notes, NoteView{
 			LastUpdate: v.LastUpdate,
 			Extension:  v.Extension,
 			Version:    v.Version,
@@ -335,14 +334,14 @@ func (d *Box) List() []SetView {
 		})
 	}
 
-	return sets
+	return notes
 }
 
-func (d *Box) ListWithHiddenContent() []SetViewWithoutContent {
-	sets := make([]SetViewWithoutContent, 0)
+func (d *Box) ListWithHiddenContent() []NoteViewWithoutContent {
+	notes := make([]NoteViewWithoutContent, 0)
 
 	for k, v := range d.box.NaoSet {
-		sets = append(sets, SetViewWithoutContent{
+		notes = append(notes, NoteViewWithoutContent{
 			LastUpdate: v.LastUpdate,
 			Extension:  v.Extension,
 			Version:    v.Version,
@@ -354,7 +353,7 @@ func (d *Box) ListWithHiddenContent() []SetViewWithoutContent {
 		})
 	}
 
-	return sets
+	return notes
 }
 
 func (d *Box) ListAllKeys() []string {

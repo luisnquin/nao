@@ -14,7 +14,7 @@ import (
 )
 
 func SetsFromDir(path string) ([]data.Note, error) {
-	sets := make([]data.Note, 0)
+	notes := make([]data.Note, 0)
 
 	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -23,17 +23,17 @@ func SetsFromDir(path string) ([]data.Note, error) {
 				return err
 			}
 
-			set := data.Note{
+			note := data.Note{
 				Content: string(content),
 				Type:    constants.TypeImported,
 			}
 
 			fragments := strings.Split(info.Name(), ".")
 			if len(fragments) == 2 {
-				set.Extension = fragments[1]
+				note.Extension = fragments[1]
 			}
 
-			sets = append(sets, set)
+			notes = append(notes, note)
 		}
 
 		return nil
@@ -43,24 +43,24 @@ func SetsFromDir(path string) ([]data.Note, error) {
 		return nil, err
 	}
 
-	return sets, nil
+	return notes, nil
 }
 
-func SetFromFile(filePath string) (data.Note, error) {
-	var set data.Note
+func NoteFromFile(filePath string) (data.Note, error) {
+	var note data.Note
 
 	content, err := os.ReadFile(filePath)
 	if err != nil && !errors.Is(err, io.EOF) {
-		return set, err
+		return note, err
 	}
 
 	fileFragments := strings.Split(path.Base(filePath), ".")
 	if len(fileFragments) == 2 {
-		set.Extension = fileFragments[1]
+		note.Extension = fileFragments[1]
 	}
 
-	set.Type = constants.TypeImported
-	set.Content = string(content)
+	note.Type = constants.TypeImported
+	note.Content = string(content)
 
-	return set, nil
+	return note, nil
 }

@@ -11,7 +11,7 @@ func (d *Box) NewGroup(name string) error {
 
 	d.box.Groups = append(d.box.Groups, name)
 
-	return d.updateFile()
+	return d.updateBoxFile()
 }
 
 func (d *Box) DeleteGroupWithRelated(name string) error {
@@ -19,13 +19,13 @@ func (d *Box) DeleteGroupWithRelated(name string) error {
 		if group == name {
 			d.box.Groups = append(d.box.Groups[:i], d.box.Groups[i+1:]...)
 
-			for k, set := range d.box.NaoSet {
-				if set.Group == name {
+			for k, note := range d.box.NaoSet {
+				if note.Group == name {
 					delete(d.box.NaoSet, k)
 				}
 			}
 
-			return d.updateFile()
+			return d.updateBoxFile()
 		}
 	}
 
@@ -47,15 +47,15 @@ func (d *Box) ModifyGroupName(oldName, newName string) error {
 		if group == oldName {
 			d.box.Groups[i] = newName
 
-			for k, set := range d.box.NaoSet {
-				if set.Group == oldName {
-					set.Group = newName
+			for k, note := range d.box.NaoSet {
+				if note.Group == oldName {
+					note.Group = newName
 
-					d.box.NaoSet[k] = set
+					d.box.NaoSet[k] = note
 				}
 			}
 
-			return d.updateFile()
+			return d.updateBoxFile()
 		}
 	}
 
@@ -67,16 +67,46 @@ func (d *Box) DeleteGroup(name string) error {
 		if group == name {
 			d.box.Groups = append(d.box.Groups[:i], d.box.Groups[i+1:]...)
 
-			for k, set := range d.box.NaoSet {
-				if set.Group == name {
-					set.Group = ""
-					d.box.NaoSet[k] = set
+			for k, note := range d.box.NaoSet {
+				if note.Group == name {
+					note.Group = ""
+					d.box.NaoSet[k] = note
 				}
 			}
 
-			return d.updateFile()
+			return d.updateBoxFile()
 		}
 	}
 
 	return ErrGroupNotFound
+}
+
+func (d *Box) ModifyAssignedGroup(key, name string) error {
+	if !d.GroupExists(name) {
+		return ErrGroupNotFound
+	}
+
+	for k, v := range d.box.NaoSet {
+		if k == key {
+			v.Group = name
+			d.box.NaoSet[k] = v
+
+			return d.updateBoxFile()
+		}
+	}
+
+	return ErrNoteNotFound
+}
+
+func (d *Box) RemoveFromAssignedGroup(key string) error {
+	for k, v := range d.box.NaoSet {
+		if k == key {
+			v.Group = ""
+			d.box.NaoSet[k] = v
+
+			return d.updateBoxFile()
+		}
+	}
+
+	return ErrNoteNotFound
 }

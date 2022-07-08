@@ -7,7 +7,7 @@ func (d *Box) GetHistoryOf(key string) ([]Change, error) {
 		}
 	}
 
-	return nil, ErrSetNotFound
+	return nil, ErrNoteNotFound
 }
 
 func (d *Box) CleanHistoryOf(key string) error {
@@ -18,10 +18,10 @@ func (d *Box) CleanHistoryOf(key string) error {
 
 		d.box.NaoSet[k] = v
 
-		return d.updateFile()
+		return d.updateBoxFile()
 	}
 
-	return ErrSetNotFound
+	return ErrNoteNotFound
 }
 
 func (d *Box) CleanHistoryOfAll() error {
@@ -31,5 +31,5 @@ func (d *Box) CleanHistoryOfAll() error {
 		d.box.NaoSet[k] = v
 	}
 
-	return d.updateFile()
+	return d.updateBoxFile()
 }

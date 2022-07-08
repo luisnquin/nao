@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/luisnquin/nao/src/constants"
 	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
 	"github.com/spf13/cobra"
@@ -47,35 +48,37 @@ func (e *modComp) Main() scriptor {
 		box := data.New()
 
 		var (
-			key string
-			set data.Note
-			err error
+			key  string
+			note data.Note
+			err  error
 		)
 
 		switch {
 		case len(args) == 1:
-			key, set, err = box.SearchByKeyTagPattern(args[0])
-		case e.latest:
-			key, set, err = box.SearchByKeyPattern(box.GetLastKey())
-		case e.main:
-			k, err := box.GetMainKey()
-			if err != nil {
-				return err
+			key, note, err = box.SearchByKeyTagPattern(args[0])
+			cobra.CheckErr(err)
+
+			if e.main {
+				err = box.ModifyType(key, constants.TypeMain)
 			}
 
-			key, set, err = box.SearchByKeyPattern(k)
+		case e.latest:
+			key, note, err = box.SearchByKeyPattern(box.GetLastKey())
+		case e.main:
+			k, err := box.GetMainKey()
+			cobra.CheckErr(err)
+
+			key, note, err = box.SearchByKeyPattern(k)
 
 		default:
-			cmd.Usage()
-
-			return nil
+			return cmd.Usage()
 		}
 
 		if err != nil {
 			return err
 		}
 
-		path, err := helper.LoadContentInCache(key, set.Content)
+		path, err := helper.LoadContentInCache(key, note.Content)
 		if err != nil {
 			return err
 		}

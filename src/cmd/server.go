@@ -20,6 +20,7 @@ func buildServer() serverComp {
 		cmd: &cobra.Command{
 			Use:           "server",
 			Short:         "Serve content via REST server",
+			Args:          cobra.NoArgs,
 			SilenceUsage:  true,
 			SilenceErrors: true,
 		},

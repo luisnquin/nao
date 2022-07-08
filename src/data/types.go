@@ -40,7 +40,7 @@ type Window struct {
 }
 
 type (
-	SetView struct {
+	NoteView struct {
 		Tag        string    `json:"tag"`
 		Key        string    `json:"key"`
 		Type       string    `json:"type"`
@@ -52,7 +52,7 @@ type (
 		Version    int       `json:"version"`
 	}
 
-	SetViewWithoutContent struct {
+	NoteViewWithoutContent struct {
 		Tag        string    `json:"tag"`
 		Key        string    `json:"key"`
 		Title      string    `json:"title"`
