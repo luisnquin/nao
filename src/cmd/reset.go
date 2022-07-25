@@ -24,8 +24,8 @@ func buildReset() resetComp {
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().BoolVarP(&c.hard, "hard", "h", false, "")
-	c.cmd.Flags().BoolVarP(&c.soft, "soft", "s", false, "")
+	c.cmd.Flags().BoolVar(&c.hard, "hard", false, "deletes the all the history after the provided identifier")
+	c.cmd.Flags().BoolVar(&c.soft, "soft", false, "moves the file state to the state of the file associated provided identifier")
 
 	return c
 }

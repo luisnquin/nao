@@ -89,7 +89,6 @@ func (e *modComp) Main() scriptor {
 			Path:   path,
 			Editor: e.editor,
 		})
-
 		if err != nil {
 			return err
 		}
@@ -101,6 +100,10 @@ func (e *modComp) Main() scriptor {
 		content, err := ioutil.ReadFile(path)
 		if err != nil {
 			return err
+		}
+
+		if string(content) == note.Content {
+			return nil
 		}
 
 		return box.ModifyContent(key, string(content))
