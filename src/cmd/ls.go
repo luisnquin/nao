@@ -75,7 +75,7 @@ func (c *lsComp) Main() scriptor {
 		)
 
 		if c.long {
-			header = table.Row{"ID", "TITLE", "TYPE", "TAG", "GROUP", "SIZE", "TYPE", "SIZE", "LAST UPDATE", "VERSION"}
+			header = table.Row{"ID", "TITLE", "TYPE", "TAG", "GROUP", "LAST UPDATE", "SIZE", "VERSION"}
 		} else {
 			header = table.Row{"ID", "TAG", "GROUP", "LAST UPDATE", "SIZE", "VERSION"}
 		}
