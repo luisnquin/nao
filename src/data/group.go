@@ -14,6 +14,15 @@ func (d *Box) NewGroup(name string) error {
 	return d.updateBoxFile()
 }
 
+func (d *Box) GroupOf(key string) (string, error) {
+	v, ok := d.box.NaoSet[key]
+	if !ok {
+		return "", ErrNoteNotFound
+	}
+
+	return v.Group, nil
+}
+
 func (d *Box) DeleteGroupWithRelated(name string) error {
 	for i, group := range d.box.Groups {
 		if group == name {

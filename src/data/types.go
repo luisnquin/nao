@@ -22,7 +22,7 @@ type (
 	Note struct {
 		Tag        string    `json:"tag,omitempty"`
 		Type       string    `json:"type"`
-		ShadowType string    `json:"shadowType"` // TODO: main could be a mark
+		ShadowType string    `json:"shadowType"`
 		Group      string    `json:"group"`
 		Content    string    `json:"content"`
 		Extension  string    `json:"extension,omitempty"`
@@ -39,30 +39,18 @@ type Window struct {
 	LastUpdate time.Time
 }
 
-type (
-	NoteView struct {
-		Tag        string    `json:"tag"`
-		Key        string    `json:"key"`
-		Type       string    `json:"type"`
-		Content    string    `json:"content"`
-		Group      string    `json:"group"`
-		Title      string    `json:"title"`
-		Extension  string    `json:"extension"`
-		LastUpdate time.Time `json:"lastUpdate"`
-		Version    int       `json:"version"`
-	}
-
-	NoteViewWithoutContent struct {
-		Tag        string    `json:"tag"`
-		Key        string    `json:"key"`
-		Title      string    `json:"title"`
-		Group      string    `json:"group"`
-		Type       string    `json:"type"`
-		Extension  string    `json:"extension"`
-		LastUpdate time.Time `json:"lastUpdate"`
-		Version    int       `json:"version"`
-	}
-)
+type NoteView struct {
+	Tag        string    `json:"tag"`
+	Key        string    `json:"key"`
+	Type       string    `json:"type"`
+	Size       string    `json:"size"`
+	Content    string    `json:"content"`
+	Group      string    `json:"group"`
+	Title      string    `json:"title"`
+	Extension  string    `json:"extension"`
+	LastUpdate time.Time `json:"lastUpdate"`
+	Version    int       `json:"version"`
+}
 
 type SetModifier interface {
 	ModifyContent(key string, content string) error

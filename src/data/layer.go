@@ -328,25 +328,7 @@ func (d *Box) List() []NoteView {
 			Content:    v.Content,
 			Group:      v.Group,
 			Title:      v.Title,
-			Type:       v.Type,
-			Tag:        v.Tag,
-			Key:        k,
-		})
-	}
-
-	return notes
-}
-
-func (d *Box) ListWithHiddenContent() []NoteViewWithoutContent {
-	notes := make([]NoteViewWithoutContent, 0)
-
-	for k, v := range d.box.NaoSet {
-		notes = append(notes, NoteViewWithoutContent{
-			LastUpdate: v.LastUpdate,
-			Extension:  v.Extension,
-			Version:    v.Version,
-			Title:      v.Title,
-			Group:      v.Group,
+			Size:       d.boxSize(v),
 			Type:       v.Type,
 			Tag:        v.Tag,
 			Key:        k,

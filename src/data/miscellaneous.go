@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/src/config"
+	"github.com/luisnquin/nao/src/utils"
 )
 
 func (d *Box) updateBoxFile() error {
@@ -16,7 +17,7 @@ func (d *Box) updateBoxFile() error {
 		return err
 	}
 
-	return ioutil.WriteFile(config.App.Paths.DataFile, content, 0644)
+	return ioutil.WriteFile(config.App.Paths.DataFile, content, 0o644)
 }
 
 func (d *Box) newKey() string {
@@ -33,4 +34,10 @@ func (d *Box) TagIsValid(tag string) error {
 	}
 
 	return nil
+}
+
+func (d *Box) boxSize(n Note) string {
+	content, _ := json.Marshal(n)
+
+	return utils.BytesToStorageUnits(int64(len(content)))
 }
