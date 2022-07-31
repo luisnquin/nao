@@ -14,7 +14,7 @@ require (
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/spf13/cobra v1.4.0
-	github.com/xeonx/timeago v1.0.0-rc4
+	github.com/xeonx/timeago v1.0.0-rc5
 	gopkg.in/yaml.v3 v3.0.1
 )
 
