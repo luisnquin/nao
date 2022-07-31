@@ -11,7 +11,7 @@ import (
 	"github.com/luisnquin/nao/src/utils"
 )
 
-func (d *Box) updateBoxFile() error {
+func (d *Box) updateFile() error {
 	content, err := json.MarshalIndent(d.box, "", "\t")
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (d *Box) TagIsValid(tag string) error {
 	return nil
 }
 
-func (d *Box) boxSize(n Note) string {
+func (d *Box) getNoteSize(n Note) string {
 	content, _ := json.Marshal(n)
 
 	return utils.BytesToStorageUnits(int64(len(content)))

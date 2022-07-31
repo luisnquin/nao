@@ -11,7 +11,7 @@ func (d *Box) NewGroup(name string) error {
 
 	d.box.Groups = append(d.box.Groups, name)
 
-	return d.updateBoxFile()
+	return d.updateFile()
 }
 
 func (d *Box) GroupOf(key string) (string, error) {
@@ -34,7 +34,7 @@ func (d *Box) DeleteGroupWithRelated(name string) error {
 				}
 			}
 
-			return d.updateBoxFile()
+			return d.updateFile()
 		}
 	}
 
@@ -64,7 +64,7 @@ func (d *Box) ModifyGroupName(oldName, newName string) error {
 				}
 			}
 
-			return d.updateBoxFile()
+			return d.updateFile()
 		}
 	}
 
@@ -83,7 +83,7 @@ func (d *Box) DeleteGroup(name string) error {
 				}
 			}
 
-			return d.updateBoxFile()
+			return d.updateFile()
 		}
 	}
 
@@ -100,7 +100,7 @@ func (d *Box) ModifyAssignedGroup(key, name string) error {
 			v.Group = name
 			d.box.NaoSet[k] = v
 
-			return d.updateBoxFile()
+			return d.updateFile()
 		}
 	}
 
@@ -113,7 +113,7 @@ func (d *Box) RemoveFromAssignedGroup(key string) error {
 			v.Group = ""
 			d.box.NaoSet[k] = v
 
-			return d.updateBoxFile()
+			return d.updateFile()
 		}
 	}
 

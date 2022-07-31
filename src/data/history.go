@@ -18,7 +18,7 @@ func (d *Box) CleanHistoryOf(key string) error {
 
 		d.box.NaoSet[k] = v
 
-		return d.updateBoxFile()
+		return d.updateFile()
 	}
 
 	return ErrNoteNotFound
@@ -31,5 +31,5 @@ func (d *Box) CleanHistoryOfAll() error {
 		d.box.NaoSet[k] = v
 	}
 
-	return d.updateBoxFile()
+	return d.updateFile()
 }

@@ -31,7 +31,7 @@ func (d *Box) Get(key string) (Note, error) {
 
 	d.box.LastAccess = key
 
-	return note, d.updateBoxFile()
+	return note, d.updateFile()
 }
 
 func (d *Box) New(content, contentType string) (string, error) {
@@ -49,7 +49,7 @@ func (d *Box) New(content, contentType string) (string, error) {
 		Version:    1,
 	}
 
-	return key, d.updateBoxFile()
+	return key, d.updateFile()
 }
 
 func (d *Box) NewWithTag(content, contentType, tag string) (string, error) {
@@ -73,7 +73,7 @@ func (d *Box) NewWithTag(content, contentType, tag string) (string, error) {
 		Version:    1,
 	}
 
-	return key, d.updateBoxFile()
+	return key, d.updateFile()
 }
 
 func (d *Box) GetLastKey() string {
@@ -112,7 +112,7 @@ func (d *Box) NewFrom(note Note) (string, error) {
 
 	d.box.NaoSet[key] = note
 
-	return key, d.updateBoxFile()
+	return key, d.updateFile()
 }
 
 func (d *Box) ManyNewFrom(notes []Note) ([]string, error) {
@@ -138,7 +138,7 @@ func (d *Box) Replace(key string, note Note) error {
 
 	d.box.NaoSet[key] = note
 
-	return d.updateBoxFile()
+	return d.updateFile()
 }
 
 func (d *Box) ReplaceBox(box BoxData) {
@@ -162,7 +162,7 @@ func (d *Box) ModifyContent(key string, content string) error {
 
 	d.box.NaoSet[key] = note
 
-	return d.updateBoxFile()
+	return d.updateFile()
 }
 
 func (d *Box) ModifyType(key string, sType string) error {
@@ -190,7 +190,7 @@ func (d *Box) ModifyType(key string, sType string) error {
 
 	d.box.NaoSet[key] = note
 
-	return d.updateBoxFile()
+	return d.updateFile()
 }
 
 func (d *Box) ModifyTag(key string, tag string) error {
@@ -209,7 +209,7 @@ func (d *Box) ModifyTag(key string, tag string) error {
 
 	d.box.NaoSet[key] = note
 
-	return d.updateBoxFile()
+	return d.updateFile()
 }
 
 func (d *Box) Delete(key string) error {
@@ -220,7 +220,7 @@ func (d *Box) Delete(key string) error {
 
 	delete(d.box.NaoSet, key)
 
-	return d.updateBoxFile()
+	return d.updateFile()
 }
 
 func (d *Box) ResetToBefore(key string) error {
@@ -230,7 +230,7 @@ func (d *Box) ResetToBefore(key string) error {
 		s.Content = s.History[0].Content
 		d.box.NaoSet[key] = s
 
-		return d.updateBoxFile()
+		return d.updateFile()
 	}
 
 	return ErrKeyNotFound
@@ -244,7 +244,7 @@ func (d *Box) ResetTo(key, subKey string) error {
 			s.Content = c.Content
 			d.box.NaoSet[key] = s
 
-			return d.updateBoxFile()
+			return d.updateFile()
 		}
 	}
 
@@ -280,20 +280,20 @@ func (d *Box) ResetToWithDeletions(key, subKey string) error {
 
 	d.box.NaoSet[key] = s
 
-	return d.updateBoxFile()
+	return d.updateFile()
 }
 
 func (d *Box) SearchByKeyPattern(pattern string) (string, Note, error) {
 	note, ok := d.box.NaoSet[pattern]
 	if ok {
 		d.box.LastAccess = pattern
-		return pattern, note, d.updateBoxFile()
+		return pattern, note, d.updateFile()
 	}
 
 	for k, Note := range d.box.NaoSet {
 		if strings.HasPrefix(k, pattern) {
 			d.box.LastAccess = k
-			return k, Note, d.updateBoxFile()
+			return k, Note, d.updateFile()
 		}
 	}
 
@@ -304,13 +304,13 @@ func (d *Box) SearchByKeyTagPattern(pattern string) (string, Note, error) {
 	note, ok := d.box.NaoSet[pattern]
 	if ok {
 		d.box.LastAccess = pattern
-		return pattern, note, d.updateBoxFile()
+		return pattern, note, d.updateFile()
 	}
 
 	for k, note := range d.box.NaoSet {
 		if strings.HasPrefix(k, pattern) || strings.HasPrefix(note.Tag, pattern) {
 			d.box.LastAccess = k
-			return k, note, d.updateBoxFile()
+			return k, note, d.updateFile()
 		}
 	}
 
@@ -328,7 +328,7 @@ func (d *Box) List() []NoteView {
 			Content:    v.Content,
 			Group:      v.Group,
 			Title:      v.Title,
-			Size:       d.boxSize(v),
+			Size:       d.getNoteSize(v),
 			Type:       v.Type,
 			Tag:        v.Tag,
 			Key:        k,
