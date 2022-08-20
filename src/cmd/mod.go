@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/luisnquin/nao/src/constants"
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/config"
 	"github.com/luisnquin/nao/src/helper"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 )
 
@@ -24,9 +24,9 @@ func buildMod() modComp {
 			Short: "Edit almost any file",
 			Args:  cobra.MaximumNArgs(1),
 			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return data.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
+				return store.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
 			},
-			ValidArgs:     data.New().ListAllKeys(),
+			ValidArgs:     store.New().ListAllKeys(),
 			SilenceUsage:  true,
 			SilenceErrors: true,
 		},
@@ -45,11 +45,11 @@ func buildMod() modComp {
 
 func (e *modComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		box := data.New()
+		box := store.New()
 
 		var (
 			key  string
-			note data.Note
+			note store.Note
 			err  error
 		)
 
@@ -59,7 +59,7 @@ func (e *modComp) Main() scriptor {
 			cobra.CheckErr(err)
 
 			if e.main {
-				err = box.ModifyType(key, constants.TypeMain)
+				err = box.ModifyType(key, config.TypeMain)
 			}
 
 		case e.latest:

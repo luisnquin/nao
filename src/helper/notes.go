@@ -1,8 +1,8 @@
 package helper
 
-import "github.com/luisnquin/nao/src/data"
+import "github.com/luisnquin/nao/src/store"
 
-func SearchCriteriaInNoteView(notes []data.NoteView, f func(n data.NoteView) bool) bool {
+func SearchCriteriaInNoteView(notes []store.NoteView, f func(n store.NoteView) bool) bool {
 	for _, note := range notes {
 		if f(note) {
 			return true

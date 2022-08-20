@@ -13,8 +13,7 @@ import (
 	"github.com/eiannone/keyboard"
 	"github.com/fatih/color"
 	"github.com/luisnquin/nao/src/config"
-	"github.com/luisnquin/nao/src/constants"
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 )
 
@@ -55,7 +54,7 @@ func buildExpose() exposeComp {
 func (c *exposeComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		var (
-			box              = data.New()
+			box              = store.New()
 			views            = box.List()
 			targetDir string = config.App.Paths.CacheDir + "/"
 		)
@@ -67,7 +66,7 @@ func (c *exposeComp) Main() scriptor {
 				return err
 			}
 
-			targetDir = c.path + "/" + constants.AppName + "/"
+			targetDir = c.path + "/" + config.AppName + "/"
 		}
 
 		if !c.untree {
@@ -146,7 +145,7 @@ func (c *exposeComp) Main() scriptor {
 	}
 }
 
-func (e *exposeComp) watchFile(originalPath string, d data.SetModifier) {
+func (e *exposeComp) watchFile(originalPath string, d store.SetModifier) {
 	w := fswatch.NewFileWatcher(originalPath, 1)
 	w.Start()
 
@@ -197,15 +196,15 @@ func (e *exposeComp) watchFile(originalPath string, d data.SetModifier) {
 			sType := path.Base(path.Dir(resolvedPath))
 			key, _, _ := strings.Cut(path.Base(resolvedPath), "-")
 
-			if constants.AppName == sType {
-				sType = constants.TypeMain
+			if config.AppName == sType {
+				sType = config.TypeMain
 			}
 
 			err := d.ModifyType(key, sType)
 			if err != nil {
-				if errors.Is(err, data.ErrMainAlreadyExists) || errors.Is(err, data.ErrInvalidNoteType) {
+				if errors.Is(err, store.ErrMainAlreadyExists) || errors.Is(err, store.ErrInvalidNoteType) {
 					color.New(color.FgHiYellow).Fprintf(os.Stderr, "Error: %v, the file type cannot be updated but it's still being watched\n", err)
-				} else if errors.Is(err, data.ErrNoteNotFound) {
+				} else if errors.Is(err, store.ErrNoteNotFound) {
 					color.New(color.FgHiYellow).Fprintf(os.Stderr, "Error: %v, it means that is untrackable, out of sight\n", err)
 				} else {
 					panic(err)

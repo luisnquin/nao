@@ -1,3 +1,5 @@
 {
-    "rpc.enabled": true
+    "material-icon-theme.folders.associations": {
+        "store": "Json"
+    }
 }

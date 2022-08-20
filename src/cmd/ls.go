@@ -6,8 +6,8 @@ import (
 	"sort"
 
 	"github.com/jedib0t/go-pretty/table"
-	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 	"github.com/xeonx/timeago"
 )
@@ -41,7 +41,7 @@ func buildLs() lsComp {
 
 func (c *lsComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		box := data.New()
+		box := store.New()
 
 		if c.quiet {
 			for _, k := range box.ListAllKeys() {
@@ -65,7 +65,7 @@ func (c *lsComp) Main() scriptor {
 		}
 
 		if c.group != "" && !box.GroupExists(c.group) {
-			return data.ErrGroupNotFound
+			return store.ErrGroupNotFound
 		}
 
 		var (
@@ -82,7 +82,7 @@ func (c *lsComp) Main() scriptor {
 
 		sort.SliceStable(notes, func(i, j int) bool { return notes[i].LastUpdate.After(notes[j].LastUpdate) })
 
-		usingGroups := helper.SearchCriteriaInNoteView(notes, func(n data.NoteView) bool { return n.Group != "" })
+		usingGroups := helper.SearchCriteriaInNoteView(notes, func(n store.NoteView) bool { return n.Group != "" })
 
 		if !usingGroups {
 			for i, h := range header {

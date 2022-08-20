@@ -9,14 +9,14 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/luisnquin/nao/src/config"
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/store"
 )
 
 func New(port string, quiet, verbose bool) *Server {
 	s := &Server{
 		itWasMyFault: make(chan bool),
 		router:       echo.New(),
-		box:          data.New(),
+		box:          store.New(),
 		quiet:        quiet,
 		port:         port,
 	}
@@ -56,7 +56,7 @@ func (a *Server) watchAndRefreshData() {
 
 			default:
 				timesMod++
-				a.box.ReplaceBox(data.JustLoadBox())
+				a.box.ReplaceBox(store.JustLoadBox())
 
 				if !a.quiet {
 					color.New(color.FgHiBlue).Fprintf(os.Stdout, "\rData refreshed(x%d)", timesMod)

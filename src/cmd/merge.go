@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luisnquin/nao/src/constants"
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/config"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +37,7 @@ func buildMerge() mergeComp {
 func (m *mergeComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		var (
-			box     = data.New()
+			box     = store.New()
 			oldKeys = make([]string, 0)
 
 			mergedContent string
@@ -69,7 +69,7 @@ func (m *mergeComp) Main() scriptor {
 			}
 		}
 
-		key, err := box.New(mergedContent, constants.TypeMerged)
+		key, err := box.New(mergedContent, config.TypeMerged)
 		if err != nil {
 			return err
 		}

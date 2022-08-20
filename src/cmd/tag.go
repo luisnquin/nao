@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,7 @@ var tagCmd = &cobra.Command{
 			return fmt.Errorf(args[1] + " is not a valid tag")
 		}
 
-		box := data.New()
+		box := store.New()
 
 		key, _, err := box.SearchByKeyTagPattern(args[0])
 		if err != nil {

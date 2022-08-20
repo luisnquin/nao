@@ -9,12 +9,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luisnquin/nao/src/constants"
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/config"
+	"github.com/luisnquin/nao/src/store"
 )
 
-func SetsFromDir(path string) ([]data.Note, error) {
-	notes := make([]data.Note, 0)
+func SetsFromDir(path string) ([]store.Note, error) {
+	notes := make([]store.Note, 0)
 
 	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -23,9 +23,9 @@ func SetsFromDir(path string) ([]data.Note, error) {
 				return err
 			}
 
-			note := data.Note{
+			note := store.Note{
 				Content: string(content),
-				Type:    constants.TypeImported,
+				Type:    config.TypeImported,
 			}
 
 			fragments := strings.Split(info.Name(), ".")
@@ -38,7 +38,6 @@ func SetsFromDir(path string) ([]data.Note, error) {
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -46,8 +45,8 @@ func SetsFromDir(path string) ([]data.Note, error) {
 	return notes, nil
 }
 
-func NoteFromFile(filePath string) (data.Note, error) {
-	var note data.Note
+func NoteFromFile(filePath string) (store.Note, error) {
+	var note store.Note
 
 	content, err := os.ReadFile(filePath)
 	if err != nil && !errors.Is(err, io.EOF) {
@@ -59,7 +58,7 @@ func NoteFromFile(filePath string) (data.Note, error) {
 		note.Extension = fileFragments[1]
 	}
 
-	note.Type = constants.TypeImported
+	note.Type = config.TypeImported
 	note.Content = string(content)
 
 	return note, nil

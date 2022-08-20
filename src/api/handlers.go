@@ -5,14 +5,14 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/luisnquin/nao/src/constants"
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/config"
+	"github.com/luisnquin/nao/src/store"
 )
 
 func (a *Server) GetNotesHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		return c.JSON(http.StatusOK, StandardResponse{
-			Version: constants.Version,
+			Version: config.Version,
 			Method:  c.Request().Method,
 			Context: "notes",
 			Data:    a.box.List(),
@@ -24,7 +24,7 @@ func (a *Server) GetNoteHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		note, err := a.box.Get(c.Param("id"))
 		if err != nil {
-			if errors.Is(err, data.ErrNoteNotFound) {
+			if errors.Is(err, store.ErrNoteNotFound) {
 				return echo.ErrNotFound
 			}
 
@@ -32,7 +32,7 @@ func (a *Server) GetNoteHandler() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, StandardResponse{
-			Version: constants.Version,
+			Version: config.Version,
 			Method:  c.Request().Method,
 			Context: "notes",
 			Params: params{
@@ -45,7 +45,7 @@ func (a *Server) GetNoteHandler() echo.HandlerFunc {
 
 func (a *Server) NewNoteHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var request data.Note
+		var request store.Note
 
 		err := c.Bind(&request)
 		if err != nil {
@@ -60,7 +60,7 @@ func (a *Server) NewNoteHandler() echo.HandlerFunc {
 		a.itWasMyFault <- true
 
 		return c.JSON(http.StatusCreated, StandardResponse{
-			Version: constants.Version,
+			Version: config.Version,
 			Method:  c.Request().Method,
 			Context: "notes",
 			Data: echo.Map{
@@ -81,7 +81,7 @@ func (a *Server) ModifyNoteContentHandler() echo.HandlerFunc {
 
 		err = a.box.ModifyContent(c.Param("id"), request.Content)
 		if err != nil {
-			if errors.Is(err, data.ErrNoteNotFound) {
+			if errors.Is(err, store.ErrNoteNotFound) {
 				return echo.ErrNotFound
 			}
 
@@ -96,11 +96,11 @@ func (a *Server) ModifyNoteContentHandler() echo.HandlerFunc {
 
 func (a *Server) ModifyNoteHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var request data.Note
+		var request store.Note
 
 		err := a.box.Replace(c.Param("id"), request)
 		if err != nil {
-			if errors.Is(err, data.ErrNoteNotFound) {
+			if errors.Is(err, store.ErrNoteNotFound) {
 				return echo.ErrNotFound
 			}
 
@@ -117,7 +117,7 @@ func (a *Server) DeleteNoteHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		err := a.box.Delete(c.Param("id"))
 		if err != nil {
-			if errors.Is(err, data.ErrNoteNotFound) {
+			if errors.Is(err, store.ErrNoteNotFound) {
 				return echo.ErrNotFound
 			}
 

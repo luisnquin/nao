@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/store"
 )
 
 type StandardResponse struct {
@@ -11,12 +11,12 @@ type StandardResponse struct {
 	Method  string `json:"method"`
 	Params  params `json:"params,omitempty"`
 	Error   any    `json:"error,omitempty"`
-	Data    any    `json:"data"`
+	Data    any    `json:"store"`
 }
 
 type Server struct {
 	router       *echo.Echo
-	box          *data.Box
+	box          *store.Box
 	itWasMyFault chan bool
 	port         string
 	quiet        bool

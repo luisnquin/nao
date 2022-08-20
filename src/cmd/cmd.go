@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/luisnquin/nao/src/config"
-	"github.com/luisnquin/nao/src/constants"
 	"github.com/spf13/cobra"
 )
 
@@ -10,8 +9,8 @@ import (
 type scriptor func(cmd *cobra.Command, args []string) error
 
 var root = &cobra.Command{
-	Use:   constants.AppName,
-	Short: constants.AppName + " is a tool to manage your notes",
+	Use:   config.AppName,
+	Short: config.AppName + " is a tool to manage your notes",
 	Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {

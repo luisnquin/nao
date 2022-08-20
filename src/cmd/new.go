@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/luisnquin/nao/src/constants"
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/config"
 	"github.com/luisnquin/nao/src/helper"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ func buildNew() newComp {
 		cmd: &cobra.Command{
 			Use:           "new",
 			Short:         "Creates a new nao file",
-			Args:          cobra.NoArgs,
+			Args:          cobra.MaximumNArgs(1),
 			SilenceErrors: true,
 			SilenceUsage:  true,
 		},
@@ -48,10 +48,14 @@ func buildNew() newComp {
 
 func (n *newComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		box := data.New()
+		box := store.New()
 
 		if n.main && box.MainAlreadyExists() {
-			return data.ErrMainAlreadyExists
+			return store.ErrMainAlreadyExists
+		}
+
+		if args != nil && n.tag == "" {
+			n.tag = args[0]
 		}
 
 		err := box.TagIsValid(n.tag)
@@ -60,7 +64,7 @@ func (n *newComp) Main() scriptor {
 		}
 
 		if n.group != "" && !box.GroupExists(n.group) {
-			return data.ErrGroupNotFound
+			return store.ErrGroupNotFound
 		}
 
 		fPath, err := helper.NewCached()
@@ -76,7 +80,7 @@ func (n *newComp) Main() scriptor {
 				return err
 			}
 
-			err = ioutil.WriteFile(fPath, []byte(note.Content), 0644)
+			err = ioutil.WriteFile(fPath, []byte(note.Content), 0o644)
 			if err != nil {
 				return err
 			}
@@ -86,7 +90,6 @@ func (n *newComp) Main() scriptor {
 			Editor: n.editor,
 			Path:   fPath,
 		})
-
 		if err != nil {
 			return err
 		}
@@ -105,12 +108,12 @@ func (n *newComp) Main() scriptor {
 			return fmt.Errorf("Empty content, will not be saved")
 		}
 
-		contentType := constants.TypeDefault
+		contentType := config.TypeDefault
 		if n.main {
-			contentType = constants.TypeMain
+			contentType = config.TypeMain
 		}
 
-		k, err := box.NewFrom(data.Note{
+		k, err := box.NewFrom(store.Note{
 			Content:   string(content),
 			Extension: n.extension,
 			Type:      contentType,

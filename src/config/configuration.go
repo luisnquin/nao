@@ -7,15 +7,26 @@ import (
 	"os"
 
 	"github.com/ProtonMail/go-appdir"
-	"github.com/luisnquin/nao/src/constants"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+)
+
+const (
+	AppName string = "nao"
+	Version string = "v1.2.0"
+)
+
+const (
+	TypeImported string = "imported"
+	TypeDefault  string = "default"
+	TypeMerged   string = "merged"
+	TypeMain     string = "main"
 )
 
 var App AppConfig
 
 func init() {
-	dirs := appdir.New(constants.AppName)
+	dirs := appdir.New(AppName)
 	App.Paths.ConfigDir = dirs.UserConfig()
 	App.Paths.CacheDir = dirs.UserCache()
 	App.Paths.DataDir = dirs.UserData()

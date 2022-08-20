@@ -4,15 +4,15 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/luisnquin/nao/src/constants"
+	"github.com/luisnquin/nao/src/config"
 	"github.com/spf13/cobra"
 )
 
 var version = &cobra.Command{
 	Use:   "version",
-	Short: "Print the " + constants.AppName + " version number",
+	Short: "Print the " + config.AppName + " version number",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		color.New(color.FgHiMagenta).Fprintln(os.Stdout, constants.AppName+" "+constants.Version)
+		color.New(color.FgHiMagenta).Fprintln(os.Stdout, config.AppName+" "+config.Version)
 	},
 }

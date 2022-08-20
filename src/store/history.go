@@ -1,4 +1,4 @@
-package data
+package store
 
 func (d *Box) GetHistoryOf(key string) ([]Change, error) {
 	for k, v := range d.box.NaoSet {

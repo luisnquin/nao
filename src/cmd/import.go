@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +36,7 @@ func buildImport() importComp {
 
 func (c *importComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		all := make([]data.Note, 0)
+		all := make([]store.Note, 0)
 
 		for _, path := range args {
 			info, err := os.Stat(path)
@@ -63,11 +63,11 @@ func (c *importComp) Main() scriptor {
 			all = append(all, note)
 		}
 
-		box := data.New()
+		box := store.New()
 
 		if c.group != "" {
 			if !box.GroupExists(c.group) {
-				return data.ErrGroupNotFound
+				return store.ErrGroupNotFound
 			}
 
 			for i := range all {

@@ -9,9 +9,7 @@ import (
 	"github.com/luisnquin/nao/src/config"
 )
 
-var (
-	ErrPathRequired error = errors.New("path required")
-)
+var ErrPathRequired error = errors.New("path required")
 
 type EditorOptions struct {
 	Editor string

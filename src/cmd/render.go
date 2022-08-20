@@ -5,7 +5,7 @@ import (
 	"os"
 
 	markdown "github.com/MichaelMure/go-term-markdown"
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +34,7 @@ func buildRender() renderComp {
 
 func (r *renderComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		_, note, err := data.New().SearchByKeyTagPattern(args[0])
+		_, note, err := store.New().SearchByKeyTagPattern(args[0])
 		if err != nil {
 			return err
 		}

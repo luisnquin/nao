@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/jedib0t/go-pretty/table"
-	"github.com/luisnquin/nao/src/data"
 	"github.com/luisnquin/nao/src/helper"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +38,7 @@ func buildGroup() groupComp {
 
 func (g *groupComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		box := data.New()
+		box := store.New()
 
 		switch len(args) {
 		case 1:

@@ -57,7 +57,6 @@ func (c *configComp) editConf() error {
 		Path:   config.App.Paths.ConfigFile,
 		Editor: c.editor,
 	})
-
 	if err != nil {
 		return err
 	}

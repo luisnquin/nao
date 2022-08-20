@@ -1,4 +1,4 @@
-package data
+package store
 
 func (d *Box) GetGroups() []string {
 	return d.box.Groups

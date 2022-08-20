@@ -24,3 +24,6 @@ install:
 
 install-remote:
 	@go install github.com/luisnquin/nao@$(last_tag_released)
+
+style: 
+	@gofumpt -w ./

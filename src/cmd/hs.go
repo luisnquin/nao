@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 	"github.com/xeonx/timeago"
 )
@@ -16,7 +16,6 @@ type hsComp struct {
 	clean    bool
 	cleanAll bool
 }
-
 
 func buildHs() hsComp {
 	c := hsComp{
@@ -40,7 +39,7 @@ func buildHs() hsComp {
 
 func (c *hsComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		box := data.New()
+		box := store.New()
 
 		if c.cleanAll {
 			return box.CleanHistoryOfAll()

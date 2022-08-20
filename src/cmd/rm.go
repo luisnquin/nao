@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luisnquin/nao/src/data"
+	"github.com/luisnquin/nao/src/store"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +22,7 @@ func buildRm() rmComp {
 			Short: "Removes a file",
 			Args:  cobra.MinimumNArgs(1),
 			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return data.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
+				return store.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
 			},
 			SilenceUsage:  true,
 			SilenceErrors: true,
@@ -40,7 +40,7 @@ func buildRm() rmComp {
 
 func (r *rmComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		box := data.New()
+		box := store.New()
 
 		for _, arg := range args {
 			key, _, err := box.SearchByKeyTagPattern(arg)

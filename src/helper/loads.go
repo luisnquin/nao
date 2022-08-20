@@ -10,5 +10,5 @@ func LoadContentInCache(key, content string) (string, error) {
 		return "", err
 	}
 
-	return path, ioutil.WriteFile(path, []byte(content), 0644)
+	return path, ioutil.WriteFile(path, []byte(content), 0o644)
 }

@@ -1,4 +1,4 @@
-package data
+package store
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/cip8/autoname"
-	"github.com/luisnquin/nao/src/constants"
+	"github.com/luisnquin/nao/src/config"
 	"github.com/luisnquin/nao/src/utils"
 )
 
@@ -37,7 +37,7 @@ func (d *Box) Get(key string) (Note, error) {
 func (d *Box) New(content, contentType string) (string, error) {
 	key := d.newKey()
 
-	if contentType == constants.TypeMain && d.MainAlreadyExists() {
+	if contentType == config.TypeMain && d.MainAlreadyExists() {
 		return "", ErrMainAlreadyExists
 	}
 
@@ -61,7 +61,7 @@ func (d *Box) NewWithTag(content, contentType, tag string) (string, error) {
 		return "", err
 	}
 
-	if contentType == constants.TypeMain && d.MainAlreadyExists() {
+	if contentType == config.TypeMain && d.MainAlreadyExists() {
 		return "", ErrMainAlreadyExists
 	}
 
@@ -82,7 +82,7 @@ func (d *Box) GetLastKey() string {
 
 func (d *Box) GetMainKey() (string, error) {
 	for k, note := range d.box.NaoSet {
-		if note.Type == constants.TypeMain {
+		if note.Type == config.TypeMain {
 			return k, nil
 		}
 	}
@@ -106,7 +106,7 @@ func (d *Box) NewFrom(note Note) (string, error) {
 	note.LastUpdate = time.Now()
 	note.Version = 1
 
-	if note.Type == constants.TypeMain && d.MainAlreadyExists() {
+	if note.Type == config.TypeMain && d.MainAlreadyExists() {
 		return "", ErrMainAlreadyExists
 	}
 
@@ -167,13 +167,13 @@ func (d *Box) ModifyContent(key string, content string) error {
 
 func (d *Box) ModifyType(key string, sType string) error {
 	validTypes := []string{
-		constants.TypeDefault,
-		constants.TypeImported,
-		constants.TypeMain,
-		constants.TypeMerged,
+		config.TypeDefault,
+		config.TypeImported,
+		config.TypeMain,
+		config.TypeMerged,
 	}
 
-	if sType == constants.TypeMain && d.MainAlreadyExists() {
+	if sType == config.TypeMain && d.MainAlreadyExists() {
 		return ErrMainAlreadyExists
 	}
 
@@ -360,7 +360,7 @@ func (d *Box) TagAlreadyExists(tag string) bool {
 
 func (d *Box) MainAlreadyExists() bool {
 	for _, s := range d.box.NaoSet {
-		if s.Type == constants.TypeMain {
+		if s.Type == config.TypeMain {
 			return true
 		}
 	}
