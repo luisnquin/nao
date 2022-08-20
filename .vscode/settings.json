@@ -1,5 +1,8 @@
 {
     "material-icon-theme.folders.associations": {
-        "store": "Json"
+        "helper": "Controller",
+        "store": "Json",
+        "api": "Server",
+        "cmd": "Core",
     }
 }
