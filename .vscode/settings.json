@@ -1,8 +1,10 @@
 {
     "material-icon-theme.folders.associations": {
         "helper": "Controller",
+        "internal": "Src",
         "store": "Json",
         "api": "Server",
         "cmd": "Core",
+        "nao": "App",
     }
 }
