@@ -1,5 +1,5 @@
 package api
-
+/*
 import (
 	"errors"
 	"net/http"
@@ -129,3 +129,4 @@ func (a *Server) DeleteNoteHandler() echo.HandlerFunc {
 		return c.NoContent(http.StatusOK)
 	}
 }
+*/

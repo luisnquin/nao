@@ -4,51 +4,52 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/luisnquin/nao/internal/config"
+	"github.com/luisnquin/nao/internal/data"
 	"github.com/luisnquin/nao/internal/store"
+	"github.com/luisnquin/nao/internal/store/keyutils"
 	"github.com/spf13/cobra"
 )
 
-type rmComp struct {
-	cmd *cobra.Command
-	// before string
-	// after  string
-	// except string
+type RmComp struct {
+	config *config.AppConfig
+	cmd    *cobra.Command
+	data   *data.Buffer
 }
 
-func buildRm() rmComp {
-	c := rmComp{
+func BuildRm(config *config.AppConfig, data *data.Buffer) RmComp {
+	c := RmComp{
 		cmd: &cobra.Command{
 			Use:   "rm [<id> | <tag>]",
 			Short: "Removes a file",
 			Args:  cobra.MinimumNArgs(1),
 			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return store.New().ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
+				return store.NewNotesRepository(data).ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
 			},
 			SilenceUsage:  true,
 			SilenceErrors: true,
 		},
+		config: config,
+		data:   data,
 	}
 
 	c.cmd.RunE = c.Main()
 
-	// c.cmd.Flags().StringVarP(&c.before, "before", "b", "", "removes all the files before a determinated date or time")
-	// c.cmd.Flags().StringVarP(&c.after, "after", "a", "", "removes all the files after a determinated date or time")
-	// c.cmd.Flags().StringVarP(&c.except, "except", "e", "", "")
-
 	return c
 }
 
-func (r *rmComp) Main() scriptor {
+func (r RmComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		box := store.New()
+		keyutil := keyutils.NewDispatcher(r.data)
+		repo := store.NewNotesRepository(r.data)
 
 		for _, arg := range args {
-			key, _, err := box.SearchByKeyTagPattern(arg)
+			key, err := keyutil.Like(arg)
 			if err != nil {
 				return err
 			}
 
-			err = box.Delete(key)
+			err = repo.Delete(key)
 			if err != nil {
 				return err
 			}

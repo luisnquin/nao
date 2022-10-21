@@ -2,7 +2,6 @@ package utils
 
 import (
 	"os"
-	"strings"
 )
 
 func Contains[T int | string](slice []T, target T) bool {
@@ -13,10 +12,6 @@ func Contains[T int | string](slice []T, target T) bool {
 	}
 
 	return false
-}
-
-func PrettyJoin(v []string) string {
-	return strings.Join(v[:len(v)-1], ", ") + " and " + v[len(v)-1]
 }
 
 func IsDirectory(path string) (bool, error) {

@@ -1,5 +1,5 @@
 package cmd
-
+/*
 import (
 	"os"
 
@@ -48,3 +48,4 @@ func (s *serverComp) Main() scriptor {
 		return api.New(s.port, s.quiet, s.verbose).Start()
 	}
 }
+*/

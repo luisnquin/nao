@@ -5,101 +5,100 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/cip8/autoname"
 	"github.com/luisnquin/nao/internal/config"
-	"github.com/luisnquin/nao/internal/helper"
+	"github.com/luisnquin/nao/internal/data"
 	"github.com/luisnquin/nao/internal/store"
+	"github.com/luisnquin/nao/internal/store/keyutils"
 	"github.com/spf13/cobra"
 )
 
 type newComp struct {
-	cmd       *cobra.Command
-	editor    string
-	from      string
-	group     string
-	tag       string
-	extension string
-	title     string
-	main      bool
+	config *config.AppConfig
+	cmd    *cobra.Command
+	data   *data.Buffer
+	editor string
+	from   string
+	tag    string
+	title  string
 }
 
-func buildNew() newComp {
+func BuildNew(config *config.AppConfig, data *data.Buffer) newComp {
 	c := newComp{
 		cmd: &cobra.Command{
 			Use:           "new",
 			Short:         "Creates a new nao file",
-			Args:          cobra.MaximumNArgs(1),
+			Args:          cobra.MinimumNArgs(1), // TODO: cobra.Max and with 'from'
 			SilenceErrors: true,
 			SilenceUsage:  true,
 		},
+		config: config,
+		data:   data,
 	}
 
 	c.cmd.RunE = c.Main()
 
-	c.cmd.Flags().BoolVarP(&c.main, "main", "m", false, "creates a new main file, throws an error in case that one already exists")
 	c.cmd.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
 	c.cmd.Flags().StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
-	c.cmd.Flags().StringVarP(&c.extension, "extension", "e", "", "assigns a extension to the file")
 	c.cmd.Flags().StringVarP(&c.tag, "tag", "t", "", "assigns a tag to the new file")
 	c.cmd.Flags().StringVar(&c.title, "title", "", "assigns a title to the file")
-	c.cmd.Flags().StringVarP(&c.group, "group", "g", "", "assigns a group")
 
 	return c
 }
 
+func (c *newComp) getEditorName() string {
+	if c.editor != "" {
+		return c.editor
+	}
+
+	if c.config.Editor.Name != "" {
+		return c.config.Editor.Name
+	}
+
+	return "nano"
+}
+
 func (n *newComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		box := store.New()
-
-		if n.main && box.MainAlreadyExists() {
-			return store.ErrMainAlreadyExists
-		}
+		notesRepo := store.NewNotesRepository(n.data)
+		keyutil := keyutils.NewDispatcher(n.data)
 
 		if args != nil && n.tag == "" {
 			n.tag = args[0]
 		}
 
-		err := box.TagIsValid(n.tag)
+		// TODO: from
+
+		path, err := NewFileCached(n.config, "")
 		if err != nil {
 			return err
 		}
 
-		if n.group != "" && !box.GroupExists(n.group) {
-			return store.ErrGroupNotFound
-		}
-
-		fPath, err := helper.NewCached()
-		if err != nil {
-			return err
-		}
-
-		defer os.Remove(fPath)
+		defer os.Remove(path)
 
 		if n.from != "" {
-			_, note, err := box.SearchByKeyTagPattern(n.from)
+			key, err := keyutil.Like(n.from)
 			if err != nil {
 				return err
 			}
 
-			err = ioutil.WriteFile(fPath, []byte(note.Content), 0o644)
+			note, err := notesRepo.Get(key)
+			if err != nil {
+				return err
+			}
+
+			err = ioutil.WriteFile(path, []byte(note.Content), 0o644)
 			if err != nil {
 				return err
 			}
 		}
 
-		run, err := helper.PrepareToRun(cmd.Context(), helper.EditorOptions{
-			Editor: n.editor,
-			Path:   fPath,
-		})
+		err = RunEditor(cmd.Context(), n.getEditorName(), path)
 		if err != nil {
 			return err
 		}
 
-		err = run()
-		if err != nil {
-			return err
-		}
-
-		content, err := ioutil.ReadFile(fPath)
+		content, err := ioutil.ReadFile(path)
 		if err != nil {
 			return err
 		}
@@ -108,24 +107,16 @@ func (n *newComp) Main() scriptor {
 			return fmt.Errorf("Empty content, will not be saved")
 		}
 
-		contentType := config.TypeDefault
-		if n.main {
-			contentType = config.TypeMain
+		if n.tag == "" {
+			n.tag = autoname.Generate("-")
 		}
 
-		k, err := box.NewFrom(store.Note{
-			Content:   string(content),
-			Extension: n.extension,
-			Type:      contentType,
-			Group:     n.group,
-			Title:     n.title,
-			Tag:       n.tag,
-		})
+		key, err := notesRepo.New(string(content), n.tag)
 		if err != nil {
 			return err
 		}
 
-		fmt.Fprintln(os.Stdout, k[:10])
+		fmt.Fprintln(os.Stdout, key[:10])
 
 		return nil
 	}

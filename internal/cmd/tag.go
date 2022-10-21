@@ -3,29 +3,54 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/luisnquin/nao/internal/helper"
+	"github.com/luisnquin/nao/internal/config"
+	"github.com/luisnquin/nao/internal/data"
 	"github.com/luisnquin/nao/internal/store"
+	"github.com/luisnquin/nao/internal/store/keyutils"
+	"github.com/luisnquin/nao/internal/store/tagutils"
 	"github.com/spf13/cobra"
 )
 
-var tagCmd = &cobra.Command{
-	Use:           "tag <old> <new>",
-	Short:         "Rename the tag of any file",
-	Args:          cobra.ExactArgs(2),
-	SilenceUsage:  true,
-	SilenceErrors: true,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if ok := helper.EnsureTagIsValid(args[1]); !ok {
-			return fmt.Errorf(args[1] + " is not a valid tag")
+type buildComp struct {
+	config *config.AppConfig
+	cmd    *cobra.Command
+	data   *data.Buffer
+}
+
+func BuildTag(config *config.AppConfig, data *data.Buffer) buildComp {
+	c := buildComp{
+		cmd: &cobra.Command{
+			Use:           "tag <old> <new>",
+			Short:         "Rename the tag of any file",
+			Args:          cobra.ExactArgs(2),
+			SilenceUsage:  true,
+			SilenceErrors: true,
+		},
+		config: config,
+		data:   data,
+	}
+
+	c.cmd.RunE = c.Main()
+
+	return c
+}
+
+func (c *buildComp) Main() scriptor {
+	return func(cmd *cobra.Command, args []string) error {
+		notesRepo := store.NewNotesRepository(c.data)
+		keyutil := keyutils.NewDispatcher(c.data)
+		tagutil := tagutils.New(c.data)
+
+		err := tagutil.IsValidAsNew(args[1])
+		if err != nil {
+			return fmt.Errorf("tag %s is not valid: %w", args[1], err)
 		}
 
-		box := store.New()
-
-		key, _, err := box.SearchByKeyTagPattern(args[0])
+		key, err := keyutil.Like(args[0])
 		if err != nil {
 			return err
 		}
 
-		return box.ModifyTag(key, args[1])
-	},
+		return notesRepo.ModifyTag(key, args[1])
+	}
 }

@@ -1,5 +1,5 @@
 package api
-
+/*
 import (
 	"net/http"
 	"os"
@@ -79,3 +79,4 @@ func (a *Server) mountHandlers() {
 	notes.DELETE("/:id", a.DeleteNoteHandler())
 	notes.PATCH("/:id", a.ModifyNoteContentHandler())
 }
+*/

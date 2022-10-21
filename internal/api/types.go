@@ -1,5 +1,5 @@
 package api
-
+/*
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/luisnquin/nao/internal/store"
@@ -27,3 +27,4 @@ type contentDTO struct {
 }
 
 type params map[string]string
+*/

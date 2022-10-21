@@ -1,26 +1,31 @@
 package utils
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
-func BytesToStorageUnits(n int64) string {
-	r := struct {
-		parsedSize  float64
-		storageUnit string
-	}{}
+// Returns an human-readable representation of the size of the passed JSON value.
+func GetHumanReadableSize(v any) string {
+	return SizeToStorageUnits(int64(GetSize(v)))
+}
 
+// Returns the size of the passed JSON value
+func GetSize(v any) int {
+	content, _ := json.Marshal(v)
+
+	return len(content)
+}
+
+func SizeToStorageUnits(n int64) string {
 	switch {
 	case n > 1000000:
-		r.parsedSize = float64(n) / (1 << 20)
-		r.storageUnit = "MB"
+		return fmt.Sprintf("%.2f%s", float64(n)/(1<<20), "MB")
 
 	case n > 1_000_000_000:
-		r.parsedSize = float64(n) / (1 << 30)
-		r.storageUnit = "GB"
+		return fmt.Sprintf("%.2f%s", float64(n)/(1<<30), "GB")
 
 	default:
-		r.parsedSize = float64(n) / (1 << 10)
-		r.storageUnit = "KB"
+		return fmt.Sprintf("%.2f%s", float64(n)/(1<<10), "KB")
 	}
-
-	return fmt.Sprintf("%.2f%s", r.parsedSize, r.storageUnit)
 }

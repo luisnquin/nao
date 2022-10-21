@@ -6,20 +6,24 @@ import (
 	"sort"
 
 	"github.com/jedib0t/go-pretty/table"
-	"github.com/luisnquin/nao/internal/helper"
+	"github.com/jedib0t/go-pretty/text"
+	"github.com/luisnquin/nao/internal/config"
+	"github.com/luisnquin/nao/internal/data"
 	"github.com/luisnquin/nao/internal/store"
 	"github.com/spf13/cobra"
 	"github.com/xeonx/timeago"
 )
 
 type lsComp struct {
-	cmd   *cobra.Command
-	group string
-	quiet bool
-	long  bool
+	config *config.AppConfig
+	cmd    *cobra.Command
+	data   *data.Buffer
+	group  string
+	quiet  bool
+	long   bool
 }
 
-func buildLs() lsComp {
+func BuildLs(config *config.AppConfig, data *data.Buffer) lsComp {
 	c := lsComp{
 		cmd: &cobra.Command{
 			Use:           "ls",
@@ -28,93 +32,83 @@ func buildLs() lsComp {
 			SilenceUsage:  true,
 			SilenceErrors: true,
 		},
+		config: config,
+		data:   data,
 	}
 
 	c.cmd.RunE = c.Main()
 
 	c.cmd.Flags().BoolVarP(&c.long, "long", "l", false, "display the content as long as possible")
 	c.cmd.Flags().BoolVarP(&c.quiet, "quiet", "q", false, "only display file ID's")
-	c.cmd.Flags().StringVarP(&c.group, "group", "g", "", "filter by group")
 
 	return c
 }
 
 func (c *lsComp) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		box := store.New()
+		notesRepo := store.NewNotesRepository(c.data)
 
 		if c.quiet {
-			for _, k := range box.ListAllKeys() {
-				groupName, err := box.GroupOf(k)
-				if err != nil {
-					return err
-				}
-
-				if groupName != c.group {
-					continue
-				}
-
+			for key := range notesRepo.IterKey() {
 				if c.long {
-					fmt.Fprintln(os.Stdout, k)
+					fmt.Fprintln(os.Stdout, key)
 				} else {
-					fmt.Fprintln(os.Stdout, k[:10])
+					fmt.Fprintln(os.Stdout, key[:10])
 				}
 			}
 
 			return nil
 		}
 
-		if c.group != "" && !box.GroupExists(c.group) {
-			return store.ErrGroupNotFound
-		}
-
-		var (
-			rows   = make([]table.Row, 0)
-			notes  = box.List()
-			header table.Row
-		)
+		var header table.Row
 
 		if c.long {
-			header = table.Row{"ID", "TITLE", "TYPE", "TAG", "GROUP", "LAST UPDATE", "SIZE", "VERSION"}
+			header = table.Row{"ID", "TITLE", "TAG", "LAST UPDATE", "SIZE", "VERSION"}
 		} else {
-			header = table.Row{"ID", "TAG", "GROUP", "LAST UPDATE", "SIZE", "VERSION"}
+			header = table.Row{"ID", "TAG", "LAST UPDATE", "SIZE", "VERSION"}
 		}
 
-		sort.SliceStable(notes, func(i, j int) bool { return notes[i].LastUpdate.After(notes[j].LastUpdate) })
+		notes := notesRepo.List()
 
-		usingGroups := helper.SearchCriteriaInNoteView(notes, func(n store.NoteView) bool { return n.Group != "" })
+		sort.SliceStable(notes, func(i, j int) bool {
+			return notes[i].LastUpdate.After(notes[j].LastUpdate)
+		})
 
-		if !usingGroups {
-			for i, h := range header {
-				if h == "GROUP" {
-					header = append(header[:i], header[i+1:]...)
-				}
-			}
-		}
+		rows := make([]table.Row, 0, len(notes))
 
-		for _, n := range notes {
-			if c.group != "" && n.Group != c.group {
+		for _, note := range notes {
+			if c.group != "" && note.Group != c.group {
 				continue
 			}
 
-			var row table.Row
-
-			if usingGroups {
-				row = table.Row{n.Tag, n.Group, timeago.English.Format(n.LastUpdate), n.Size, n.Version}
-			} else {
-				row = table.Row{n.Tag, timeago.English.Format(n.LastUpdate), n.Size, n.Version}
-			}
+			row := table.Row{note.Tag, timeago.English.Format(note.LastUpdate), note.HumanReadableSize(), note.Version}
 
 			if c.long {
-				row = append(table.Row{n.Key, n.Title, n.Type}, row...)
+				row = append(table.Row{note.Key, note.Title}, row...)
 			} else {
-				row = append(table.Row{n.Key[:10]}, row...)
+				row = append(table.Row{note.Key[:10]}, row...)
 			}
 
 			rows = append(rows, row)
 		}
 
-		helper.RenderTable(header, rows)
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(header)
+		t.AppendRows(rows)
+
+		t.SetStyle(table.Style{
+			Name: "cat",
+			Box:  table.StyleBoxDefault,
+			Format: table.FormatOptions{
+				Footer: text.FormatUpper,
+				Header: text.FormatTitle,
+				Row:    text.FormatDefault,
+			},
+			Options: table.OptionsNoBordersAndSeparators,
+		})
+
+		t.Render()
 
 		return nil
 	}
