@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/luisnquin/nao/internal/config"
-	"github.com/luisnquin/nao/internal/data"
+	"github.com/luisnquin/nao/v2/internal/config"
+	"github.com/luisnquin/nao/v2/internal/data"
 	"github.com/spf13/cobra"
 )
 

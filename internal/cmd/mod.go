@@ -10,12 +10,12 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/luisnquin/nao/internal/config"
-	"github.com/luisnquin/nao/internal/data"
-	"github.com/luisnquin/nao/internal/models"
-	"github.com/luisnquin/nao/internal/store"
-	"github.com/luisnquin/nao/internal/store/keyutils"
-	"github.com/luisnquin/nao/internal/store/tagutils"
+	"github.com/luisnquin/nao/v2/internal/config"
+	"github.com/luisnquin/nao/v2/internal/data"
+	"github.com/luisnquin/nao/v2/internal/models"
+	"github.com/luisnquin/nao/v2/internal/store"
+	"github.com/luisnquin/nao/v2/internal/store/keyutils"
+	"github.com/luisnquin/nao/v2/internal/store/tagutils"
 	"github.com/spf13/cobra"
 )
 

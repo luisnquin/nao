@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/luisnquin/nao/internal/config"
-	"github.com/luisnquin/nao/internal/models"
+	"github.com/luisnquin/nao/v2/internal/config"
+	"github.com/luisnquin/nao/v2/internal/models"
 )
 
 type Buffer struct {

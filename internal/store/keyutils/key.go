@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/luisnquin/nao/internal/data"
+	"github.com/luisnquin/nao/v2/internal/data"
 )
 
 type Key struct {

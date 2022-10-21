@@ -7,9 +7,9 @@ import (
 
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
-	"github.com/luisnquin/nao/internal/config"
-	"github.com/luisnquin/nao/internal/data"
-	"github.com/luisnquin/nao/internal/store"
+	"github.com/luisnquin/nao/v2/internal/config"
+	"github.com/luisnquin/nao/v2/internal/data"
+	"github.com/luisnquin/nao/v2/internal/store"
 	"github.com/spf13/cobra"
 	"github.com/xeonx/timeago"
 )

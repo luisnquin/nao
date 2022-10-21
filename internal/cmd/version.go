@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/luisnquin/nao/internal/config"
+	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/spf13/cobra"
 )
 

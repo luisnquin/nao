@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/cip8/autoname"
-	"github.com/luisnquin/nao/internal/data"
-	"github.com/luisnquin/nao/internal/models"
-	"github.com/luisnquin/nao/internal/store/keyutils"
-	"github.com/luisnquin/nao/internal/store/tagutils"
+	"github.com/luisnquin/nao/v2/internal/data"
+	"github.com/luisnquin/nao/v2/internal/models"
+	"github.com/luisnquin/nao/v2/internal/store/keyutils"
+	"github.com/luisnquin/nao/v2/internal/store/tagutils"
 )
 
 var (
