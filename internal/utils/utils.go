@@ -1,10 +1,8 @@
 package utils
 
-import (
-	"os"
-)
+import "os"
 
-func Contains[T int | string](slice []T, target T) bool {
+func Contains[T comparable](slice []T, target T) bool {
 	for _, el := range slice {
 		if el == target {
 			return true

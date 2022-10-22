@@ -11,15 +11,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type buildComp struct {
+type TagCmd struct {
+	*cobra.Command
 	config *config.AppConfig
-	cmd    *cobra.Command
 	data   *data.Buffer
 }
 
-func BuildTag(config *config.AppConfig, data *data.Buffer) buildComp {
-	c := buildComp{
-		cmd: &cobra.Command{
+func BuildTag(config *config.AppConfig, data *data.Buffer) TagCmd {
+	c := TagCmd{
+		Command: &cobra.Command{
 			Use:           "tag <old> <new>",
 			Short:         "Rename the tag of any file",
 			Args:          cobra.ExactArgs(2),
@@ -30,12 +30,12 @@ func BuildTag(config *config.AppConfig, data *data.Buffer) buildComp {
 		data:   data,
 	}
 
-	c.cmd.RunE = c.Main()
+	c.RunE = c.Main()
 
 	return c
 }
 
-func (c *buildComp) Main() scriptor {
+func (c *TagCmd) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
 		keyutil := keyutils.NewDispatcher(c.data)

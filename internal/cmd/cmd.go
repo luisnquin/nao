@@ -34,11 +34,13 @@ func init() {
 	}
 
 	root.AddCommand(
-		// buildServer().cmd,
-		BuildMod(config, data).cmd,
-		BuildNew(config, data).cmd,
-		BuildTag(config, data).cmd,
-		BuildLs(config, data).cmd,
-		BuildRm(config, data).cmd,
-		version)
+		BuildMod(config, data).Command,
+		BuildNew(config, data).Command,
+		BuildTag(config, data).Command,
+		BuildLs(config, data).Command,
+		BuildRm(config, data).Command,
+		BuildVersion().Command,
+	)
 }
+
+// buildServer().cmd,

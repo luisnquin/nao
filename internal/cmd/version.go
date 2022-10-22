@@ -8,11 +8,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = &cobra.Command{
-	Use:   "version",
-	Short: "Print the " + config.AppName + " version number",
-	Args:  cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
-		color.New(color.FgHiMagenta).Fprintln(os.Stdout, config.AppName+" "+config.Version)
-	},
+type VersionCmd struct {
+	*cobra.Command
+}
+
+func BuildVersion() VersionCmd {
+	return VersionCmd{
+		Command: &cobra.Command{
+			Use:   "version",
+			Short: "Print the " + config.AppName + " version number",
+			Args:  cobra.NoArgs,
+			Run: func(cmd *cobra.Command, args []string) {
+				color.New(color.FgHiMagenta).Fprintln(os.Stdout, config.AppName+" "+config.Version)
+			},
+		},
+	}
 }

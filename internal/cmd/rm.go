@@ -11,15 +11,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type RmComp struct {
+type RmCmd struct {
+	*cobra.Command
 	config *config.AppConfig
-	cmd    *cobra.Command
 	data   *data.Buffer
 }
 
-func BuildRm(config *config.AppConfig, data *data.Buffer) RmComp {
-	c := RmComp{
-		cmd: &cobra.Command{
+func BuildRm(config *config.AppConfig, data *data.Buffer) RmCmd {
+	c := RmCmd{
+		Command: &cobra.Command{
 			Use:   "rm [<id> | <tag>]",
 			Short: "Removes a file",
 			Args:  cobra.MinimumNArgs(1),
@@ -33,12 +33,12 @@ func BuildRm(config *config.AppConfig, data *data.Buffer) RmComp {
 		data:   data,
 	}
 
-	c.cmd.RunE = c.Main()
+	c.RunE = c.Main()
 
 	return c
 }
 
-func (r RmComp) Main() scriptor {
+func (r RmCmd) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		keyutil := keyutils.NewDispatcher(r.data)
 		repo := store.NewNotesRepository(r.data)

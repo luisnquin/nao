@@ -14,18 +14,17 @@ import (
 	"github.com/xeonx/timeago"
 )
 
-type lsComp struct {
+type LsCmd struct {
+	*cobra.Command
 	config *config.AppConfig
-	cmd    *cobra.Command
 	data   *data.Buffer
-	group  string
 	quiet  bool
 	long   bool
 }
 
-func BuildLs(config *config.AppConfig, data *data.Buffer) lsComp {
-	c := lsComp{
-		cmd: &cobra.Command{
+func BuildLs(config *config.AppConfig, data *data.Buffer) LsCmd {
+	c := LsCmd{
+		Command: &cobra.Command{
 			Use:           "ls",
 			Short:         "See a list of all available files",
 			Args:          cobra.NoArgs,
@@ -36,15 +35,15 @@ func BuildLs(config *config.AppConfig, data *data.Buffer) lsComp {
 		data:   data,
 	}
 
-	c.cmd.RunE = c.Main()
+	c.RunE = c.Main()
 
-	c.cmd.Flags().BoolVarP(&c.long, "long", "l", false, "display the content as long as possible")
-	c.cmd.Flags().BoolVarP(&c.quiet, "quiet", "q", false, "only display file ID's")
+	c.Flags().BoolVarP(&c.long, "long", "l", false, "display the content as long as possible")
+	c.Flags().BoolVarP(&c.quiet, "quiet", "q", false, "only display file ID's")
 
 	return c
 }
 
-func (c *lsComp) Main() scriptor {
+func (c *LsCmd) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
 
@@ -77,10 +76,6 @@ func (c *lsComp) Main() scriptor {
 		rows := make([]table.Row, 0, len(notes))
 
 		for _, note := range notes {
-			if c.group != "" && note.Group != c.group {
-				continue
-			}
-
 			row := table.Row{note.Tag, timeago.English.Format(note.LastUpdate), note.HumanReadableSize(), note.Version}
 
 			if c.long {

@@ -13,9 +13,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type newComp struct {
+type NewCmd struct {
+	*cobra.Command
 	config *config.AppConfig
-	cmd    *cobra.Command
 	data   *data.Buffer
 	editor string
 	from   string
@@ -23,9 +23,9 @@ type newComp struct {
 	title  string
 }
 
-func BuildNew(config *config.AppConfig, data *data.Buffer) newComp {
-	c := newComp{
-		cmd: &cobra.Command{
+func BuildNew(config *config.AppConfig, data *data.Buffer) NewCmd {
+	c := NewCmd{
+		Command: &cobra.Command{
 			Use:           "new",
 			Short:         "Creates a new nao file",
 			Args:          cobra.MinimumNArgs(1), // TODO: cobra.Max and with 'from'
@@ -36,17 +36,17 @@ func BuildNew(config *config.AppConfig, data *data.Buffer) newComp {
 		data:   data,
 	}
 
-	c.cmd.RunE = c.Main()
+	c.RunE = c.Main()
 
-	c.cmd.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
-	c.cmd.Flags().StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
-	c.cmd.Flags().StringVarP(&c.tag, "tag", "t", "", "assigns a tag to the new file")
-	c.cmd.Flags().StringVar(&c.title, "title", "", "assigns a title to the file")
+	c.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
+	c.Flags().StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
+	c.Flags().StringVarP(&c.tag, "tag", "t", "", "assigns a tag to the new file")
+	c.Flags().StringVar(&c.title, "title", "", "assigns a title to the file")
 
 	return c
 }
 
-func (c *newComp) getEditorName() string {
+func (c *NewCmd) getEditorName() string {
 	if c.editor != "" {
 		return c.editor
 	}
@@ -58,7 +58,7 @@ func (c *newComp) getEditorName() string {
 	return "nano"
 }
 
-func (n *newComp) Main() scriptor {
+func (n *NewCmd) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(n.data)
 		keyutil := keyutils.NewDispatcher(n.data)

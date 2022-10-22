@@ -1,15 +1,11 @@
 package cmd
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
-	"strings"
 
-	"github.com/google/uuid"
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
 	"github.com/luisnquin/nao/v2/internal/models"
@@ -19,17 +15,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type modComp struct {
+type ModCmd struct {
+	*cobra.Command
 	config *config.AppConfig
-	cmd    *cobra.Command
 	data   *data.Buffer
 	latest bool
 	editor string
 }
 
-func BuildMod(config *config.AppConfig, data *data.Buffer) modComp {
-	c := modComp{
-		cmd: &cobra.Command{
+func BuildMod(config *config.AppConfig, data *data.Buffer) ModCmd {
+	c := ModCmd{
+		Command: &cobra.Command{
 			Use:   "mod [<id> | <tag>]",
 			Short: "Edit almost any file",
 			Args:  cobra.MaximumNArgs(1),
@@ -44,18 +40,18 @@ func BuildMod(config *config.AppConfig, data *data.Buffer) modComp {
 		data:   data,
 	}
 
-	c.cmd.RunE = c.Main()
+	c.RunE = c.Main()
 
 	if !c.latest {
-		c.cmd.Flags().BoolVarP(&c.latest, "latest", "l", false, "access the last modified file")
+		c.Flags().BoolVarP(&c.latest, "latest", "l", false, "access the last modified file")
 	}
 
-	c.cmd.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
+	c.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
 
 	return c
 }
 
-func (e *modComp) Main() scriptor {
+func (e *ModCmd) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(e.data)
 		keyutil := keyutils.NewDispatcher(e.data)
@@ -69,7 +65,9 @@ func (e *modComp) Main() scriptor {
 			if err != nil {
 				if errors.Is(err, keyutils.ErrKeyNotFound) {
 					key, err = tagutil.Like(args[0])
-					cobra.CheckErr(err)
+					if err != nil {
+						return fmt.Errorf("tag/key '%s' not found", args[0])
+					}
 				} else {
 					return err
 				}
@@ -111,7 +109,7 @@ func (e *modComp) Main() scriptor {
 	}
 }
 
-func (c *modComp) getEditorName() string {
+func (c *ModCmd) getEditorName() string {
 	if c.editor != "" {
 		return c.editor
 	}
@@ -121,40 +119,4 @@ func (c *modComp) getEditorName() string {
 	}
 
 	return "nano"
-}
-
-func RunEditor(ctx context.Context, editor, filePath string, subCommands ...string) error {
-	_, err := os.Stat(filePath)
-	if err != nil {
-		return fmt.Errorf("unable to stat file: %w", err)
-	}
-
-	subCommands = append([]string{filePath}, subCommands...)
-
-	bin := exec.CommandContext(ctx, editor, subCommands...)
-
-	bin.Stderr = os.Stderr
-	bin.Stdout = os.Stdout
-	bin.Stdin = os.Stdin
-
-	return bin.Run()
-}
-
-func NewFileCached(config *config.AppConfig, content string) (string, error) {
-	err := os.MkdirAll(config.Paths.CacheDir, os.ModePerm)
-	if err != nil {
-		return "", err
-	}
-
-	f, err := os.Create(config.Paths.CacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
-	if err != nil {
-		return "", err
-	}
-
-	_, err = f.WriteString(content)
-	if err != nil {
-		return "", err
-	}
-
-	return f.Name(), f.Close()
 }

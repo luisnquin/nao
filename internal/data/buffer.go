@@ -15,14 +15,11 @@ import (
 type Buffer struct {
 	LastAccess string                 `json:"lastAccess,omitempty"`
 	Notes      map[string]models.Note `json:"notes"`
-	Groups     []models.Group         `json:"groups"`
 	config     *config.AppConfig
 }
 
 func NewBuffer(config *config.AppConfig) (*Buffer, error) {
-	data := Buffer{
-		config: config,
-	}
+	data := Buffer{config: config}
 
 	return &data, data.Load()
 }

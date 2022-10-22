@@ -9,7 +9,6 @@ import (
 type Note struct {
 	Key        string    `json:"-"`
 	Tag        string    `json:"tag,omitempty"`
-	Group      string    `json:"group"`
 	Title      string    `json:"title,omitempty"`
 	Content    string    `json:"content"`
 	LastUpdate time.Time `json:"lastUpdate"`

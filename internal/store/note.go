@@ -13,11 +13,8 @@ import (
 )
 
 var (
-	ErrNoAvailableNotes    = errors.New("no available notes available")
-	ErrNoteAlreadyHasGroup = errors.New("note already has group")
-	ErrGroupAlreadyExists  = errors.New("group already exists")
-	ErrGroupNotFound       = errors.New("group not found")
-	ErrNoteNotFound        = errors.New("note not found")
+	ErrNoAvailableNotes = errors.New("no available notes available")
+	ErrNoteNotFound     = errors.New("note not found")
 )
 
 type NotesRepository struct {
