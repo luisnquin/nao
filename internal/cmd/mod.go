@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"sort"
-	"strings"
 
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
@@ -32,43 +30,7 @@ func BuildMod(config *config.AppConfig, data *data.Buffer) ModCmd {
 			Short: "Edit any file",
 			Args:  cobra.MaximumNArgs(1),
 			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				if toComplete != "" {
-					opts := make([]string, 0, 10)
-
-					i, j := 0, 0
-
-					for key, note := range data.Notes {
-						switch {
-						case i == 5 || j == 5:
-							continue
-						case strings.HasPrefix(key, toComplete):
-							opts = append(opts, key)
-							i++
-						case strings.HasPrefix(note.Tag, toComplete):
-							opts = append(opts, note.Tag)
-							j++
-						}
-					}
-
-					return opts, cobra.ShellCompDirectiveNoFileComp
-				}
-
-				notes := store.NewNotesRepository(data).List()
-				sort.SliceStable(notes, func(i, j int) bool {
-					return notes[i].LastUpdate.After(notes[j].LastUpdate)
-				})
-
-				opts := make([]string, 0, 10)
-
-				for i, note := range notes {
-					if i == 5 {
-						break
-					}
-
-					opts = append(opts, note.Key, note.Tag)
-				}
-
-				return opts, cobra.ShellCompDirectiveNoFileComp
+				return SearchKeyTagsByPattern(toComplete, data), cobra.ShellCompDirectiveNoFileComp
 			},
 			SilenceUsage:  true,
 			SilenceErrors: true,

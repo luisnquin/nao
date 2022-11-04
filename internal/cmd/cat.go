@@ -11,7 +11,6 @@ import (
 
 type CatCmd struct {
 	*cobra.Command
-	// config *config.AppConfig
 	data *data.Buffer
 }
 
@@ -23,6 +22,9 @@ func BuildCat(data *data.Buffer) CatCmd {
 			Args:          cobra.ExactArgs(1),
 			SilenceErrors: true,
 			SilenceUsage:  true,
+			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+				return SearchKeyTagsByPattern(toComplete, data), cobra.ShellCompDirectiveNoFileComp
+			},
 		},
 		data: data,
 	}

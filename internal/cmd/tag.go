@@ -6,7 +6,6 @@ import (
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
 	"github.com/luisnquin/nao/v2/internal/store"
-	"github.com/luisnquin/nao/v2/internal/store/keyutils"
 	"github.com/luisnquin/nao/v2/internal/store/tagutils"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +24,9 @@ func BuildTag(config *config.AppConfig, data *data.Buffer) TagCmd {
 			Args:          cobra.ExactArgs(2),
 			SilenceUsage:  true,
 			SilenceErrors: true,
+			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+				return SearchKeyTagsByPattern(toComplete, data), cobra.ShellCompDirectiveNoFileComp
+			},
 		},
 		config: config,
 		data:   data,
@@ -38,7 +40,6 @@ func BuildTag(config *config.AppConfig, data *data.Buffer) TagCmd {
 func (c *TagCmd) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
-		keyutil := keyutils.NewDispatcher(c.data)
 		tagutil := tagutils.New(c.data)
 
 		err := tagutil.IsValidAsNew(args[1])
@@ -46,11 +47,6 @@ func (c *TagCmd) Main() scriptor {
 			return fmt.Errorf("tag %s is not valid: %w", args[1], err)
 		}
 
-		key, err := keyutil.Like(args[0])
-		if err != nil {
-			return err
-		}
-
-		return notesRepo.ModifyTag(key, args[1])
+		return notesRepo.ModifyTag(SearchKeyByPattern(args[0], c.data), args[1])
 	}
 }

@@ -30,8 +30,8 @@ func BuildLs(config *config.AppConfig, data *data.Buffer) LsCmd {
 			Args:          cobra.NoArgs,
 			SilenceUsage:  true,
 			SilenceErrors: true,
-			ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-				return nil, cobra.ShellCompDirectiveNoFileComp
+			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+				return SearchKeyTagsByPattern(toComplete, data), cobra.ShellCompDirectiveNoFileComp
 			},
 		},
 		config: config,

@@ -12,7 +12,7 @@ import (
 
 const (
 	AppName string = "nao"
-	Version string = "v2.0.0"
+	Version string = "v2.1.0"
 )
 
 const (

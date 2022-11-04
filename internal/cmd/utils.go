@@ -81,7 +81,3 @@ func SearchKeyTagsByPattern(pattern string, data *data.Buffer) []string {
 
 	return results
 }
-
-/*
-bufio.NewReader with search ?????
-*/

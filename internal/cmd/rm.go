@@ -20,14 +20,14 @@ type RmCmd struct {
 func BuildRm(config *config.AppConfig, data *data.Buffer) RmCmd {
 	c := RmCmd{
 		Command: &cobra.Command{
-			Use:   "rm [<id> | <tag>]",
-			Short: "Removes a file",
-			Args:  cobra.MinimumNArgs(1),
-			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return store.NewNotesRepository(data).ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
-			},
+			Use:           "rm [<id> | <tag>]",
+			Short:         "Removes a file",
+			Args:          cobra.MinimumNArgs(1),
 			SilenceUsage:  true,
 			SilenceErrors: true,
+			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+				return SearchKeyTagsByPattern(toComplete, data), cobra.ShellCompDirectiveNoFileComp
+			},
 		},
 		config: config,
 		data:   data,
@@ -40,17 +40,15 @@ func BuildRm(config *config.AppConfig, data *data.Buffer) RmCmd {
 
 func (r RmCmd) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		keyutil := keyutils.NewDispatcher(r.data)
 		repo := store.NewNotesRepository(r.data)
 
 		for _, arg := range args {
-			key, err := keyutil.Like(arg)
-			if err != nil {
-				return err
+			key := SearchKeyByPattern(arg, r.data)
+			if key == "" {
+				return keyutils.ErrKeyNotFound
 			}
 
-			err = repo.Delete(key)
-			if err != nil {
+			if err := repo.Delete(key); err != nil {
 				return err
 			}
 
