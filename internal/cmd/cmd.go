@@ -34,6 +34,7 @@ func init() {
 	}
 
 	root.AddCommand(
+		BuildCat(data).Command,
 		BuildMod(config, data).Command,
 		BuildNew(config, data).Command,
 		BuildTag(config, data).Command,

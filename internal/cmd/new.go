@@ -26,9 +26,10 @@ type NewCmd struct {
 func BuildNew(config *config.AppConfig, data *data.Buffer) NewCmd {
 	c := NewCmd{
 		Command: &cobra.Command{
-			Use:           "new",
-			Short:         "Creates a new nao file",
-			Args:          cobra.MinimumNArgs(1), // TODO: cobra.Max and with 'from'
+			Use:   "new",
+			Short: "Creates a new nao file",
+			Args:  cobra.MinimumNArgs(1), // TODO: cobra.Max and with 'from'
+			// TODO: new without args but before to close assign a name or not
 			SilenceErrors: true,
 			SilenceUsage:  true,
 		},
@@ -38,10 +39,11 @@ func BuildNew(config *config.AppConfig, data *data.Buffer) NewCmd {
 
 	c.RunE = c.Main()
 
-	c.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
-	c.Flags().StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
-	c.Flags().StringVarP(&c.tag, "tag", "t", "", "assigns a tag to the new file")
-	c.Flags().StringVar(&c.title, "title", "", "assigns a title to the file")
+	flags := c.Flags()
+	flags.StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
+	flags.StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
+	flags.StringVarP(&c.tag, "tag", "t", "", "assigns a tag to the new file")
+	flags.StringVar(&c.title, "title", "", "assigns a title to the file")
 
 	return c
 }
@@ -67,7 +69,7 @@ func (n *NewCmd) Main() scriptor {
 			n.tag = args[0]
 		}
 
-		// TODO: from
+		// TODO: from, title
 
 		path, err := NewFileCached(n.config, "")
 		if err != nil {

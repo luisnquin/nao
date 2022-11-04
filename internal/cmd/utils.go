@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/v2/internal/config"
+	"github.com/luisnquin/nao/v2/internal/data"
 )
 
 func RunEditor(ctx context.Context, editor, filePath string, subCommands ...string) error {
@@ -46,3 +47,41 @@ func NewFileCached(config *config.AppConfig, content string) (string, error) {
 
 	return f.Name(), f.Close()
 }
+
+func SearchKeyByPattern(pattern string, data *data.Buffer) string {
+	var result string
+
+	// We look for the pattern most similar to the availables keys/tags
+	for key, note := range data.Notes {
+		if strings.HasPrefix(note.Tag, pattern) && len(note.Tag) > len(result) ||
+			strings.HasPrefix(key, pattern) && len(key) > len(result) {
+			result = key
+
+			if note.Tag == pattern || key == pattern {
+				break
+			}
+		}
+	}
+
+	return result
+}
+
+func SearchKeyTagsByPattern(pattern string, data *data.Buffer) []string {
+	var results []string
+
+	for key, note := range data.Notes {
+		if strings.HasPrefix(note.Tag, pattern) {
+			results = append(results, note.Tag)
+		}
+
+		if strings.HasPrefix(key, pattern) {
+			results = append(results, key)
+		}
+	}
+
+	return results
+}
+
+/*
+bufio.NewReader with search ?????
+*/

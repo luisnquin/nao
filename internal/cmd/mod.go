@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
+	"strings"
 
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
@@ -27,12 +29,47 @@ func BuildMod(config *config.AppConfig, data *data.Buffer) ModCmd {
 	c := ModCmd{
 		Command: &cobra.Command{
 			Use:   "mod [<id> | <tag>]",
-			Short: "Edit almost any file",
+			Short: "Edit any file",
 			Args:  cobra.MaximumNArgs(1),
-			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return store.NewNotesRepository(data).ListAllKeys(), cobra.ShellCompDirectiveNoFileComp
+			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+				if toComplete != "" {
+					opts := make([]string, 0, 10)
+
+					i, j := 0, 0
+
+					for key, note := range data.Notes {
+						switch {
+						case i == 5 || j == 5:
+							continue
+						case strings.HasPrefix(key, toComplete):
+							opts = append(opts, key)
+							i++
+						case strings.HasPrefix(note.Tag, toComplete):
+							opts = append(opts, note.Tag)
+							j++
+						}
+					}
+
+					return opts, cobra.ShellCompDirectiveNoFileComp
+				}
+
+				notes := store.NewNotesRepository(data).List()
+				sort.SliceStable(notes, func(i, j int) bool {
+					return notes[i].LastUpdate.After(notes[j].LastUpdate)
+				})
+
+				opts := make([]string, 0, 10)
+
+				for i, note := range notes {
+					if i == 5 {
+						break
+					}
+
+					opts = append(opts, note.Key, note.Tag)
+				}
+
+				return opts, cobra.ShellCompDirectiveNoFileComp
 			},
-			ValidArgs:     store.NewNotesRepository(data).ListAllKeys(),
 			SilenceUsage:  true,
 			SilenceErrors: true,
 		},
@@ -42,11 +79,12 @@ func BuildMod(config *config.AppConfig, data *data.Buffer) ModCmd {
 
 	c.RunE = c.Main()
 
+	flags := c.Flags()
 	if !c.latest {
-		c.Flags().BoolVarP(&c.latest, "latest", "l", false, "access the last modified file")
+		flags.BoolVarP(&c.latest, "latest", "l", false, "access the last modified file")
 	}
 
-	c.Flags().StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
+	flags.StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
 
 	return c
 }

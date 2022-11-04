@@ -30,6 +30,9 @@ func BuildLs(config *config.AppConfig, data *data.Buffer) LsCmd {
 			Args:          cobra.NoArgs,
 			SilenceUsage:  true,
 			SilenceErrors: true,
+			ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			},
 		},
 		config: config,
 		data:   data,
@@ -37,8 +40,9 @@ func BuildLs(config *config.AppConfig, data *data.Buffer) LsCmd {
 
 	c.RunE = c.Main()
 
-	c.Flags().BoolVarP(&c.long, "long", "l", false, "display the content as long as possible")
-	c.Flags().BoolVarP(&c.quiet, "quiet", "q", false, "only display file ID's")
+	flags := c.Flags()
+	flags.BoolVarP(&c.long, "long", "l", false, "display the content as long as possible")
+	flags.BoolVarP(&c.quiet, "quiet", "q", false, "only display file ID's")
 
 	return c
 }
@@ -93,7 +97,7 @@ func (c *LsCmd) Main() scriptor {
 		t.AppendRows(rows)
 
 		t.SetStyle(table.Style{
-			Name: "cat",
+			Name: "simple",
 			Box:  table.StyleBoxDefault,
 			Format: table.FormatOptions{
 				Footer: text.FormatUpper,
