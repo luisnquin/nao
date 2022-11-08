@@ -12,14 +12,7 @@ import (
 
 const (
 	AppName string = "nao"
-	Version string = "v2.1.0"
-)
-
-const (
-	TypeImported string = "imported"
-	TypeDefault  string = "default"
-	TypeMerged   string = "merged"
-	TypeMain     string = "main"
+	Version string = "v2.2.0"
 )
 
 func New() (*AppConfig, error) {

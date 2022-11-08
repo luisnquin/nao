@@ -19,7 +19,7 @@ func BuildCat(data *data.Buffer) CatCmd {
 		Command: &cobra.Command{
 			Use:           "cat",
 			Short:         "Displays the note in the standard output",
-			Args:          cobra.ExactArgs(1),
+			Args:          cobra.MinimumNArgs(1),
 			SilenceErrors: true,
 			SilenceUsage:  true,
 			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -34,16 +34,18 @@ func BuildCat(data *data.Buffer) CatCmd {
 	return c
 }
 
-func (c *CatCmd) Main() scriptor {
+func (c CatCmd) Main() scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		key := SearchKeyByPattern(args[0], c.data)
-		if key == "" {
-			return keyutils.ErrKeyNotFound
+		for _, arg := range args {
+			key := SearchKeyByPattern(arg, c.data)
+			if key == "" {
+				return keyutils.ErrKeyNotFound
+			}
+
+			note := c.data.Notes[key]
+
+			fmt.Fprintln(os.Stdout, note.Content)
 		}
-
-		note := c.data.Notes[key]
-
-		fmt.Fprintln(os.Stdout, note.Content)
 
 		return nil
 	}
