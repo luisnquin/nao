@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
 	"github.com/spf13/cobra"
@@ -26,6 +27,7 @@ var (
 
 func Execute(config *config.AppConfig, data *data.Buffer) error {
 	root.PersistentFlags().BoolVar(&NoColor, "no-color", false, "disable colorized output")
+
 	root.AddCommand(
 		BuildCat(data).Command,
 		BuildConfig(config).Command,
@@ -37,7 +39,18 @@ func Execute(config *config.AppConfig, data *data.Buffer) error {
 		BuildVersion(config).Command,
 	)
 
+	cc.Init(&cc.Config{
+		Commands:        cc.HiCyan,
+		ExecName:        cc.HiRed + cc.Italic,
+		Flags:           cc.HiMagenta,
+		FlagsDataType:   cc.Underline,
+		FlagsDescr:      cc.HiWhite,
+		Headings:        cc.HiWhite + cc.Underline,
+		NoExtraNewlines: true,
+		RootCmd:         root,
+	})
+
 	return root.Execute()
 }
 
-// buildServer().cmd,
+// buildServer().Command,
