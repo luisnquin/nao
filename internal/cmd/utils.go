@@ -30,12 +30,12 @@ func RunEditor(ctx context.Context, editor, filePath string, subCommands ...stri
 }
 
 func NewFileCached(config *config.AppConfig, content string) (string, error) {
-	err := os.MkdirAll(config.Paths.CacheDir, os.ModePerm)
+	err := os.MkdirAll(config.FS.CacheDir, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
 
-	f, err := os.Create(config.Paths.CacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
+	f, err := os.Create(config.FS.CacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
 	if err != nil {
 		return "", err
 	}

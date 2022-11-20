@@ -6,5 +6,7 @@
         "api": "Server",
         "cmd": "Core",
         "nao": "App",
+        "styles": "Theme",
+        "style": "Theme"
     }
 }

@@ -1,25 +1,24 @@
 package cmd
 
 import (
-	"os"
-
-	"github.com/fatih/color"
 	"github.com/luisnquin/nao/v2/internal/config"
+	"github.com/luisnquin/nao/v2/internal/style"
 	"github.com/spf13/cobra"
 )
 
 type VersionCmd struct {
+	// config *config.ConfigV2
 	*cobra.Command
 }
 
-func BuildVersion() VersionCmd {
+func BuildVersion(config *config.AppConfig) VersionCmd {
 	return VersionCmd{
 		Command: &cobra.Command{
 			Use:   "version",
-			Short: "Print the " + config.AppName + " version number",
+			Short: "Print the nao version number",
 			Args:  cobra.NoArgs,
 			Run: func(cmd *cobra.Command, args []string) {
-				color.New(color.FgHiMagenta).Fprintln(os.Stdout, config.AppName+" "+config.Version)
+				style.GetPrinter(config.Command.Version.Color).Println("nao v2.2.0")
 			},
 		},
 	}

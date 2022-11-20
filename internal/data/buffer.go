@@ -32,21 +32,21 @@ func (b *Buffer) Save() error {
 		return fmt.Errorf("unexpected error, can't format data buffer to json: %w", err)
 	}
 
-	return ioutil.WriteFile(b.config.Paths.DataFile, content, 0o644)
+	return ioutil.WriteFile(b.config.FS.DataFile, content, 0o644)
 }
 
 // First data load, if there's no file to load then it creates it.
 func (b *Buffer) Load() error {
 	if err := b.Reload(); err != nil {
 		if os.IsNotExist(err) {
-			err = os.MkdirAll(b.config.Paths.DataDir, os.ModePerm)
+			err = os.MkdirAll(b.config.FS.DataDir, os.ModePerm)
 			if err != nil {
-				return fmt.Errorf("unable to create a new directory in '%s': %w", b.config.Paths.DataFile, err)
+				return fmt.Errorf("unable to create a new directory in '%s': %w", b.config.FS.DataFile, err)
 			}
 
-			file, err := os.Create(b.config.Paths.DataFile)
+			file, err := os.Create(b.config.FS.DataFile)
 			if err != nil {
-				return fmt.Errorf("unable to create data file %s: %v", b.config.Paths.DataFile, err)
+				return fmt.Errorf("unable to create data file %s: %v", b.config.FS.DataFile, err)
 			}
 
 			err = file.Close()
@@ -66,7 +66,7 @@ func (b *Buffer) Load() error {
 // Reloads the data taking it from the expected file. If the file
 // doesn't exists then throws an error and doesn't updates anything.
 func (b *Buffer) Reload() error {
-	file, err := os.Open(b.config.Paths.DataFile)
+	file, err := os.Open(b.config.FS.DataFile)
 	if err != nil {
 		return err
 	}

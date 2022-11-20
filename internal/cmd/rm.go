@@ -38,7 +38,7 @@ func BuildRm(config *config.AppConfig, data *data.Buffer) RmCmd {
 	return c
 }
 
-func (r RmCmd) Main() scriptor {
+func (r RmCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		repo := store.NewNotesRepository(r.data)
 

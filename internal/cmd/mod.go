@@ -51,7 +51,7 @@ func BuildMod(config *config.AppConfig, data *data.Buffer) ModCmd {
 	return c
 }
 
-func (e *ModCmd) Main() scriptor {
+func (e *ModCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(e.data)
 		keyutil := keyutils.NewDispatcher(e.data)

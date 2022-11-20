@@ -34,7 +34,7 @@ func BuildCat(data *data.Buffer) CatCmd {
 	return c
 }
 
-func (c CatCmd) Main() scriptor {
+func (c CatCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		for _, arg := range args {
 			key := SearchKeyByPattern(arg, c.data)

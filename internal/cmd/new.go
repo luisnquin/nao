@@ -60,7 +60,7 @@ func (c *NewCmd) getEditorName() string {
 	return "nano"
 }
 
-func (n *NewCmd) Main() scriptor {
+func (n *NewCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(n.data)
 		keyutil := keyutils.NewDispatcher(n.data)

@@ -37,7 +37,7 @@ func BuildTag(config *config.AppConfig, data *data.Buffer) TagCmd {
 	return c
 }
 
-func (c *TagCmd) Main() scriptor {
+func (c *TagCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
 		tagutil := tagutils.New(c.data)

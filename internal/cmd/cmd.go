@@ -6,42 +6,38 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type scriptor func(cmd *cobra.Command, args []string) error
+// Type that satisfies cobra.Command.RunE.
+type Scriptor func(cmd *cobra.Command, args []string) error
 
-var root = &cobra.Command{
-	Use:   config.AppName,
-	Short: config.AppName + " is a tool to manage your notes",
-	Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return cmd.Usage()
-	},
-	TraverseChildren: false,
-}
-
-func Execute() {
-	cobra.CheckErr(root.Execute())
-}
-
-func init() {
-	config, err := config.New()
-	if err != nil {
-		panic(err)
+var (
+	root = &cobra.Command{
+		Use:   config.AppName,
+		Short: config.AppName + " is a tool to manage your notes",
+		Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmd.Usage()
+		},
+		TraverseChildren:   false,
+		DisableFlagParsing: false,
 	}
 
-	data, err := data.NewBuffer(config)
-	if err != nil {
-		panic(err)
-	}
+	NoColor bool
+)
 
+func Execute(config *config.AppConfig, data *data.Buffer) error {
+	root.PersistentFlags().BoolVar(&NoColor, "no-color", false, "disable colorized output")
 	root.AddCommand(
 		BuildCat(data).Command,
+		BuildConfig(config).Command,
+		BuildLs(config, data).Command,
 		BuildMod(config, data).Command,
 		BuildNew(config, data).Command,
-		BuildTag(config, data).Command,
-		BuildLs(config, data).Command,
 		BuildRm(config, data).Command,
-		BuildVersion().Command,
+		BuildTag(config, data).Command,
+		BuildVersion(config).Command,
 	)
+
+	return root.Execute()
 }
 
 // buildServer().cmd,

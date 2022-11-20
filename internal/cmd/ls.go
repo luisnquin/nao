@@ -5,11 +5,13 @@ import (
 	"os"
 	"sort"
 
+	"github.com/gookit/color"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
 	"github.com/luisnquin/nao/v2/internal/store"
+	"github.com/luisnquin/nao/v2/internal/style"
 	"github.com/spf13/cobra"
 	"github.com/xeonx/timeago"
 )
@@ -47,58 +49,67 @@ func BuildLs(config *config.AppConfig, data *data.Buffer) LsCmd {
 	return c
 }
 
-func (c *LsCmd) Main() scriptor {
+func (c *LsCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
+		defaultKeySize := c.getDefaultKeySize()
 
+		// Quiet mode
 		if c.quiet {
 			for key := range notesRepo.IterKey() {
 				if c.long {
 					fmt.Fprintln(os.Stdout, key)
 				} else {
-					fmt.Fprintln(os.Stdout, key[:10])
+					fmt.Fprintln(os.Stdout, key[:defaultKeySize])
 				}
 			}
 
 			return nil
 		}
 
-		var header table.Row
+		// We prepare the header and rows
+		header := table.Row{"ID", "TAG", "LAST UPDATE", "SIZE", "VERSION"}
 
-		if c.long {
-			header = table.Row{"ID", "TITLE", "TAG", "LAST UPDATE", "SIZE", "VERSION"}
-		} else {
-			header = table.Row{"ID", "TAG", "LAST UPDATE", "SIZE", "VERSION"}
+		headerColorizer := c.HeaderColorizer()
+		for i, v := range header {
+			header[i] = headerColorizer.Sprint(v)
 		}
 
-		notes := notesRepo.List()
+		notes := notesRepo.Slice()
 
 		sort.SliceStable(notes, func(i, j int) bool {
 			return notes[i].LastUpdate.After(notes[j].LastUpdate)
 		})
 
-		rows := make([]table.Row, 0, len(notes))
+		rows := make([]table.Row, len(notes))
 
-		for _, note := range notes {
-			row := table.Row{note.Tag, timeago.English.Format(note.LastUpdate), note.HumanReadableSize(), note.Version}
+		idColorizer := c.IdColorizer()
+		tagColorizer := c.TagColorizer()
+		sizeColorizer := c.SizeColorizer()
+		timeColorizer := c.TimeColorizer()
+		versionColorizer := c.VersionColorizer()
 
-			if c.long {
-				row = append(table.Row{note.Key, note.Title}, row...)
-			} else {
-				row = append(table.Row{note.Key[:10]}, row...)
+		for i, note := range notes {
+			if !c.long {
+				note.Key = note.Key[:defaultKeySize]
 			}
 
-			rows = append(rows, row)
+			rows[i] = table.Row{
+				idColorizer.Sprint(note.Key),
+				tagColorizer.Sprint(note.Tag),
+				timeColorizer.Sprint(timeago.English.Format(note.LastUpdate)),
+				sizeColorizer.Sprint(note.HumanReadableSize()),
+				versionColorizer.Sprint(note.Version),
+			}
 		}
 
+		// Table build and render
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(header)
 		t.AppendRows(rows)
-
 		t.SetStyle(table.Style{
-			Name: "simple",
-			Box:  table.StyleBoxDefault,
+			Box: table.StyleBoxDefault,
 			Format: table.FormatOptions{
 				Footer: text.FormatUpper,
 				Header: text.FormatTitle,
@@ -111,4 +122,60 @@ func (c *LsCmd) Main() scriptor {
 
 		return nil
 	}
+}
+
+func (c LsCmd) getDefaultKeySize() int {
+	if c.config.Command.Ls.KeyLength > 2 && c.config.Command.Ls.KeyLength < 33 {
+		return c.config.Command.Ls.KeyLength
+	}
+
+	return 10
+}
+
+func (c LsCmd) HeaderColorizer() color.PrinterFace {
+	if NoColor || c.config.Command.Ls.NoColor {
+		return color.Normal
+	}
+
+	return style.GetPrinter(c.config.Command.Ls.Header.Color)
+}
+
+func (c LsCmd) IdColorizer() color.PrinterFace {
+	if NoColor || c.config.Command.Ls.NoColor {
+		return color.Normal
+	}
+
+	return style.GetPrinter(c.config.Command.Ls.Rows.ID.Color)
+}
+
+func (c LsCmd) TagColorizer() color.PrinterFace {
+	if NoColor || c.config.Command.Ls.NoColor {
+		return color.Normal
+	}
+
+	return style.GetPrinter(c.config.Command.Ls.Rows.Tag.Color)
+}
+
+func (c LsCmd) TimeColorizer() color.PrinterFace {
+	if NoColor || c.config.Command.Ls.NoColor {
+		return color.Normal
+	}
+
+	return style.GetPrinter(c.config.Command.Ls.Rows.LastUpdate.Color)
+}
+
+func (c LsCmd) SizeColorizer() color.PrinterFace {
+	if NoColor || c.config.Command.Ls.NoColor {
+		return color.Normal
+	}
+
+	return style.GetPrinter(c.config.Command.Ls.Rows.Size.Color)
+}
+
+func (c LsCmd) VersionColorizer() color.PrinterFace {
+	if NoColor || c.config.Command.Ls.NoColor {
+		return color.Normal
+	}
+
+	return style.GetPrinter(c.config.Command.Ls.Rows.Version.Color)
 }

@@ -13,8 +13,8 @@ func TestXxx(t *testing.T) {
 		panic(err)
 	}
 
-	config.Paths.DataFile = "./test/data.json"
-	config.Paths.DataDir = "./test/"
+	config.FS.DataFile = "./test/data.json"
+	config.FS.DataDir = "./test/"
 
 	buffer, err := data.NewBuffer(config)
 	if err != nil {

@@ -38,7 +38,7 @@ func (r NotesRepository) LastAccessed() (models.Note, error) {
 	return note, nil
 }
 
-func (r NotesRepository) List() []models.Note {
+func (r NotesRepository) Slice() []models.Note {
 	notes := make([]models.Note, 0, len(r.data.Notes))
 
 	// TODO: autorepair key
@@ -137,6 +137,7 @@ func (r NotesRepository) New(content, tag string) (string, error) {
 		Tag:        tag,
 		Title:      autoname.Generate("."),
 		Content:    content,
+		CreatedAt:  time.Now(),
 		LastUpdate: time.Now(),
 		Version:    1,
 	}
