@@ -65,8 +65,12 @@ func (n *NewCmd) Main() Scriptor {
 		notesRepo := store.NewNotesRepository(n.data)
 		keyutil := keyutils.NewDispatcher(n.data)
 
-		if args != nil && n.tag == "" {
+		if len(args) != 0 && n.tag == "" {
 			n.tag = args[0]
+		}
+
+		if notesRepo.TagExists(n.tag) {
+			return fmt.Errorf("tag '%s' already exists", n.tag)
 		}
 
 		// TODO: from, title
@@ -106,7 +110,7 @@ func (n *NewCmd) Main() Scriptor {
 		}
 
 		if len(content) == 0 {
-			return fmt.Errorf("Empty content, will not be saved")
+			return fmt.Errorf("empty content, will not be saved")
 		}
 
 		if n.tag == "" {
