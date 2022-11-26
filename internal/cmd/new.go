@@ -28,7 +28,7 @@ func BuildNew(config *config.AppConfig, data *data.Buffer) NewCmd {
 		Command: &cobra.Command{
 			Use:   "new",
 			Short: "Creates a new nao file",
-			Args:  cobra.MinimumNArgs(1), // TODO: cobra.Max and with 'from'
+			Args:  cobra.MaximumNArgs(1), // TODO: cobra.Max and with 'from'
 			// TODO: new without args but before to close assign a name or not
 			SilenceErrors: true,
 			SilenceUsage:  true,
