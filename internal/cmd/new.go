@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/cip8/autoname"
 	"github.com/luisnquin/nao/v2/internal/config"
@@ -99,6 +100,8 @@ func (n *NewCmd) Main() Scriptor {
 			}
 		}
 
+		start := time.Now()
+
 		err = RunEditor(cmd.Context(), n.getEditorName(), path)
 		if err != nil {
 			return err
@@ -117,7 +120,7 @@ func (n *NewCmd) Main() Scriptor {
 			n.tag = autoname.Generate("-")
 		}
 
-		key, err := notesRepo.New(string(content), n.tag)
+		key, err := notesRepo.New(string(content), n.tag, time.Now().Sub(start))
 		if err != nil {
 			return err
 		}

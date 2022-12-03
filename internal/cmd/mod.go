@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
@@ -91,6 +92,8 @@ func (e *ModCmd) Main() Scriptor {
 
 		defer func() { cobra.CheckErr(os.Remove(filePath)) }()
 
+		start := time.Now()
+
 		err = RunEditor(cmd.Context(), e.getEditorName(), filePath) // args[1:]...)
 		if err != nil {
 			return err
@@ -105,7 +108,7 @@ func (e *ModCmd) Main() Scriptor {
 			return nil
 		}
 
-		return notesRepo.ModifyContent(note.Key, string(content))
+		return notesRepo.ModifyContent(note.Key, string(content), time.Now().Sub(start))
 	}
 }
 
