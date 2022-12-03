@@ -4,6 +4,7 @@
 
 ## Installation
 
-```shell
+```bash
+    # This method requires go 1.18>=
     go install github.com/luisnquin/nao/v2/cmd/nao@latest
 ```
