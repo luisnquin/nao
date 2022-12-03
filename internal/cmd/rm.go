@@ -6,8 +6,10 @@ import (
 
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
+	"github.com/luisnquin/nao/v2/internal/prompts"
 	"github.com/luisnquin/nao/v2/internal/store"
 	"github.com/luisnquin/nao/v2/internal/store/keyutils"
+	"github.com/luisnquin/nao/v2/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -15,6 +17,7 @@ type RmCmd struct {
 	*cobra.Command
 	config *config.AppConfig
 	data   *data.Buffer
+	yes    bool
 }
 
 func BuildRm(config *config.AppConfig, data *data.Buffer) RmCmd {
@@ -35,6 +38,8 @@ func BuildRm(config *config.AppConfig, data *data.Buffer) RmCmd {
 
 	c.RunE = c.Main()
 
+	c.Flags().BoolVarP(&c.yes, "yes", "y", false, "to pretend to be sure")
+
 	return c
 }
 
@@ -42,12 +47,41 @@ func (r RmCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		repo := store.NewNotesRepository(r.data)
 
+		keys := make([]string, 0, len(args))
+		tags := make([]string, 0, len(args))
+
+		maxSize := 0
+
 		for _, arg := range args {
 			key := SearchKeyByPattern(arg, r.data)
 			if key == "" {
 				return keyutils.ErrKeyNotFound
 			}
 
+			note, err := repo.Get(key)
+			if err != nil {
+				return err
+			}
+
+			maxSize += note.Size()
+
+			tags = append(tags, note.Tag)
+			keys = append(keys, key)
+		}
+
+		if len(keys) == 1 {
+			prompts.YesOrNo(&r.yes, "Are you sure you want to delete this note %s(%s/%s)?", tags[0], keys[0][:10], utils.SizeToStorageUnits(maxSize))
+		} else if len(keys) < 6 {
+			prompts.YesOrNo(&r.yes, "Are you sure you want to delete %d notes(%s) %v?", len(keys), utils.SizeToStorageUnits(maxSize), tags)
+		} else {
+			prompts.YesOrNo(&r.yes, "Are you sure you want to delete %d notes(%s)?", len(keys), utils.SizeToStorageUnits(maxSize))
+		}
+
+		if !r.yes {
+			return nil
+		}
+
+		for _, key := range keys {
 			if err := repo.Delete(key); err != nil {
 				return err
 			}

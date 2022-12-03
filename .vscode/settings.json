@@ -1,12 +1,13 @@
 {
     "material-icon-theme.folders.associations": {
-        "helper": "Controller",
-        "internal": "Src",
-        "store": "Json",
         "api": "Server",
         "cmd": "Core",
+        "helper": "Controller",
+        "internal": "Src",
         "nao": "App",
-        "styles": "Theme",
-        "style": "Theme"
+        "prompts": "Custom",
+        "store": "Json",
+        "style": "Theme",
+        "styles": "Theme"
     }
 }
