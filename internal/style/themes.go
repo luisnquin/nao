@@ -16,12 +16,12 @@ type (
 	}
 )
 
-var Themes = []string{"default", "custom", "party", "nord", "skip"}
+var Themes = []string{"default", "custom", "party", "nord", "beach-day", "skip"}
 
 var (
 	DefaultTheme = &Theme{
 		Ls: LsTable{
-			Header:     "#73628A",
+			Header:     "#715399",
 			ID:         "#89bfc9",
 			Tag:        "#ded9d9",
 			LastUpdate: "#ded9d9",
@@ -55,12 +55,17 @@ var (
 		Version: "#F7DB69",
 	}
 
-	BeachDayTheme = new(Theme) // https://palettes.shecodes.io/palettes/359#palette
-	// https://palettes.shecodes.io/palettes/1064#palette
-
-	RockTheme = new(Theme) // https://palettes.shecodes.io/palettes/691#palette
-
-	SunsetTheme = new(Theme) // https://palettes.shecodes.io/palettes/187#palette
+	BeachDayTheme = &Theme{
+		Ls: LsTable{
+			Header:     "#e0ffcd",
+			ID:         "#fbfae1",
+			Tag:        "#7cebe9",
+			LastUpdate: "#5a6968",
+			Size:       "#ffcab0",
+			Version:    "#f1efb9",
+		},
+		Version: "#7cebe9",
+	}
 
 	NoTheme = new(Theme)
 )

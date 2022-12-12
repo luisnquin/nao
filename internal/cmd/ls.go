@@ -98,7 +98,7 @@ func (c *LsCmd) Main() Scriptor {
 				idColorizer.Sprint(note.Key),
 				tagColorizer.Sprint(note.Tag),
 				timeColorizer.Sprint(timeago.English.Format(note.LastUpdate)),
-				sizeColorizer.Sprint(note.HumanReadableSize()),
+				sizeColorizer.Sprint(note.ReadableSize()),
 				versionColorizer.Sprint(note.Version),
 			}
 		}

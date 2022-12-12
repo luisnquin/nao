@@ -1,13 +1,13 @@
 package data
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 
+	"github.com/goccy/go-json"
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/models"
 )

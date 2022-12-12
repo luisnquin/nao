@@ -94,7 +94,7 @@ func New() (*AppConfig, error) {
 		panic(err)
 	}
 
-	switch config.Theme {
+	switch config.Theme { // The configuration should not be updated for this
 	case "custom":
 		break
 	case "nord":
@@ -103,6 +103,8 @@ func New() (*AppConfig, error) {
 		config.adoptTheme(style.NoTheme)
 	case "party":
 		config.adoptTheme(style.PartyTheme)
+	case "beach-day":
+		config.adoptTheme(style.BeachDayTheme)
 	default:
 		config.adoptTheme(style.DefaultTheme)
 	}

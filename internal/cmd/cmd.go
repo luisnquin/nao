@@ -39,6 +39,7 @@ func Execute(config *config.AppConfig, data *data.Buffer) error {
 		BuildVersion(config).Command,
 	)
 
+	// TODO: configurable
 	cc.Init(&cc.Config{
 		Commands:        cc.HiCyan,
 		ExecName:        cc.HiRed + cc.Italic,

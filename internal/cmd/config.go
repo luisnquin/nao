@@ -1,7 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+	"math/rand"
+	"os"
 	"sort"
+	"time"
 
 	"github.com/enescakir/emoji"
 	"github.com/luisnquin/nao/v2/internal/config"
@@ -39,17 +43,57 @@ func (c *ConfigCmd) Main() Scriptor {
 		})
 
 		prompt := promptui.Select{
-			Label:    "Select a theme " + emoji.MilkyWay.String(),
-			Items:    style.Themes,
-			HideHelp: true,
+			Label: "What would you like to change",
+			Items: []string{
+				"Theme " + emoji.ArtistPalette.String(),
+				"Editor" + emoji.Ledger.String(),
+				"Nothing ",
+			},
+			HideHelp:     true,
+			HideSelected: true,
 		}
 
-		_, result, err := prompt.Run()
+		index, _, err := prompt.Run()
 		if err != nil {
-			return err
+			index = -1
 		}
 
-		c.config.Theme = result
+		switch index {
+		case 0:
+			prompt = promptui.Select{
+				Size:     len(style.Themes),
+				Label:    "Which theme do you want to use " + emoji.MilkyWay.String(),
+				Items:    style.Themes,
+				HideHelp: true,
+			}
+
+			_, result, err := prompt.Run()
+			if err != nil {
+				return err
+			}
+
+			c.config.Theme = result
+
+		case 1:
+			prompt = promptui.Select{
+				Label:    "Select a editor " + emoji.BlueBook.String(),
+				Items:    []string{"nano", "vim", "nvim"},
+				HideHelp: true,
+			}
+
+			_, result, err := prompt.Run()
+			if err != nil {
+				return err
+			}
+
+			c.config.Editor.Name = result
+		default:
+			rand.Seed(time.Now().Unix())
+
+			emojis := []emoji.Emoji{emoji.Candle, emoji.MusicalNotes, emoji.Seedling, emoji.HuggingFace}
+
+			fmt.Fprintln(os.Stdout, "Bye! "+emojis[rand.Intn(len(emojis))].String())
+		}
 
 		return c.config.Save()
 	}
