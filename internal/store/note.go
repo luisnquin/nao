@@ -35,6 +35,8 @@ func (r NotesRepository) LastAccessed() (models.Note, error) {
 		return note, ErrNoteNotFound
 	}
 
+	note.Key = r.data.LastAccess
+
 	return note, nil
 }
 
@@ -125,7 +127,17 @@ func (r NotesRepository) Get(key string) (models.Note, error) {
 	return note, r.data.Save()
 }
 
-func (r NotesRepository) New(content, tag string) (string, error) {
+func (r NotesRepository) TagExists(tag string) bool {
+	for _, note := range r.data.Notes {
+		if note.Tag == tag {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (r NotesRepository) New(content, tag string, spentTime time.Duration) (string, error) {
 	err := r.tag.IsValidAsNew(tag)
 	if err != nil {
 		return "", err
@@ -156,13 +168,14 @@ func (r NotesRepository) Replace(key string, note models.Note) error {
 	return r.data.Save()
 }
 
-func (r NotesRepository) ModifyContent(key, content string) error {
+func (r NotesRepository) ModifyContent(key, content string, timeSpent time.Duration) error {
 	note, ok := r.data.Notes[key]
 	if !ok {
 		return ErrNoteNotFound
 	}
 
 	note.LastUpdate = time.Now()
+	note.TimeSpent += timeSpent
 	note.Content = content
 	note.Version++
 
