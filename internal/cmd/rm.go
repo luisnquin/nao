@@ -20,10 +20,10 @@ type RmCmd struct {
 	yes    bool
 }
 
-func BuildRm(config *config.AppConfig, data *data.Buffer) RmCmd {
-	c := RmCmd{
+func BuildRm(config *config.AppConfig, data *data.Buffer) *RmCmd {
+	c := &RmCmd{
 		Command: &cobra.Command{
-			Use:           "rm [<id> | <tag>]",
+			Use:           "rm [<id> | <tag>]...",
 			Short:         "Removes a file",
 			Args:          cobra.MinimumNArgs(1),
 			SilenceUsage:  true,
@@ -43,7 +43,7 @@ func BuildRm(config *config.AppConfig, data *data.Buffer) RmCmd {
 	return c
 }
 
-func (r RmCmd) Main() Scriptor {
+func (r *RmCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		repo := store.NewNotesRepository(r.data)
 
@@ -69,12 +69,14 @@ func (r RmCmd) Main() Scriptor {
 			keys = append(keys, key)
 		}
 
-		if len(keys) == 1 {
-			prompts.YesOrNo(&r.yes, "Are you sure you want to delete this note %s(%s/%s)?", tags[0], keys[0][:10], utils.SizeToStorageUnits(maxSize))
-		} else if len(keys) < 6 {
-			prompts.YesOrNo(&r.yes, "Are you sure you want to delete %d notes(%s) %v?", len(keys), utils.SizeToStorageUnits(maxSize), tags)
-		} else {
-			prompts.YesOrNo(&r.yes, "Are you sure you want to delete %d notes(%s)?", len(keys), utils.SizeToStorageUnits(maxSize))
+		if !r.yes {
+			if len(keys) == 1 {
+				prompts.YesOrNo(&r.yes, "Are you sure you want to delete this note %s(%s/%s)?", tags[0], keys[0][:10], utils.SizeToStorageUnits(maxSize))
+			} else if len(keys) < 6 {
+				prompts.YesOrNo(&r.yes, "Are you sure you want to delete %d notes(%s) %v?", len(keys), utils.SizeToStorageUnits(maxSize), tags)
+			} else {
+				prompts.YesOrNo(&r.yes, "Are you sure you want to delete %d notes(%s)?", len(keys), utils.SizeToStorageUnits(maxSize))
+			}
 		}
 
 		if !r.yes {
