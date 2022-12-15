@@ -45,10 +45,11 @@ func (c *ConfigCmd) Main() Scriptor {
 		prompt := promptui.Select{
 			Label: "What would you like to change",
 			Items: []string{
-				"Theme " + emoji.ArtistPalette.String(),
-				"Editor" + emoji.Ledger.String(),
-				"Nothing ",
+				fmt.Sprintf("Theme: %s", c.config.Theme),
+				fmt.Sprintf("Editor: %s", c.config.Editor.Name),
+				"Nothing",
 			},
+
 			HideHelp:     true,
 			HideSelected: true,
 		}
