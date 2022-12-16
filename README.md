@@ -102,4 +102,8 @@ All the available commands will sound familiar to you
 
 ## Configuration
 
-[self](https://en.wikipedia.org/wiki/Carrack)
+In construction
+
+## License
+
+MIT © [Luis Quiñones](https://github.com/luisnquin)
