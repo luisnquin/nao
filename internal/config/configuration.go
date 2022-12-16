@@ -1,7 +1,9 @@
 package config
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -128,20 +130,26 @@ func (c *AppConfig) Load() error {
 	}
 
 	if info.IsDir() {
-		err = os.RemoveAll(c.FS.ConfigFile)
-		if err != nil {
-			return err
-		}
+		ui.Fatalf("config file %s is a directory", c.FS.ConfigFile).
+			Suggest("delete the directory")
 
-		return os.ErrNotExist
+		os.Exit(1)
 	}
 
-	data, err := ioutil.ReadFile(c.FS.ConfigFile)
-	if err != nil {
+	data, err := os.ReadFile(c.FS.ConfigFile)
+	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 
-	return json.Unmarshal(data, c) // TODO: in case of error, the file should be removed(or not)
+	err = json.Unmarshal(data, c)
+	if err != nil {
+		ui.Fatalf("config file %s is not a valid json", c.FS.ConfigFile).
+			Suggest("fix or delete the file")
+
+		os.Exit(1)
+	}
+
+	return nil
 }
 
 func (c *AppConfig) Save() error {
