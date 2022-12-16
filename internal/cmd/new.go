@@ -21,16 +21,14 @@ type NewCmd struct {
 	editor string
 	from   string
 	tag    string
-	title  string
 }
 
 func BuildNew(config *config.AppConfig, data *data.Buffer) NewCmd {
 	c := NewCmd{
 		Command: &cobra.Command{
-			Use:   "new",
-			Short: "Creates a new nao file",
-			Args:  cobra.MaximumNArgs(1), // TODO: cobra.Max and with 'from'
-			// TODO: new without args but before to close assign a name or not
+			Use:           "new",
+			Short:         "Creates a new nao file",
+			Args:          cobra.MaximumNArgs(1),
 			SilenceErrors: true,
 			SilenceUsage:  true,
 		},
@@ -44,21 +42,8 @@ func BuildNew(config *config.AppConfig, data *data.Buffer) NewCmd {
 	flags.StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
 	flags.StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
 	flags.StringVarP(&c.tag, "tag", "t", "", "assigns a tag to the new file")
-	flags.StringVar(&c.title, "title", "", "assigns a title to the file")
 
 	return c
-}
-
-func (c *NewCmd) getEditorName() string {
-	if c.editor != "" {
-		return c.editor
-	}
-
-	if c.config.Editor.Name != "" {
-		return c.config.Editor.Name
-	}
-
-	return "nano"
 }
 
 func (n *NewCmd) Main() Scriptor {
@@ -73,6 +58,8 @@ func (n *NewCmd) Main() Scriptor {
 		if notesRepo.TagExists(n.tag) {
 			return fmt.Errorf("tag '%s' already exists", n.tag)
 		}
+
+		// TODO: cobra.Max and with 'from'
 
 		// TODO: from, title
 
@@ -129,4 +116,16 @@ func (n *NewCmd) Main() Scriptor {
 
 		return nil
 	}
+}
+
+func (c *NewCmd) getEditorName() string {
+	if c.editor != "" {
+		return c.editor
+	}
+
+	if c.config.Editor.Name != "" {
+		return c.config.Editor.Name
+	}
+
+	return "nano"
 }
