@@ -11,8 +11,8 @@ import (
 	"os"
 
 	"github.com/goccy/go-json"
-	"github.com/luisnquin/nao/v2/internal/config"
-	"github.com/luisnquin/nao/v2/internal/models"
+	"github.com/luisnquin/nao/v3/internal/config"
+	"github.com/luisnquin/nao/v3/internal/models"
 )
 
 type Buffer struct {

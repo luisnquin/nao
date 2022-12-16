@@ -3,8 +3,8 @@ package data_test
 import (
 	"testing"
 
-	"github.com/luisnquin/nao/v2/internal/config"
-	"github.com/luisnquin/nao/v2/internal/data"
+	"github.com/luisnquin/nao/v3/internal/config"
+	"github.com/luisnquin/nao/v3/internal/data"
 )
 
 func TestXxx(t *testing.T) {

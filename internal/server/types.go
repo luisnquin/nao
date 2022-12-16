@@ -3,7 +3,7 @@ package server
 /*
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/luisnquin/nao/v2/internal/store"
+	"github.com/luisnquin/nao/v3/internal/store"
 )
 
 type StandardResponse struct {

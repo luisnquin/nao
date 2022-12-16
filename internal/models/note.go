@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/luisnquin/nao/v2/internal/utils"
+	"github.com/luisnquin/nao/v3/internal/utils"
 )
 
 type Note struct {

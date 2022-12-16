@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/luisnquin/nao/v2/internal/api"
+	"github.com/luisnquin/nao/v3/internal/api"
 	"github.com/spf13/cobra"
 )
 

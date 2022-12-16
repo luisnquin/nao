@@ -17,7 +17,7 @@ install:
 	@go install ./cmd/nao/
 
 install-remote:
-	@go install github.com/luisnquin/nao/v2/cmd/nao/@$(last_tag_released)
+	@go install github.com/luisnquin/nao/v3/cmd/nao/@$(last_tag_released)
 
 style: 
 	@gofumpt -w ./internal

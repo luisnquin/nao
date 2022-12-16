@@ -3,10 +3,10 @@ package main
 import (
 	"os"
 
-	"github.com/luisnquin/nao/v2/internal/cmd"
-	"github.com/luisnquin/nao/v2/internal/config"
-	"github.com/luisnquin/nao/v2/internal/data"
-	"github.com/luisnquin/nao/v2/internal/ui"
+	"github.com/luisnquin/nao/v3/internal/cmd"
+	"github.com/luisnquin/nao/v3/internal/config"
+	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/luisnquin/nao/v3/internal/ui"
 )
 
 func main() {

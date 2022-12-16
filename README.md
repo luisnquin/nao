@@ -10,7 +10,7 @@
 
     ```bash
         # Requires go 1.18>=
-        $ go install github.com/luisnquin/nao/v2/cmd/nao@latest
+        $ go install github.com/luisnquin/nao/v3/cmd/nao@latest
     ```
 
 - Via [Nix](https://nix.dev/)

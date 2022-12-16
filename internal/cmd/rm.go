@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luisnquin/nao/v2/internal/config"
-	"github.com/luisnquin/nao/v2/internal/data"
-	"github.com/luisnquin/nao/v2/internal/store"
-	"github.com/luisnquin/nao/v2/internal/store/keyutils"
-	"github.com/luisnquin/nao/v2/internal/ui"
-	"github.com/luisnquin/nao/v2/internal/utils"
+	"github.com/luisnquin/nao/v3/internal/config"
+	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/luisnquin/nao/v3/internal/store"
+	"github.com/luisnquin/nao/v3/internal/store/keyutils"
+	"github.com/luisnquin/nao/v3/internal/ui"
+	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/spf13/cobra"
 )
 

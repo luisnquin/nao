@@ -1,4 +1,4 @@
-module github.com/luisnquin/nao/v2
+module github.com/luisnquin/nao/v3
 
 go 1.18
 

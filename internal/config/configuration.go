@@ -10,8 +10,8 @@ import (
 
 	"github.com/ProtonMail/go-appdir"
 	"github.com/goccy/go-json"
-	"github.com/luisnquin/nao/v2/internal/ui"
-	"github.com/luisnquin/nao/v2/internal/utils"
+	"github.com/luisnquin/nao/v3/internal/ui"
+	"github.com/luisnquin/nao/v3/internal/utils"
 )
 
 const (

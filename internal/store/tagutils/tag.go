@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/luisnquin/nao/v2/internal/data"
+	"github.com/luisnquin/nao/v3/internal/data"
 )
 
 type Tag struct {

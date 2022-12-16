@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luisnquin/nao/v2/internal/data"
-	"github.com/luisnquin/nao/v2/internal/store/keyutils"
+	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/luisnquin/nao/v3/internal/store/keyutils"
 	"github.com/spf13/cobra"
 )
 
