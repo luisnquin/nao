@@ -15,7 +15,6 @@ import (
 )
 
 const (
-	AppName string = "nao"
 	Version string = "v2.2.0"
 )
 

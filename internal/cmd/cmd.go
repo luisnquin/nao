@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
 	"github.com/spf13/cobra"
@@ -12,8 +11,8 @@ type Scriptor func(cmd *cobra.Command, args []string) error
 
 var (
 	root = &cobra.Command{
-		Use:   config.AppName,
-		Short: config.AppName + " is a tool to manage your notes",
+		Use:   "nao",
+		Short: "nao is a tool to manage your notes",
 		Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Usage()
@@ -39,17 +38,19 @@ func Execute(config *config.AppConfig, data *data.Buffer) error {
 		BuildVersion(config).Command,
 	)
 
-	// TODO: configurable
-	cc.Init(&cc.Config{
-		Commands:        cc.HiCyan,
-		ExecName:        cc.HiRed + cc.Italic,
-		Flags:           cc.HiMagenta,
-		FlagsDataType:   cc.Underline,
-		FlagsDescr:      cc.HiWhite,
-		Headings:        cc.HiWhite + cc.Underline,
-		NoExtraNewlines: true,
-		RootCmd:         root,
-	})
+	/*
+		// TODO: configurable
+		cc.Init(&cc.Config{
+			Commands:        cc.HiCyan,
+			ExecName:        cc.HiRed + cc.Italic,
+			Flags:           cc.HiMagenta,
+			FlagsDataType:   cc.Underline,
+			FlagsDescr:      cc.HiWhite,
+			Headings:        cc.HiWhite + cc.Underline,
+			NoExtraNewlines: true,
+			RootCmd:         root,
+		})
+	*/
 
 	return root.Execute()
 }
