@@ -118,7 +118,7 @@ func (c *AppConfig) Load() error {
 
 	c.FS = FSConfig{
 		ConfigFile: path.Join(configDir, "config.json"),
-		DataFile:   path.Join(dataDir, "data.json"),
+		DataFile:   path.Join(dataDir, "data.txt"),
 		ConfigDir:  configDir,
 		CacheDir:   cacheDir,
 		DataDir:    dataDir,
