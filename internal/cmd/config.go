@@ -9,7 +9,7 @@ import (
 
 	"github.com/enescakir/emoji"
 	"github.com/luisnquin/nao/v2/internal/config"
-	"github.com/luisnquin/nao/v2/internal/style"
+	"github.com/luisnquin/nao/v2/internal/ui"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
@@ -38,8 +38,8 @@ func BuildConfig(config *config.AppConfig) ConfigCmd {
 
 func (c *ConfigCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		sort.SliceStable(style.Themes, func(i, j int) bool {
-			return style.Themes[i] == c.config.Theme
+		sort.SliceStable(ui.Themes, func(i, j int) bool {
+			return ui.Themes[i] == c.config.Theme
 		})
 
 		prompt := promptui.Select{
@@ -62,9 +62,9 @@ func (c *ConfigCmd) Main() Scriptor {
 		switch index {
 		case 0:
 			prompt = promptui.Select{
-				Size:     len(style.Themes),
+				Size:     len(ui.Themes),
 				Label:    "Which theme do you want to use " + emoji.MilkyWay.String(),
-				Items:    style.Themes,
+				Items:    ui.Themes,
 				HideHelp: true,
 			}
 

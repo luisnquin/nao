@@ -11,7 +11,7 @@ import (
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
 	"github.com/luisnquin/nao/v2/internal/store"
-	"github.com/luisnquin/nao/v2/internal/style"
+	"github.com/luisnquin/nao/v2/internal/ui"
 	"github.com/spf13/cobra"
 	"github.com/xeonx/timeago"
 )
@@ -137,7 +137,7 @@ func (c LsCmd) HeaderColorizer() color.PrinterFace {
 		return color.Normal
 	}
 
-	return style.GetPrinter(c.config.Command.Ls.Header.Color)
+	return ui.GetPrinter(c.config.Command.Ls.Header.Color)
 }
 
 func (c LsCmd) IdColorizer() color.PrinterFace {
@@ -145,7 +145,7 @@ func (c LsCmd) IdColorizer() color.PrinterFace {
 		return color.Normal
 	}
 
-	return style.GetPrinter(c.config.Command.Ls.Rows.ID.Color)
+	return ui.GetPrinter(c.config.Command.Ls.Rows.ID.Color)
 }
 
 func (c LsCmd) TagColorizer() color.PrinterFace {
@@ -153,7 +153,7 @@ func (c LsCmd) TagColorizer() color.PrinterFace {
 		return color.Normal
 	}
 
-	return style.GetPrinter(c.config.Command.Ls.Rows.Tag.Color)
+	return ui.GetPrinter(c.config.Command.Ls.Rows.Tag.Color)
 }
 
 func (c LsCmd) TimeColorizer() color.PrinterFace {
@@ -161,7 +161,7 @@ func (c LsCmd) TimeColorizer() color.PrinterFace {
 		return color.Normal
 	}
 
-	return style.GetPrinter(c.config.Command.Ls.Rows.LastUpdate.Color)
+	return ui.GetPrinter(c.config.Command.Ls.Rows.LastUpdate.Color)
 }
 
 func (c LsCmd) SizeColorizer() color.PrinterFace {
@@ -169,7 +169,7 @@ func (c LsCmd) SizeColorizer() color.PrinterFace {
 		return color.Normal
 	}
 
-	return style.GetPrinter(c.config.Command.Ls.Rows.Size.Color)
+	return ui.GetPrinter(c.config.Command.Ls.Rows.Size.Color)
 }
 
 func (c LsCmd) VersionColorizer() color.PrinterFace {
@@ -177,5 +177,5 @@ func (c LsCmd) VersionColorizer() color.PrinterFace {
 		return color.Normal
 	}
 
-	return style.GetPrinter(c.config.Command.Ls.Rows.Version.Color)
+	return ui.GetPrinter(c.config.Command.Ls.Rows.Version.Color)
 }

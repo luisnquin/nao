@@ -6,9 +6,9 @@ import (
 
 	"github.com/luisnquin/nao/v2/internal/config"
 	"github.com/luisnquin/nao/v2/internal/data"
-	"github.com/luisnquin/nao/v2/internal/prompts"
 	"github.com/luisnquin/nao/v2/internal/store"
 	"github.com/luisnquin/nao/v2/internal/store/keyutils"
+	"github.com/luisnquin/nao/v2/internal/ui"
 	"github.com/luisnquin/nao/v2/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -71,11 +71,11 @@ func (r *RmCmd) Main() Scriptor {
 
 		if !r.yes {
 			if len(keys) == 1 {
-				prompts.YesOrNo(&r.yes, "Are you sure you want to delete this note %s(%s/%s)?", tags[0], keys[0][:10], utils.SizeToStorageUnits(maxSize))
+				ui.YesOrNoPrompt(&r.yes, "Are you sure you want to delete this note %s(%s/%s)?", tags[0], keys[0][:10], utils.SizeToStorageUnits(maxSize))
 			} else if len(keys) < 6 {
-				prompts.YesOrNo(&r.yes, "Are you sure you want to delete %d notes(%s) %v?", len(keys), utils.SizeToStorageUnits(maxSize), tags)
+				ui.YesOrNoPrompt(&r.yes, "Are you sure you want to delete %d notes(%s) %v?", len(keys), utils.SizeToStorageUnits(maxSize), tags)
 			} else {
-				prompts.YesOrNo(&r.yes, "Are you sure you want to delete %d notes(%s)?", len(keys), utils.SizeToStorageUnits(maxSize))
+				ui.YesOrNoPrompt(&r.yes, "Are you sure you want to delete %d notes(%s)?", len(keys), utils.SizeToStorageUnits(maxSize))
 			}
 		}
 

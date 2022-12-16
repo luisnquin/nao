@@ -1,4 +1,4 @@
-package style
+package ui
 
 type (
 	Theme struct {
@@ -16,7 +16,7 @@ type (
 	}
 )
 
-var Themes = []string{"default", "custom", "party", "nord", "beach-day", "skip"}
+var Themes = []string{"default", "party", "nord", "beach-day", "skip"}
 
 var (
 	DefaultTheme = &Theme{

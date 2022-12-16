@@ -1,4 +1,4 @@
-package style
+package ui
 
 import (
 	"regexp"
@@ -7,7 +7,7 @@ import (
 	"github.com/gookit/color"
 )
 
-var hexRegexp = regexp.MustCompile("^#[0-9A-f]{6}$")
+var rxHexCode = regexp.MustCompile("^#[0-9A-f]{6}$")
 
 func GetPrinter(c string) color.PrinterFace {
 	if IsHex(c) {
@@ -32,5 +32,5 @@ func GetPrinter(c string) color.PrinterFace {
 
 // Checks if the provided string is a valid hexadecimal color.
 func IsHex(s string) bool {
-	return hexRegexp.MatchString(s)
+	return rxHexCode.MatchString(s)
 }

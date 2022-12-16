@@ -8,7 +8,7 @@ import (
 
 	"github.com/ProtonMail/go-appdir"
 	"github.com/goccy/go-json"
-	"github.com/luisnquin/nao/v2/internal/style"
+	"github.com/luisnquin/nao/v2/internal/ui"
 	"github.com/luisnquin/nao/v2/internal/utils"
 )
 
@@ -22,7 +22,7 @@ type AppConfig struct {
 	FS      FSConfig       `json:"-"`
 	Theme   string         `json:"theme"`
 	Editor  EditorConfig   `json:"editor"`
-	Command CommandOptions `json:"commandOptions"`
+	Command CommandOptions `json:"-"`
 }
 
 type FSConfig struct {
@@ -82,7 +82,7 @@ func New() (*AppConfig, error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			config.fillOrFix()
-			config.adoptTheme(style.DefaultTheme)
+			config.adoptTheme(ui.DefaultTheme)
 
 			if err = config.Save(); err != nil {
 				return nil, fmt.Errorf("unable to save configuration file, error: %w", err)
@@ -95,18 +95,16 @@ func New() (*AppConfig, error) {
 	}
 
 	switch config.Theme { // The configuration should not be updated for this
-	case "custom":
-		break
 	case "nord":
-		config.adoptTheme(style.NordTheme)
+		config.adoptTheme(ui.NordTheme)
 	case "skip":
-		config.adoptTheme(style.NoTheme)
+		config.adoptTheme(ui.NoTheme)
 	case "party":
-		config.adoptTheme(style.PartyTheme)
+		config.adoptTheme(ui.PartyTheme)
 	case "beach-day":
-		config.adoptTheme(style.BeachDayTheme)
+		config.adoptTheme(ui.BeachDayTheme)
 	default:
-		config.adoptTheme(style.DefaultTheme)
+		config.adoptTheme(ui.DefaultTheme)
 	}
 
 	return &config, nil
@@ -160,12 +158,12 @@ func (c *AppConfig) fillOrFix() {
 		c.Editor.Name = "nano"
 	}
 
-	if !utils.Contains(style.Themes, c.Theme) {
+	if !utils.Contains(ui.Themes, c.Theme) {
 		c.Theme = "default"
 	}
 }
 
-func (c *AppConfig) adoptTheme(theme *style.Theme) {
+func (c *AppConfig) adoptTheme(theme *ui.Theme) {
 	ls := c.Command.Ls
 	ls.Header.Color = theme.Ls.Header
 	ls.Rows.ID.Color = theme.Ls.ID

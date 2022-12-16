@@ -1,4 +1,4 @@
-package prompts
+package ui
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-func YesOrNo(v *bool, format string, a ...any) {
+func YesOrNoPrompt(v *bool, format string, a ...any) {
 	prompt := promptui.Select{
 		HideSelected: true,
 		HideHelp:     true,

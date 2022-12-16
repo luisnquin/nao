@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/luisnquin/nao/v2/internal/config"
-	"github.com/luisnquin/nao/v2/internal/style"
+	"github.com/luisnquin/nao/v2/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +18,7 @@ func BuildVersion(config *config.AppConfig) VersionCmd {
 			Short: "Print the nao version number",
 			Args:  cobra.NoArgs,
 			Run: func(cmd *cobra.Command, args []string) {
-				style.GetPrinter(config.Command.Version.Color).Println("nao v2.2.0")
+				ui.GetPrinter(config.Command.Version.Color).Println("nao v2.2.0")
 			},
 		},
 	}

@@ -5,9 +5,7 @@
         "helper": "Controller",
         "internal": "Src",
         "nao": "App",
-        "prompts": "Custom",
         "store": "Json",
-        "style": "Theme",
-        "styles": "Theme"
+        "ui": "Theme",
     }
 }
