@@ -106,6 +106,8 @@ func (c VersionCmd) Main() Scriptor {
 				}
 
 				b.WriteString(diffPrinter.Sprintf("(↓%d %s)", diff, diffLabel))
+			} else if binaryVersion.GreaterThan(remoteVersion) {
+				b.WriteString("flying over never-before-seen versions")
 			} else {
 				b.WriteString("everything up-to-date")
 			}
