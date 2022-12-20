@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"github.com/luisnquin/nao/v3/internal/cmd"
@@ -29,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := cmd.Execute(config, data); err != nil {
+	if err := cmd.Execute(context.TODO(), config, data); err != nil {
 		ui.Error(err.Error())
 		os.Exit(1)
 	}

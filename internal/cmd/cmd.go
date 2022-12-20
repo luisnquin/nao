@@ -39,9 +39,8 @@ func Execute(ctx context.Context, config *config.AppConfig, data *data.Buffer) e
 		BuildVersion(config).Command,
 	)
 
+	// Errors are also returned by execute context
 	root.SetErr(io.Discard)
-
-	// check if I can use a goroutine
 
 	return root.ExecuteContext(ctx)
 }

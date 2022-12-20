@@ -7,6 +7,7 @@ import (
 	"sort"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/enescakir/emoji"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/ui"
@@ -35,6 +36,99 @@ func BuildConfig(config *config.AppConfig) ConfigCmd {
 
 	return c
 }
+
+type configSelector struct {
+	options  []string
+	selected map[int]struct{}
+	cursor   int
+}
+
+func initialConfigSelector() configSelector {
+	return configSelector{
+		options:  []string{"themes", "editor", "nothing"},
+		selected: make(map[int]struct{}),
+	}
+}
+
+func (s configSelector) Init() tea.Cmd {
+	return nil
+}
+
+func (s configSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	// Is it a key press?
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return s, tea.Quit
+
+		// The "up" and "k" keys move the cursor up
+		case "up", "k":
+			if s.cursor > 0 {
+				s.cursor--
+			}
+
+		// The "down" and "j" keys move the cursor down
+		case "down", "j":
+			if s.cursor < len(s.options)-1 {
+				s.cursor++
+			}
+
+		case "enter", " ":
+			_, ok := s.selected[s.cursor]
+			if ok {
+				delete(s.selected, s.cursor)
+			} else {
+				s.selected[s.cursor] = struct{}{}
+			}
+		}
+	}
+	return s, nil
+}
+
+func (s configSelector) View() string {
+	label := "What would you like to change"
+
+	// Iterate over our choices
+	for i, choice := range s.options {
+
+		// Is the cursor pointing at this choice?
+		cursor := " " // no cursor
+		if s.cursor == i {
+			cursor = ">" // cursor!
+		}
+
+		// Is this choice selected?
+		checked := " " // not selected
+		if _, ok := s.selected[i]; ok {
+			checked = "x" // selected!
+		}
+
+		// Render the row
+		label += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+	}
+
+	// The footer
+	label += "\nPress q to quit.\n"
+
+	return label
+}
+
+/*
+type Model interface {
+    // Init is the first function that will be called. It returns an optional
+    // initial command. To not perform an initial command return nil.
+    Init() Cmd
+
+    // Update is called when a message is received. Use it to inspect messages
+    // and, in response, update the model and/or send a command.
+    Update(Msg) (Model, Cmd)
+
+    // View renders the program's UI, which is just a string. The view is
+    // rendered after every Update.
+    View() string
+}
+*/
 
 func (c *ConfigCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
