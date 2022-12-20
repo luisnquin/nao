@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"context"
+	"io"
+
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/spf13/cobra"
@@ -9,8 +12,10 @@ import (
 // Type that satisfies cobra.Command.RunE.
 type Scriptor func(cmd *cobra.Command, args []string) error
 
-var (
-	root = &cobra.Command{
+var NoColor bool
+
+func Execute(ctx context.Context, config *config.AppConfig, data *data.Buffer) error {
+	root := cobra.Command{
 		Use:   "nao",
 		Short: "nao is a tool to manage your notes",
 		Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
@@ -21,10 +26,6 @@ var (
 		DisableFlagParsing: false,
 	}
 
-	NoColor bool
-)
-
-func Execute(config *config.AppConfig, data *data.Buffer) error {
 	root.PersistentFlags().BoolVar(&NoColor, "no-color", false, "disable colorized output")
 
 	root.AddCommand(
@@ -38,21 +39,30 @@ func Execute(config *config.AppConfig, data *data.Buffer) error {
 		BuildVersion(config).Command,
 	)
 
-	/*
-		// TODO: configurable
-		cc.Init(&cc.Config{
-			Commands:        cc.HiCyan,
-			ExecName:        cc.HiRed + cc.Italic,
-			Flags:           cc.HiMagenta,
-			FlagsDataType:   cc.Underline,
-			FlagsDescr:      cc.HiWhite,
-			Headings:        cc.HiWhite + cc.Underline,
-			NoExtraNewlines: true,
-			RootCmd:         root,
-		})
-	*/
+	root.SetErr(io.Discard)
 
-	return root.Execute()
+	// check if I can use a goroutine
+
+	return root.ExecuteContext(ctx)
 }
 
+// config.FS.CacheDir
+
 // buildServer().Command,
+
+// model, err := tea.NewProgram(initialConfigSelector()).Run()
+// fmt.Println(model, err)
+
+/*
+	// TODO: configurable
+	cc.Init(&cc.Config{
+		Commands:        cc.HiCyan,
+		ExecName:        cc.HiRed + cc.Italic,
+		Flags:           cc.HiMagenta,
+		FlagsDataType:   cc.Underline,
+		FlagsDescr:      cc.HiWhite,
+		Headings:        cc.HiWhite + cc.Underline,
+		NoExtraNewlines: true,
+		RootCmd:         root,
+	})
+*/
