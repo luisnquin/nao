@@ -31,7 +31,8 @@ type githubTagInfo struct {
 
 const (
 	tagsUrl = "https://api.github.com/repos/luisnquin/nao/tags"
-	version = "v3.0.0"
+	kind    = "azoricum"
+	version = "v2.2.0"
 )
 
 func BuildVersion(config *config.AppConfig) VersionCmd {
@@ -55,7 +56,9 @@ func (c VersionCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		var b strings.Builder
 
-		b.WriteString("nao ")
+		b.WriteString("nao (")
+		b.WriteString(kind)
+		b.WriteString(") ")
 		b.WriteString(version)
 		b.WriteString(", ")
 
