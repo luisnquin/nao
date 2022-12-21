@@ -32,7 +32,7 @@ type githubTagInfo struct {
 const (
 	tagsUrl = "https://api.github.com/repos/luisnquin/nao/tags"
 	kind    = "azoricum"
-	version = "v2.2.0"
+	version = "v3.0.0"
 )
 
 func BuildVersion(config *config.AppConfig) VersionCmd {
