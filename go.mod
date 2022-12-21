@@ -13,6 +13,7 @@ require (
 	github.com/gookit/color v1.5.2
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/manifoldco/promptui v0.9.0
+	github.com/sc0vu/didyoumean v0.0.0-20210223094345-27965c2b1bc9
 	github.com/spf13/cobra v1.4.0
 	github.com/xeonx/timeago v1.0.0-rc5
 )
@@ -37,7 +38,6 @@ require (
 	github.com/muesli/termenv v0.13.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/sc0vu/didyoumean v0.0.0-20210223094345-27965c2b1bc9 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	go.mongodb.org/mongo-driver v1.7.5 // indirect

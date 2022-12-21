@@ -110,12 +110,12 @@ func (c VersionCmd) Main() Scriptor {
 
 				b.WriteString(diffPrinter.Sprintf("(↓%d %s)", diff, diffLabel))
 			} else if binaryVersion.GreaterThan(remoteVersion) {
-				b.WriteString("flying over never-before-seen versions")
+				b.WriteString("unstable!")
 			} else {
-				b.WriteString("everything up-to-date")
+				b.WriteString("updated!")
 			}
 		} else {
-			b.WriteString("state unknown")
+			b.WriteString("bleak...")
 		}
 
 		ui.GetPrinter(c.config.Command.Version.Color).Println(b.String())
