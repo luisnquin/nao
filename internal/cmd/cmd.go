@@ -6,6 +6,7 @@ import (
 
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/sc0vu/didyoumean"
 	"github.com/spf13/cobra"
 )
 
@@ -25,6 +26,8 @@ func Execute(ctx context.Context, config *config.Core, data *data.Buffer) error 
 		TraverseChildren:   false,
 		DisableFlagParsing: false,
 	}
+
+	didyoumean.ThresholdRate = 0.9
 
 	root.PersistentFlags().BoolVar(&NoColor, "no-color", false, "disable colorized output")
 

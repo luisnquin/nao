@@ -37,6 +37,7 @@ require (
 	github.com/muesli/termenv v0.13.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/sc0vu/didyoumean v0.0.0-20210223094345-27965c2b1bc9 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	go.mongodb.org/mongo-driver v1.7.5 // indirect

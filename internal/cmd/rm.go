@@ -7,7 +7,6 @@ import (
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/store"
-	"github.com/luisnquin/nao/v3/internal/store/keyutils"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/spf13/cobra"
@@ -53,9 +52,9 @@ func (r *RmCmd) Main() Scriptor {
 		maxSize := 0
 
 		for _, arg := range args {
-			key := SearchKeyByPattern(arg, r.data)
-			if key == "" {
-				return keyutils.ErrKeyNotFound
+			key, err := SearchByPattern(arg, r.data)
+			if err != nil {
+				return err
 			}
 
 			note, err := repo.Get(key)

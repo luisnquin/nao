@@ -47,6 +47,11 @@ func (c *TagCmd) Main() Scriptor {
 			return fmt.Errorf("tag %s is not valid: %w", args[1], err)
 		}
 
-		return notesRepo.ModifyTag(SearchKeyByPattern(args[0], c.data), args[1])
+		key, err := SearchByPattern(args[0], c.data)
+		if err != nil {
+			return err
+		}
+
+		return notesRepo.ModifyTag(key, args[1])
 	}
 }

@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/luisnquin/nao/v3/internal/store/keyutils"
+	"github.com/sc0vu/didyoumean"
 )
 
 func RunEditor(ctx context.Context, editor, filePath string, subCommands ...string) error {
@@ -48,7 +50,7 @@ func NewFileCached(config *config.Core, content string) (string, error) {
 	return f.Name(), f.Close()
 }
 
-func SearchKeyByPattern(pattern string, data *data.Buffer) string {
+func SearchByPattern(pattern string, data *data.Buffer) (string, error) {
 	var result string
 
 	// We look for the pattern most similar to the availables keys/tags
@@ -63,7 +65,23 @@ func SearchKeyByPattern(pattern string, data *data.Buffer) string {
 		}
 	}
 
-	return result
+	// Your last bullet, I think
+	if result != "" {
+		return result, nil
+	}
+
+	opts := make([]string, 0, len(data.Notes))
+
+	for _, n := range data.Notes {
+		opts = append(opts, n.Tag)
+	}
+
+	bestMatch := didyoumean.FirstMatch(pattern, opts)
+	if bestMatch != "" {
+		return "", fmt.Errorf("key not found, did you mean '%s'?", bestMatch)
+	}
+
+	return "", keyutils.ErrKeyNotFound
 }
 
 func SearchKeyTagsByPattern(pattern string, data *data.Buffer) []string {

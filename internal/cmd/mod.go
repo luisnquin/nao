@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
@@ -11,8 +9,6 @@ import (
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/models"
 	"github.com/luisnquin/nao/v3/internal/store"
-	"github.com/luisnquin/nao/v3/internal/store/keyutils"
-	"github.com/luisnquin/nao/v3/internal/store/tagutils"
 	"github.com/spf13/cobra"
 )
 
@@ -55,33 +51,28 @@ func BuildMod(config *config.Core, data *data.Buffer) ModCmd {
 func (e *ModCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(e.data)
-		keyutil := keyutils.NewDispatcher(e.data)
-		tagutil := tagutils.New(e.data)
 
 		var note models.Note
 
 		switch {
 		case len(args) == 1:
-			key, err := keyutil.Like(args[0])
+			key, err := SearchByPattern(args[0], e.data)
 			if err != nil {
-				if errors.Is(err, keyutils.ErrKeyNotFound) {
-					key, err = tagutil.Like(args[0])
-					if err != nil {
-						return fmt.Errorf("tag/key '%s' not found", args[0])
-					}
-				} else {
-					return err
-				}
+				return err
 			}
 
 			note, err = notesRepo.Get(key)
-			cobra.CheckErr(err)
+			if err != nil {
+				return err
+			}
 
 		case e.latest:
 			var err error
 
 			note, err = notesRepo.LastAccessed()
-			cobra.CheckErr(err)
+			if err != nil {
+				return err
+			}
 
 		default:
 			return cmd.Usage()

@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/luisnquin/nao/v3/internal/data"
-	"github.com/luisnquin/nao/v3/internal/store/keyutils"
 	"github.com/spf13/cobra"
 )
 
@@ -37,9 +36,9 @@ func BuildCat(data *data.Buffer) CatCmd {
 func (c CatCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		for _, arg := range args {
-			key := SearchKeyByPattern(arg, c.data)
-			if key == "" {
-				return keyutils.ErrKeyNotFound
+			key, err := SearchByPattern(arg, c.data)
+			if err != nil {
+				return err
 			}
 
 			note := c.data.Notes[key]
