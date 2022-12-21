@@ -13,10 +13,20 @@
         $ go install github.com/luisnquin/nao/v3/cmd/nao@latest
     ```
 
+- From source
+
+    ```bash
+        # Requires git and go 1.18>=
+        $ git clone https://github.com/luisnquin/nao.git
+        $ cd nao
+        $ make build
+    ```
+
 - Via [Nix](https://nix.dev/)
 
     ```bash
-        nix-env -iA nixpkgs.nao
+        # ❄️
+        $ nix-env -iA nixpkgs.nao
     ```
 
 ## Some basic commands
