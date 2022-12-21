@@ -7,5 +7,6 @@
         "nao": "App",
         "store": "Json",
         "ui": "Theme",
-    }
+    },
+    "go.diagnostic.vulncheck": "Imports"
 }
