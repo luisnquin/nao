@@ -15,12 +15,12 @@ import (
 
 type RmCmd struct {
 	*cobra.Command
-	config *config.AppConfig
+	config *config.Core
 	data   *data.Buffer
 	yes    bool
 }
 
-func BuildRm(config *config.AppConfig, data *data.Buffer) *RmCmd {
+func BuildRm(config *config.Core, data *data.Buffer) *RmCmd {
 	c := &RmCmd{
 		Command: &cobra.Command{
 			Use:           "rm [<id> | <tag>]...",

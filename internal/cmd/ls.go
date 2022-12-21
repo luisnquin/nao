@@ -18,13 +18,13 @@ import (
 
 type LsCmd struct {
 	*cobra.Command
-	config *config.AppConfig
+	config *config.Core
 	data   *data.Buffer
 	quiet  bool
 	long   bool
 }
 
-func BuildLs(config *config.AppConfig, data *data.Buffer) LsCmd {
+func BuildLs(config *config.Core, data *data.Buffer) LsCmd {
 	c := LsCmd{
 		Command: &cobra.Command{
 			Use:           "ls",

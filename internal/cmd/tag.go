@@ -12,11 +12,11 @@ import (
 
 type TagCmd struct {
 	*cobra.Command
-	config *config.AppConfig
+	config *config.Core
 	data   *data.Buffer
 }
 
-func BuildTag(config *config.AppConfig, data *data.Buffer) TagCmd {
+func BuildTag(config *config.Core, data *data.Buffer) TagCmd {
 	c := TagCmd{
 		Command: &cobra.Command{
 			Use:           "tag <old> <new>",

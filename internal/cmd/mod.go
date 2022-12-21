@@ -18,13 +18,13 @@ import (
 
 type ModCmd struct {
 	*cobra.Command
-	config *config.AppConfig
+	config *config.Core
 	data   *data.Buffer
 	latest bool
 	editor string
 }
 
-func BuildMod(config *config.AppConfig, data *data.Buffer) ModCmd {
+func BuildMod(config *config.Core, data *data.Buffer) ModCmd {
 	c := ModCmd{
 		Command: &cobra.Command{
 			Use:   "mod [<id> | <tag>]",

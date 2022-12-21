@@ -18,7 +18,7 @@ import (
 type VersionCmd struct {
 	// config *config.ConfigV2
 	*cobra.Command
-	config *config.AppConfig
+	config *config.Core
 }
 
 type githubTagInfo struct {
@@ -35,7 +35,7 @@ const (
 	version = "v3.0.0"
 )
 
-func BuildVersion(config *config.AppConfig) VersionCmd {
+func BuildVersion(config *config.Core) VersionCmd {
 	c := VersionCmd{
 		Command: &cobra.Command{
 			Use:     "version",

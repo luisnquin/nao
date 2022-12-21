@@ -16,14 +16,14 @@ import (
 
 type NewCmd struct {
 	*cobra.Command
-	config *config.AppConfig
+	config *config.Core
 	data   *data.Buffer
 	editor string
 	from   string
 	tag    string
 }
 
-func BuildNew(config *config.AppConfig, data *data.Buffer) NewCmd {
+func BuildNew(config *config.Core, data *data.Buffer) NewCmd {
 	c := NewCmd{
 		Command: &cobra.Command{
 			Use:           "new",

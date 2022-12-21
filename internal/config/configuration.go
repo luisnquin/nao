@@ -18,7 +18,7 @@ const (
 	Version string = "v2.2.0"
 )
 
-type AppConfig struct {
+type Core struct {
 	Schema  string         `json:"$schema"`
 	FS      FSConfig       `json:"-"`
 	Theme   string         `json:"theme"`
@@ -74,8 +74,8 @@ type (
 	}
 )
 
-func New() (*AppConfig, error) {
-	var config AppConfig
+func New() (*Core, error) {
+	var config Core
 
 	config.Schema = "https://github.com/luisnquin/nao/docs/schema.json"
 
@@ -111,7 +111,7 @@ func New() (*AppConfig, error) {
 	return &config, nil
 }
 
-func (c *AppConfig) Load() error {
+func (c *Core) Load() error {
 	dirs := appdir.New("nao")
 	configDir, dataDir, cacheDir := dirs.UserConfig(), dirs.UserData(), dirs.UserCache()
 
@@ -151,7 +151,7 @@ func (c *AppConfig) Load() error {
 	return nil
 }
 
-func (c *AppConfig) Save() error {
+func (c *Core) Save() error {
 	content, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
 		return fmt.Errorf("unexpected error, cannot encode config to json: %w", err)
@@ -160,7 +160,7 @@ func (c *AppConfig) Save() error {
 	return ioutil.WriteFile(c.FS.ConfigFile, content, 0o644)
 }
 
-func (c *AppConfig) fillOrFix() {
+func (c *Core) fillOrFix() {
 	if !utils.Contains([]string{"nano", "nvim", "vim"}, c.Editor.Name) {
 		c.Editor.Name = "nano"
 	}
@@ -170,7 +170,7 @@ func (c *AppConfig) fillOrFix() {
 	}
 }
 
-func (c *AppConfig) adoptTheme(theme *ui.Theme) {
+func (c *Core) adoptTheme(theme *ui.Theme) {
 	ls := c.Command.Ls
 	ls.Header.Color = theme.Ls.Header
 	ls.Rows.ID.Color = theme.Ls.ID

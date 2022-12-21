@@ -29,7 +29,7 @@ func RunEditor(ctx context.Context, editor, filePath string, subCommands ...stri
 	return bin.Run()
 }
 
-func NewFileCached(config *config.AppConfig, content string) (string, error) {
+func NewFileCached(config *config.Core, content string) (string, error) {
 	err := os.MkdirAll(config.FS.CacheDir, os.ModePerm)
 	if err != nil {
 		return "", err

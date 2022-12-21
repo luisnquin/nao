@@ -17,10 +17,10 @@ import (
 
 type ConfigCmd struct {
 	*cobra.Command
-	config *config.AppConfig
+	config *config.Core
 }
 
-func BuildConfig(config *config.AppConfig) ConfigCmd {
+func BuildConfig(config *config.Core) ConfigCmd {
 	c := ConfigCmd{
 		Command: &cobra.Command{
 			Use:           "config",

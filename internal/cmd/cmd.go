@@ -14,7 +14,7 @@ type Scriptor func(cmd *cobra.Command, args []string) error
 
 var NoColor bool
 
-func Execute(ctx context.Context, config *config.AppConfig, data *data.Buffer) error {
+func Execute(ctx context.Context, config *config.Core, data *data.Buffer) error {
 	root := cobra.Command{
 		Use:   "nao",
 		Short: "nao is a tool to manage your notes",

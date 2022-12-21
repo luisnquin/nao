@@ -18,10 +18,10 @@ import (
 type Buffer struct {
 	LastAccess string                 `json:"lastAccess,omitempty"`
 	Notes      map[string]models.Note `json:"notes"`
-	config     *config.AppConfig
+	config     *config.Core
 }
 
-func NewBuffer(config *config.AppConfig) (*Buffer, error) {
+func NewBuffer(config *config.Core) (*Buffer, error) {
 	data := Buffer{config: config}
 
 	return &data, data.Load()
