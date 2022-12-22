@@ -14,17 +14,22 @@ import (
 	"github.com/luisnquin/nao/v3/internal/utils"
 )
 
-const (
-	Version string = "v2.2.0"
-)
-
 type Core struct {
-	Schema  string         `json:"$schema"`
+	Schema  string         `json:"$schema"` // deprecated
 	FS      FSConfig       `json:"-"`
 	Theme   string         `json:"theme"`
 	Editor  EditorConfig   `json:"editor"`
 	Command CommandOptions `json:"-"`
+	Colors  ui.Colors
 }
+
+/*
+command:
+	  ls:
+	    columns:
+		   -
+		   -
+*/
 
 type FSConfig struct {
 	ConfigFile string
@@ -51,20 +56,9 @@ type (
 	}
 
 	LsConfig struct {
-		KeyLength int          `json:"keyLength,omitempty"`
-		NoColor   bool         `json:"NoColor,omitempty"`
-		Header    HeaderConfig `json:"header,omitempty"`
-		Rows      struct {
-			ID         ElementConfig `json:"id"`
-			Tag        ElementConfig `json:"tag"`
-			LastUpdate ElementConfig `json:"lastUpdate"`
-			Size       ElementConfig `json:"size"`
-			Version    ElementConfig `json:"version"`
-		} `json:"rows"`
-	}
-
-	HeaderConfig struct {
-		Color string `json:"color,omitempty"`
+		KeyLength int  `json:"keyLength,omitempty"`
+		NoColor   bool `json:"NoColor,omitempty"`
+		Columns   []string
 	}
 
 	ElementConfig struct {
@@ -170,16 +164,6 @@ func (c *Core) fillOrFix() {
 	}
 }
 
-func (c *Core) adoptTheme(theme *ui.Theme) {
-	ls := c.Command.Ls
-	ls.Header.Color = theme.Ls.Header
-	ls.Rows.ID.Color = theme.Ls.ID
-	ls.Rows.LastUpdate.Color = theme.Ls.LastUpdate
-	ls.Rows.Tag.Color = theme.Ls.Tag
-	ls.Rows.Size.Color = theme.Ls.Size
-	ls.Rows.Version.Color = theme.Ls.Version
-
-	c.Command.Ls = ls
-
-	c.Command.Version.Color = theme.Version
+func (c *Core) adoptTheme(theme *ui.Colors) {
+	c.Colors = *theme
 }

@@ -118,7 +118,13 @@ func (c VersionCmd) Main() Scriptor {
 			b.WriteString("bleak...")
 		}
 
-		ui.GetPrinter(c.config.Command.Version.Color).Println(b.String())
+		color := c.config.Colors.One
+
+		if c.config.Command.Version.Color != "" {
+			color = c.config.Command.Version.Color
+		}
+
+		ui.GetPrinter(color).Println(b.String())
 
 		return nil
 	}
