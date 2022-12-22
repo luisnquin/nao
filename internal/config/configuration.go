@@ -56,9 +56,9 @@ type (
 	}
 
 	LsConfig struct {
-		KeyLength int  `json:"keyLength,omitempty"`
-		NoColor   bool `json:"NoColor,omitempty"`
-		Columns   []string
+		KeySize int  `json:"keyLength,omitempty"`
+		NoColor bool `json:"NoColor,omitempty"`
+		Columns []string
 	}
 
 	ElementConfig struct {

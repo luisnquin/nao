@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cip8/autoname"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/models"
 	"github.com/luisnquin/nao/v3/internal/store/keyutils"
@@ -147,7 +146,6 @@ func (r NotesRepository) New(content, tag string, spentTime time.Duration) (stri
 
 	r.data.Notes[key] = models.Note{
 		Tag:        tag,
-		Title:      autoname.Generate("."),
 		Content:    content,
 		CreatedAt:  time.Now(),
 		LastUpdate: time.Now(),

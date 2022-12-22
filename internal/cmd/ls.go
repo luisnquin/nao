@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"time"
 
 	"github.com/gookit/color"
 	"github.com/jedib0t/go-pretty/table"
@@ -12,6 +13,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/store"
 	"github.com/luisnquin/nao/v3/internal/ui"
+	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/spf13/cobra"
 	"github.com/xeonx/timeago"
 )
@@ -52,30 +54,46 @@ func BuildLs(config *config.Core, data *data.Buffer) LsCmd {
 func (c *LsCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
-		defaultKeySize := c.getDefaultKeySize()
 
-		// Quiet mode
+		keySize := 10
+
+		if c.config.Command.Ls.KeySize > 2 && c.config.Command.Ls.KeySize < 33 {
+			keySize = c.config.Command.Ls.KeySize
+		}
+
 		if c.quiet {
 			for key := range notesRepo.IterKey() {
 				if c.long {
 					fmt.Fprintln(os.Stdout, key)
 				} else {
-					fmt.Fprintln(os.Stdout, key[:defaultKeySize])
+					fmt.Fprintln(os.Stdout, key[:keySize])
 				}
 			}
 
 			return nil
 		}
 
-		// We prepare the header and rows
-		header := table.Row{"ID", "TAG", "LAST UPDATE", "SIZE", "VERSION"}
-
-		headerColorizer := c.HeaderColorizer()
-		for i, v := range header {
-			header[i] = headerColorizer.Sprint(v)
-		}
+		if len(c.config.Command.Ls.Columns) == 0 {
+			c.config.Command.Ls.Columns = []string{
+				"ID", "TAG", "LAST UPDATE", "SIZE", "TIME SPENT", "VERSION",
+			}
+		} // else {
+		//	for i, column := range c.config.Command.Ls.Columns {
+		//		c.config.Command.Ls.Columns[i] = strings.ToUpper(strings.TrimSpace(column))
+		//	}
+		//}
 
 		notes := notesRepo.Slice()
+
+		colors := map[string]color.PrinterFace{
+			"ID":            c.ColorOrNop(c.config.Colors.Three),
+			"TAG":           c.ColorOrNop(c.config.Colors.Four),
+			"SIZE":          c.ColorOrNop(c.config.Colors.Five),
+			"LAST UPDATE":   c.ColorOrNop(c.config.Colors.Six),
+			"CREATION DATE": c.ColorOrNop(c.config.Colors.Seven),
+			"TIME SPENT":    c.ColorOrNop(c.config.Colors.Eight),
+			"VERSION":       c.ColorOrNop(c.config.Colors.Nine),
+		}
 
 		sort.SliceStable(notes, func(i, j int) bool {
 			return notes[i].LastUpdate.After(notes[j].LastUpdate)
@@ -83,24 +101,44 @@ func (c *LsCmd) Main() Scriptor {
 
 		rows := make([]table.Row, len(notes))
 
-		idColorizer := c.IdColorizer()
-		tagColorizer := c.TagColorizer()
-		sizeColorizer := c.SizeColorizer()
-		timeColorizer := c.TimeColorizer()
-		versionColorizer := c.VersionColorizer()
-
-		for i, note := range notes {
+		for i, n := range notes {
 			if !c.long {
-				note.Key = note.Key[:defaultKeySize]
+				n.Key = n.Key[:keySize]
 			}
 
-			rows[i] = table.Row{
-				idColorizer.Sprint(note.Key),
-				tagColorizer.Sprint(note.Tag),
-				timeColorizer.Sprint(timeago.English.Format(note.LastUpdate)),
-				sizeColorizer.Sprint(note.ReadableSize()),
-				versionColorizer.Sprint(note.Version),
+			noteMap := map[string]any{
+				"ID":            n.Key,
+				"TAG":           n.Tag,
+				"SIZE":          n.ReadableSize(),
+				"LAST UPDATE":   timeago.English.Format(n.LastUpdate),
+				"CREATION DATE": timeago.English.Format(n.CreatedAt),
+				"TIME SPENT":    n.TimeSpent.Round(time.Second),
+				"VERSION":       n.Version,
 			}
+
+			for k, v := range noteMap {
+				if !utils.Contains(c.config.Command.Ls.Columns, k) {
+					delete(noteMap, k)
+				} else {
+					noteMap[k] = colors[k].Sprint(v)
+				}
+			}
+
+			row := make(table.Row, len(c.config.Command.Ls.Columns))
+
+			for j, column := range c.config.Command.Ls.Columns {
+				row[j] = noteMap[column]
+			}
+
+			rows[i] = row
+		}
+
+		// We prepare the header and rows
+		header := make(table.Row, len(c.config.Command.Ls.Columns))
+		headerColorizer := c.ColorOrNop(c.config.Colors.Two)
+
+		for i, column := range c.config.Command.Ls.Columns {
+			header[i] = headerColorizer.Sprint(column)
 		}
 
 		// Table build and render
@@ -124,58 +162,10 @@ func (c *LsCmd) Main() Scriptor {
 	}
 }
 
-func (c LsCmd) getDefaultKeySize() int {
-	if c.config.Command.Ls.KeyLength > 2 && c.config.Command.Ls.KeyLength < 33 {
-		return c.config.Command.Ls.KeyLength
-	}
-
-	return 10
-}
-
-func (c LsCmd) HeaderColorizer() color.PrinterFace {
+func (c LsCmd) ColorOrNop(code string) color.PrinterFace {
 	if NoColor || c.config.Command.Ls.NoColor {
 		return color.Normal
 	}
 
-	return ui.GetPrinter(c.config.Colors.Two)
-}
-
-func (c LsCmd) IdColorizer() color.PrinterFace {
-	if NoColor || c.config.Command.Ls.NoColor {
-		return color.Normal
-	}
-
-	return ui.GetPrinter(c.config.Colors.Three)
-}
-
-func (c LsCmd) TagColorizer() color.PrinterFace {
-	if NoColor || c.config.Command.Ls.NoColor {
-		return color.Normal
-	}
-
-	return ui.GetPrinter(c.config.Colors.Four)
-}
-
-func (c LsCmd) TimeColorizer() color.PrinterFace {
-	if NoColor || c.config.Command.Ls.NoColor {
-		return color.Normal
-	}
-
-	return ui.GetPrinter(c.config.Colors.Five)
-}
-
-func (c LsCmd) SizeColorizer() color.PrinterFace {
-	if NoColor || c.config.Command.Ls.NoColor {
-		return color.Normal
-	}
-
-	return ui.GetPrinter(c.config.Colors.Six)
-}
-
-func (c LsCmd) VersionColorizer() color.PrinterFace {
-	if NoColor || c.config.Command.Ls.NoColor {
-		return color.Normal
-	}
-
-	return ui.GetPrinter(c.config.Colors.Seven)
+	return ui.GetPrinter(code)
 }
