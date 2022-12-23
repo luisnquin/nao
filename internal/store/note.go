@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/models"
-	"github.com/luisnquin/nao/v3/internal/store/keyutils"
 	"github.com/luisnquin/nao/v3/internal/store/tagutils"
 )
 
@@ -29,12 +29,12 @@ func NewNotesRepository(data *data.Buffer) NotesRepository {
 }
 
 func (r NotesRepository) LastAccessed() (models.Note, error) {
-	note, ok := r.data.Notes[r.data.LastAccess]
+	note, ok := r.data.Notes[r.data.Metadata.LastAccess.Key]
 	if !ok {
 		return note, ErrNoteNotFound
 	}
 
-	note.Key = r.data.LastAccess
+	note.Key = r.data.Metadata.LastAccess.Key
 
 	return note, nil
 }
@@ -51,6 +51,12 @@ func (r NotesRepository) Slice() []models.Note {
 	}
 
 	return notes
+}
+
+func (r NotesRepository) Exists(key string) bool {
+	_, ok := r.data.Notes[key]
+
+	return ok
 }
 
 func (r NotesRepository) Iter() <-chan models.Note {
@@ -120,7 +126,11 @@ func (r NotesRepository) Get(key string) (models.Note, error) {
 		return note, ErrNoteNotFound
 	}
 
-	r.data.LastAccess = key
+	r.data.Metadata.LastAccess = data.KeyTag{
+		Tag: note.Tag,
+		Key: key,
+	}
+
 	note.Key = key
 
 	return note, r.data.Save()
@@ -137,12 +147,16 @@ func (r NotesRepository) TagExists(tag string) bool {
 }
 
 func (r NotesRepository) New(content, tag string, spentTime time.Duration) (string, error) {
-	err := r.tag.IsValidAsNew(tag)
-	if err != nil {
+	if err := r.tag.IsValidAsNew(tag); err != nil {
 		return "", err
 	}
 
-	key := keyutils.New()
+	key := internal.NewKey()
+
+	r.data.Metadata.LastCreated = data.KeyTag{
+		Key: key,
+		Tag: tag,
+	}
 
 	r.data.Notes[key] = models.Note{
 		Tag:        tag,

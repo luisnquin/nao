@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
-	"github.com/luisnquin/nao/v3/internal/store/keyutils"
+	"github.com/luisnquin/nao/v3/internal/store"
 	"github.com/sc0vu/didyoumean"
 )
 
@@ -81,7 +81,7 @@ func SearchByPattern(pattern string, data *data.Buffer) (string, error) {
 		return "", fmt.Errorf("key not found, did you mean '%s'?", bestMatch)
 	}
 
-	return "", keyutils.ErrKeyNotFound
+	return "", store.ErrNoteNotFound
 }
 
 func SearchKeyTagsByPattern(pattern string, data *data.Buffer) []string {

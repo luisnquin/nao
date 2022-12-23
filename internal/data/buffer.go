@@ -16,16 +16,64 @@ import (
 )
 
 type Buffer struct {
-	LastAccess string                 `json:"lastAccess,omitempty"`
-	Notes      map[string]models.Note `json:"notes"`
-	config     *config.Core
+	Notes    map[string]models.Note `json:"notes"`
+	Metadata Metadata               `json:"metadata"`
+	config   *config.Core
+}
+
+type Metadata struct {
+	// The key of the last accessed note.
+	LastCreated KeyTag `json:"lastCreated,omitempty"`
+	// The key of the last accessed/modified note.
+	LastAccess KeyTag `json:"lastAccess,omitempty"`
+}
+
+type KeyTag struct {
+	Key string `json:"key"`
+	Tag string `json:"tag"`
 }
 
 func NewBuffer(config *config.Core) (*Buffer, error) {
 	data := Buffer{config: config}
 
-	return &data, data.Load()
+	return &data, data.Reload()
 }
+
+/*
+w, err := fsnotify.NewWatcher()
+	if err != nil {
+		return nil, err
+	}
+
+	err = w.Add(config.FS.DataFile)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		for {
+			select {
+			case event, ok := <-w.Events:
+				if !ok {
+					continue
+				}
+
+				if event.Op == fsnotify.Write {
+					if err := data.Reload(); err != nil {
+						panic(err)
+					}
+				}
+
+			case err, ok := <-w.Errors:
+				if !ok {
+					continue
+				}
+
+				panic(err)
+			}
+		}
+	}()
+*/
 
 var (
 	bytes = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 0o5}
@@ -49,8 +97,8 @@ func (b *Buffer) Save() error {
 }
 
 // First data load, if there's no file to load then it creates it.
-func (b *Buffer) Load() error {
-	if err := b.Reload(); err != nil {
+func (b *Buffer) Reload() error {
+	if err := b.Load(); err != nil {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(b.config.FS.DataDir, os.ModePerm)
 			if err != nil {
@@ -67,7 +115,7 @@ func (b *Buffer) Load() error {
 				return err
 			}
 
-			return b.Reload()
+			return b.Load()
 		}
 
 		return fmt.Errorf("unexpected error: %w", err)
@@ -78,7 +126,7 @@ func (b *Buffer) Load() error {
 
 // Reloads the data taking it from the expected file. If the file
 // doesn't exists then throws an error and doesn't updates anything.
-func (b *Buffer) Reload() error {
+func (b *Buffer) Load() error {
 	file, err := os.Open(b.config.FS.DataFile)
 	if err != nil {
 		return err

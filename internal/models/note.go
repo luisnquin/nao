@@ -14,6 +14,8 @@ type Note struct {
 	LastUpdate time.Time     `json:"lastUpdate"`
 	Version    int           `json:"version"`
 	TimeSpent  time.Duration `json:"timeSpent"`
+	// The number of get operations performed on a note.
+	Picks uint64 `json:"picks"`
 }
 
 func (n *Note) Size() int {

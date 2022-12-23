@@ -22,7 +22,7 @@ func TestXxx(t *testing.T) {
 		t.FailNow()
 	}
 
-	err = buffer.Reload()
+	err = buffer.Load()
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

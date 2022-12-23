@@ -10,7 +10,6 @@ import (
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/store"
-	"github.com/luisnquin/nao/v3/internal/store/keyutils"
 	"github.com/spf13/cobra"
 )
 
@@ -49,14 +48,17 @@ func BuildNew(config *config.Core, data *data.Buffer) NewCmd {
 func (n *NewCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(n.data)
-		keyutil := keyutils.NewDispatcher(n.data)
 
 		if len(args) != 0 && n.tag == "" {
 			n.tag = args[0]
 		}
 
 		if notesRepo.TagExists(n.tag) {
-			return fmt.Errorf("tag '%s' already exists", n.tag)
+			if n.data.Metadata.LastCreated.Tag == n.tag {
+				return fmt.Errorf("recently created tag, try 'nao mod %s' or remove it", n.tag)
+			}
+
+			return fmt.Errorf("tag already exists, try 'nao mod %s'", n.tag)
 		}
 
 		// TODO: cobra.Max and with 'from'
@@ -71,7 +73,7 @@ func (n *NewCmd) Main() Scriptor {
 		defer os.Remove(path)
 
 		if n.from != "" {
-			key, err := keyutil.Like(n.from)
+			key, err := SearchByPattern(n.from, n.data)
 			if err != nil {
 				return err
 			}
