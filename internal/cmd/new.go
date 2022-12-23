@@ -109,7 +109,7 @@ func (n *NewCmd) Main() Scriptor {
 			n.tag = autoname.Generate("-")
 		}
 
-		key, err := notesRepo.New(string(content), n.tag, time.Now().Sub(start))
+		key, err := notesRepo.New(string(content), store.WithTag(n.tag), store.WithSpentTime(time.Now().Sub(start)))
 		if err != nil {
 			return err
 		}

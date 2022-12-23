@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cip8/autoname"
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/models"
@@ -146,25 +147,48 @@ func (r NotesRepository) TagExists(tag string) bool {
 	return false
 }
 
-func (r NotesRepository) New(content, tag string, spentTime time.Duration) (string, error) {
-	if err := r.tag.IsValidAsNew(tag); err != nil {
-		return "", err
-	}
+type Option func(*models.Note)
 
+func WithTag(tag string) Option {
+	return func(n *models.Note) {
+		n.Tag = tag
+	}
+}
+
+func WithSpentTime(duration time.Duration) Option {
+	return func(n *models.Note) {
+		n.TimeSpent = duration
+	}
+}
+
+func (r NotesRepository) New(content string, options ...Option) (string, error) {
 	key := internal.NewKey()
 
-	r.data.Metadata.LastCreated = data.KeyTag{
-		Key: key,
-		Tag: tag,
-	}
-
-	r.data.Notes[key] = models.Note{
-		Tag:        tag,
+	note := models.Note{
 		Content:    content,
 		CreatedAt:  time.Now(),
 		LastUpdate: time.Now(),
 		Version:    1,
 	}
+
+	for _, option := range options {
+		option(&note)
+	}
+
+	if note.Tag == "" {
+		note.Tag = autoname.Generate("-")
+	} else {
+		if err := r.tag.IsValidAsNew(note.Tag); err != nil {
+			return "", err
+		}
+	}
+
+	r.data.Metadata.LastCreated = data.KeyTag{
+		Tag: note.Tag,
+		Key: key,
+	}
+
+	r.data.Notes[key] = note
 
 	return key, r.data.Save()
 }
