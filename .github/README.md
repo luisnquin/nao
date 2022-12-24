@@ -1,4 +1,4 @@
-# Nao - notes manager, writing has become too comfortable in the 21st century
+# Nao (v3.0.0, azoricum)
 
 [![Go](https://github.com/luisnquin/nao/actions/workflows/go.yml/badge.svg)](https://github.com/luisnquin/nao/actions/workflows/go.yml)
 
