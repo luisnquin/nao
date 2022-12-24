@@ -28,8 +28,10 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 
 			return cmd.Usage()
 		},
-		TraverseChildren:   false,
 		DisableFlagParsing: false,
+		TraverseChildren:   false,
+		// Levenshtein distance implementation not the best
+		SuggestionsMinimumDistance: 2,
 	}
 
 	log.Trace().Msg("root command has been created")
