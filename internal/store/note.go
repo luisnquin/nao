@@ -151,7 +151,7 @@ func WithTag(tag string) Option {
 
 func WithSpentTime(duration time.Duration) Option {
 	return func(n *models.Note) {
-		n.TimeSpent = duration
+		n.TimeSpent += duration
 	}
 }
 
@@ -198,14 +198,17 @@ func (r NotesRepository) Replace(key string, note models.Note) error {
 	return r.data.Save()
 }
 
-func (r NotesRepository) ModifyContent(key, content string, timeSpent time.Duration) error {
+func (r NotesRepository) ModifyContent(key, content string, options ...Option) error {
 	note, ok := r.data.Notes[key]
 	if !ok {
 		return internal.ErrNoteNotFound
 	}
 
+	for _, option := range options {
+		option(&note)
+	}
+
 	note.LastUpdate = time.Now()
-	note.TimeSpent += timeSpent
 	note.Content = content
 	note.Version++
 
