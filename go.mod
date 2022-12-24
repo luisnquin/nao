@@ -16,6 +16,7 @@ require (
 	github.com/sc0vu/didyoumean v0.0.0-20210223094345-27965c2b1bc9
 	github.com/spf13/cobra v1.6.1
 	github.com/xeonx/timeago v1.0.0-rc5
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -34,4 +35,5 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.mongodb.org/mongo-driver v1.11.1 // indirect
 	golang.org/x/sys v0.3.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b // indirect
 )
