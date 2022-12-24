@@ -33,7 +33,7 @@ func main() {
 
 	logger.Trace().
 		Str("version", internal.Version).Str("kind", internal.Kind).
-		Str("os", runtime.GOOS).Str("arch", runtime.GOARCH).Send()
+		Str("runtime", runtime.Version()).Str("os", runtime.GOOS).Str("arch", runtime.GOARCH).Send()
 
 	logger.Trace().Msg("loading configuration...")
 
@@ -63,4 +63,6 @@ func main() {
 		ui.Error(err.Error())
 		os.Exit(1)
 	}
+
+	logger.Trace().Msg("finished without critical errors")
 }
