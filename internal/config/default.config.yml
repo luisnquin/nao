@@ -1,0 +1,10 @@
+# Configuring the editor to be executed
+editor:
+    # Possible values: nano, vim, nvim
+    name: nano
+    extraArgs: []
+# Possible values: default, nord, part, beach-day, skip
+theme: default
+# Your default keystore tool will provide us a key to 
+# decrypt and encrypt your content
+encrypt: false

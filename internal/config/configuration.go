@@ -9,28 +9,20 @@ import (
 	"path"
 
 	"github.com/ProtonMail/go-appdir"
-	"github.com/goccy/go-json"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/rs/zerolog"
+	"gopkg.in/yaml.v3"
 )
 
 type Core struct {
-	Schema  string         `json:"$schema"` // deprecated
-	FS      FSConfig       `json:"-"`
-	Theme   string         `json:"theme"`
-	Editor  EditorConfig   `json:"editor"`
-	Command CommandOptions `json:"-"`
-	Colors  ui.Colors
+	Encrypt bool           `yaml:"encrypt"`
+	Editor  EditorConfig   `yaml:"editor"`
+	Theme   string         `yaml:"theme"`
+	Command CommandOptions `yaml:"-"`
+	FS      FSConfig       `yaml:"-"`
+	Colors  ui.Colors      `yaml:"-"` // ???
 }
-
-/*
-command:
-	  ls:
-	    columns:
-		   -
-		   -
-*/
 
 type FSConfig struct {
 	ConfigFile string
@@ -41,38 +33,36 @@ type FSConfig struct {
 }
 
 type EditorConfig struct {
-	Name      string   `json:"name"`
-	ExtraArgs []string `json:"extraArgs"`
+	Name      string   `yaml:"name"`
+	ExtraArgs []string `yaml:"extraArgs"`
 }
 
 type (
 	CommandOptions struct {
-		Version VersionConfig `json:"version"`
-		Ls      LsConfig      `json:"ls"`
+		Version VersionConfig `yaml:"version"`
+		Ls      LsConfig      `yaml:"ls"`
 	}
 
 	VersionConfig struct {
-		NoColor bool   `json:"noColor,omitempty"`
-		Color   string `json:"color,omitempty"`
+		NoColor bool   `yaml:"noColor,omitempty"`
+		Color   string `yaml:"color,omitempty"`
 	}
 
 	LsConfig struct {
-		KeySize int  `json:"keyLength,omitempty"`
-		NoColor bool `json:"NoColor,omitempty"`
+		KeySize int  `yaml:"keyLength,omitempty"`
+		NoColor bool `yaml:"NoColor,omitempty"`
 		Columns []string
 	}
 
 	ElementConfig struct {
-		Alias string `json:"alias,omitempty"`
-		Color string `json:"color,omitempty"`
-		Ommit bool   `json:"ommit"`
+		Alias string `yaml:"alias,omitempty"`
+		Color string `yaml:"color,omitempty"`
+		Ommit bool   `yaml:"ommit"`
 	}
 )
 
 func New(logger *zerolog.Logger) (*Core, error) {
 	var config Core
-
-	config.Schema = "https://github.com/luisnquin/nao/docs/schema.json" // ! deprecated
 
 	if err := config.Load(); err != nil {
 		logger.Error().Err(err).Msg("an error occurred while loading configuration")
@@ -130,7 +120,7 @@ func (c *Core) Load() error {
 	configDir, dataDir, cacheDir := dirs.UserConfig(), dirs.UserData(), dirs.UserCache()
 
 	c.FS = FSConfig{
-		ConfigFile: path.Join(configDir, "config.json"),
+		ConfigFile: path.Join(configDir, "config.yml"),
 		DataFile:   path.Join(dataDir, "data.txt"),
 		ConfigDir:  configDir,
 		CacheDir:   cacheDir,
@@ -154,9 +144,9 @@ func (c *Core) Load() error {
 		return err
 	}
 
-	err = json.Unmarshal(data, c)
+	err = yaml.Unmarshal(data, c)
 	if err != nil {
-		ui.Fatalf("config file %s is not a valid json", c.FS.ConfigFile).
+		ui.Fatalf("config file %s is not a valid yaml", c.FS.ConfigFile).
 			Suggest("fix or delete the file")
 
 		os.Exit(1)
@@ -166,7 +156,7 @@ func (c *Core) Load() error {
 }
 
 func (c *Core) Save() error {
-	content, err := json.MarshalIndent(c, "", "\t")
+	content, err := yaml.Marshal(c)
 	if err != nil {
 		return fmt.Errorf("unexpected error, cannot encode config to json: %w", err)
 	}
