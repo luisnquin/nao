@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os"
+	"runtime"
 
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/cmd"
@@ -31,8 +32,8 @@ func main() {
 	ctx := context.Background()
 
 	logger.Trace().
-		Str("version", internal.Version).
-		Str("kind", internal.Kind).Send()
+		Str("version", internal.Version).Str("kind", internal.Kind).
+		Str("os", runtime.GOOS).Str("arch", runtime.GOARCH).Send()
 
 	logger.Trace().Msg("loading configuration...")
 
