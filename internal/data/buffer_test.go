@@ -5,10 +5,13 @@ import (
 
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/rs/zerolog"
 )
 
 func TestXxx(t *testing.T) {
-	config, err := config.New()
+	logger := zerolog.Nop()
+
+	config, err := config.New(&logger)
 	if err != nil {
 		panic(err)
 	}

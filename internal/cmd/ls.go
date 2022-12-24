@@ -9,6 +9,7 @@ import (
 	"github.com/gookit/color"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/store"
@@ -163,7 +164,7 @@ func (c *LsCmd) Main() Scriptor {
 }
 
 func (c LsCmd) ColorOrNop(code string) color.PrinterFace {
-	if NoColor || c.config.Command.Ls.NoColor {
+	if internal.NoColor || c.config.Command.Ls.NoColor {
 		return color.Normal
 	}
 

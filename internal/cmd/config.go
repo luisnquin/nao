@@ -7,7 +7,6 @@ import (
 	"sort"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/enescakir/emoji"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/ui"
@@ -25,7 +24,7 @@ func BuildConfig(config *config.Core) ConfigCmd {
 		Command: &cobra.Command{
 			Use:           "config",
 			Short:         "Allows you to move your settings from the cli",
-			Args:          cobra.NoArgs,
+			Args:          cobra.MaximumNArgs(3),
 			SilenceErrors: true,
 			SilenceUsage:  true,
 		},
@@ -34,8 +33,98 @@ func BuildConfig(config *config.Core) ConfigCmd {
 
 	c.RunE = c.Main()
 
+	c.AddCommand(c.GetCommand(), c.SetCommand())
+
 	return c
 }
+
+func (c *ConfigCmd) Main() Scriptor {
+	return func(cmd *cobra.Command, args []string) error {
+		sort.SliceStable(ui.Themes, func(i, j int) bool {
+			return ui.Themes[i] == c.config.Theme
+		})
+
+		prompt := promptui.Select{
+			Label: "What would you like to change",
+			Items: []string{
+				fmt.Sprintf("Theme: %s", c.config.Theme),
+				fmt.Sprintf("Editor: %s", c.config.Editor.Name),
+				"Nothing",
+			},
+
+			HideHelp:     true,
+			HideSelected: true,
+		}
+
+		index, _, err := prompt.Run()
+		if err != nil {
+			index = -1
+		}
+
+		switch index {
+		case 0:
+			prompt = promptui.Select{
+				Size:     len(ui.Themes),
+				Label:    "Which theme do you want to use " + emoji.MilkyWay.String(),
+				Items:    ui.Themes,
+				HideHelp: true,
+			}
+
+			_, result, err := prompt.Run()
+			if err != nil {
+				return err
+			}
+
+			c.config.Theme = result
+
+		case 1:
+			prompt = promptui.Select{
+				Label:    "Select a editor " + emoji.BlueBook.String(),
+				Items:    []string{"nano", "vim", "nvim"},
+				HideHelp: true,
+			}
+
+			_, result, err := prompt.Run()
+			if err != nil {
+				return err
+			}
+
+			c.config.Editor.Name = result
+		default:
+			rand.Seed(time.Now().Unix())
+
+			emojis := []emoji.Emoji{emoji.Candle, emoji.MusicalNotes, emoji.Seedling, emoji.HuggingFace}
+
+			fmt.Fprintln(os.Stdout, "Bye! "+emojis[rand.Intn(len(emojis))].String())
+		}
+
+		return c.config.Save()
+	}
+}
+
+// set theme asdasd
+
+func (c *ConfigCmd) GetCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:           "get",
+		Short:         "get your config values in a jsonpath style",
+		Args:          cobra.ExactArgs(1),
+		SilenceErrors: true,
+		SilenceUsage:  true,
+	}
+}
+
+func (c *ConfigCmd) SetCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:           "set",
+		Short:         "modify your config values in a jsonpath style",
+		Args:          cobra.ExactArgs(2),
+		SilenceErrors: true,
+		SilenceUsage:  true,
+	}
+}
+
+/*
 
 type configSelector struct {
 	options  []string
@@ -113,6 +202,7 @@ func (s configSelector) View() string {
 
 	return label
 }
+*/
 
 /*
 type Model interface {
@@ -129,67 +219,3 @@ type Model interface {
     View() string
 }
 */
-
-func (c *ConfigCmd) Main() Scriptor {
-	return func(cmd *cobra.Command, args []string) error {
-		sort.SliceStable(ui.Themes, func(i, j int) bool {
-			return ui.Themes[i] == c.config.Theme
-		})
-
-		prompt := promptui.Select{
-			Label: "What would you like to change",
-			Items: []string{
-				fmt.Sprintf("Theme: %s", c.config.Theme),
-				fmt.Sprintf("Editor: %s", c.config.Editor.Name),
-				"Nothing",
-			},
-
-			HideHelp:     true,
-			HideSelected: true,
-		}
-
-		index, _, err := prompt.Run()
-		if err != nil {
-			index = -1
-		}
-
-		switch index {
-		case 0:
-			prompt = promptui.Select{
-				Size:     len(ui.Themes),
-				Label:    "Which theme do you want to use " + emoji.MilkyWay.String(),
-				Items:    ui.Themes,
-				HideHelp: true,
-			}
-
-			_, result, err := prompt.Run()
-			if err != nil {
-				return err
-			}
-
-			c.config.Theme = result
-
-		case 1:
-			prompt = promptui.Select{
-				Label:    "Select a editor " + emoji.BlueBook.String(),
-				Items:    []string{"nano", "vim", "nvim"},
-				HideHelp: true,
-			}
-
-			_, result, err := prompt.Run()
-			if err != nil {
-				return err
-			}
-
-			c.config.Editor.Name = result
-		default:
-			rand.Seed(time.Now().Unix())
-
-			emojis := []emoji.Emoji{emoji.Candle, emoji.MusicalNotes, emoji.Seedling, emoji.HuggingFace}
-
-			fmt.Fprintln(os.Stdout, "Bye! "+emojis[rand.Intn(len(emojis))].String())
-		}
-
-		return c.config.Save()
-	}
-}

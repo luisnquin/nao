@@ -4,8 +4,10 @@ import (
 	"context"
 	"io"
 
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/rs/zerolog"
 	"github.com/sc0vu/didyoumean"
 	"github.com/spf13/cobra"
 )
@@ -13,23 +15,38 @@ import (
 // Type that satisfies cobra.Command.RunE.
 type Scriptor func(cmd *cobra.Command, args []string) error
 
-var NoColor bool
+func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data *data.Buffer) error {
+	log.Trace().Msg("configuring cli...")
 
-func Execute(ctx context.Context, config *config.Core, data *data.Buffer) error {
 	root := cobra.Command{
 		Use:   "nao",
 		Short: "nao is a tool to manage your notes",
 		Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			log.Debug().Strs("args", args).
+				Msg("no command specified, returning usage...")
+
 			return cmd.Usage()
 		},
 		TraverseChildren:   false,
 		DisableFlagParsing: false,
 	}
 
+	log.Trace().Msg("root command has been created")
+
 	didyoumean.ThresholdRate = 0.9
 
-	root.PersistentFlags().BoolVar(&NoColor, "no-color", false, "disable colorized output")
+	log.Trace().Float64("threshold rate", didyoumean.ThresholdRate).
+		Msg("modified 'didyomean' threshold rate")
+
+	permFlags := root.PersistentFlags()
+	permFlags.BoolVar(new(bool), "debug", false, "enable debug output, everything is written to stderr")
+	permFlags.StringVar(&internal.ConfigFile, "file", "", "specify an alternate config file")
+	permFlags.BoolVar(&internal.NoColor, "no-color", false, "disable colorized output")
+
+	log.Trace().Msg("debug, file, no-color has been added as persistent flags")
+
+	log.Trace().Msg("adding commands to root")
 
 	root.AddCommand(
 		BuildCat(data).Command,
@@ -42,11 +59,35 @@ func Execute(ctx context.Context, config *config.Core, data *data.Buffer) error 
 		BuildVersion(config).Command,
 	)
 
+	log.Trace().Msgf("%d children have been added to the root command", len(root.Commands()))
+
 	// Errors are also returned by execute context
 	root.SetErr(io.Discard)
+	log.Trace().Msg("all cobra errors will be sent to /dev/null")
+
+	log.Trace().Bool("¿context == nil?", ctx == nil).Msg("executing root command with context...")
 
 	return root.ExecuteContext(ctx)
 }
+
+/*
+
+	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		if configPathInFlag == "" {
+			info, err := os.Stat(configPathInFlag)
+			if err != nil {
+				return err
+			}
+
+			if info.IsDir() {
+				return fmt.Errorf("the config file provided is a directory, lol")
+			}
+		}
+
+		return nil
+	}
+
+*/
 
 // config.FS.CacheDir
 

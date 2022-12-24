@@ -12,6 +12,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
+	"github.com/rs/zerolog"
 )
 
 type Core struct {
@@ -68,26 +69,45 @@ type (
 	}
 )
 
-func New() (*Core, error) {
+func New(logger *zerolog.Logger) (*Core, error) {
 	var config Core
 
-	config.Schema = "https://github.com/luisnquin/nao/docs/schema.json"
+	config.Schema = "https://github.com/luisnquin/nao/docs/schema.json" // ! deprecated
 
-	err := config.Load()
-	if err != nil {
+	logger.Trace().Msg("loading configuration...")
+
+	if err := config.Load(); err != nil {
+		logger.Error().Err(err).Msg("an error occurred while loading configuration")
+
 		if os.IsNotExist(err) {
+			logger.Debug().Msg("apparently the error was because there was no configuration file available, creating...")
+
+			logger.Debug().Msg("setting default configuration options...")
 			config.fillOrFix()
+
+			logger.Debug().Msg("configuring theme...")
 			config.adoptTheme(ui.DefaultTheme)
 
-			if err = config.Save(); err != nil {
+			logger.Debug().Msg("saving default configuration...")
+
+			err = config.Save()
+			if err != nil {
+				logger.Error().Err(err).Msg("unexpected error while saving configuration")
+
 				return nil, fmt.Errorf("unable to save configuration file, error: %w", err)
 			}
 
-			return New()
+			logger.Debug().Msg("making a recursive call to create a new configuration object")
+
+			return New(logger)
 		}
+
+		logger.Err(err).Msg("the error cannot be dealt with, sending a panic message")
 
 		panic(err)
 	}
+
+	logger.Trace().Msgf("loading '%s' theme or default", config.Theme)
 
 	switch config.Theme { // The configuration should not be updated for this
 	case "nord":
@@ -99,6 +119,8 @@ func New() (*Core, error) {
 	case "beach-day":
 		config.adoptTheme(ui.BeachDayTheme)
 	default:
+		logger.Trace().Msg("apparently the default theme")
+	
 		config.adoptTheme(ui.DefaultTheme)
 	}
 
