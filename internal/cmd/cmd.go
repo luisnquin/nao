@@ -72,11 +72,21 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 	return root.ExecuteContext(ctx)
 }
 
-func LifeTimeMiddleware(log *zerolog.Logger, commandName string, script Scriptor) Scriptor {
+func LifeTimeWrapper(log *zerolog.Logger, commandName string, script Scriptor) Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
 		defer log.Trace().Msgf("command '%s' life ended", commandName)
 
 		log.Trace().Int("nb of args", len(args)).Msgf("'%s' command has been called", commandName)
+
+		return script(cmd, args)
+	}
+}
+
+func PreRunWrapper(log *zerolog.Logger, script Scriptor) Scriptor {
+	return func(cmd *cobra.Command, args []string) error {
+		defer log.Trace().Msgf("preload script execution finished")
+
+		log.Trace().Msg("executing preload script...")
 
 		return script(cmd, args)
 	}

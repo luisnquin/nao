@@ -47,8 +47,8 @@ func BuildVersion(log *zerolog.Logger, config *config.Core) VersionCmd {
 		log:    log,
 	}
 
-	c.PreRunE = c.EnsureVersionFile()
-	c.RunE = LifeTimeMiddleware(log, "version", c.Main())
+	c.PreRunE = PreRunWrapper(log, c.EnsureVersionFile())
+	c.RunE = LifeTimeWrapper(log, "version", c.Main())
 
 	log.Trace().Msg("the 'version' command has been created")
 

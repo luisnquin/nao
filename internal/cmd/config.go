@@ -35,7 +35,7 @@ func BuildConfig(log *zerolog.Logger, config *config.Core) ConfigCmd {
 		log:    log,
 	}
 
-	c.RunE = LifeTimeMiddleware(log, "config", c.Main())
+	c.RunE = LifeTimeWrapper(log, "config", c.Main())
 	c.AddCommand(c.GetCommand(), c.SetCommand()) // TODO: inject logger
 
 	log.Trace().Msg("the 'config' command has been created")

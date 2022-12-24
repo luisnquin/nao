@@ -37,7 +37,7 @@ func BuildTag(log *zerolog.Logger, config *config.Core, data *data.Buffer) TagCm
 		log:    log,
 	}
 
-	c.RunE = LifeTimeMiddleware(log, "tag", c.Main())
+	c.RunE = LifeTimeWrapper(log, "tag", c.Main())
 
 	log.Trace().Msg("the 'tag' command has been created")
 
