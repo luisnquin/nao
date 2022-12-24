@@ -13,7 +13,12 @@ import (
 )
 
 func RunEditor(ctx context.Context, editor, filePath string, subCommands ...string) error {
-	_, err := os.Stat(filePath)
+	_, err := exec.LookPath(editor)
+	if err != nil {
+		return fmt.Errorf("unable to start editor, reason: %s", err.Error())
+	}
+
+	_, err = os.Stat(filePath)
 	if err != nil {
 		return fmt.Errorf("unable to stat file: %w", err)
 	}
