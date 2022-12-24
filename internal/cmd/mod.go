@@ -42,7 +42,7 @@ func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCm
 		log:    log,
 	}
 
-	c.RunE = c.Main()
+	c.RunE = LifeTimeMiddleware(log, "mod", c.Main())
 	log.Trace().Msg("the 'mod' command has been created")
 
 	flags := c.Flags()
@@ -57,10 +57,6 @@ func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCm
 
 func (c *ModCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		defer c.log.Trace().Msg("command 'mod' life ended")
-
-		c.log.Trace().Int("nb of args", len(args)).Msgf("'mod' command has been called")
-
 		notesRepo := store.NewNotesRepository(c.data)
 
 		var note models.Note

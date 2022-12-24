@@ -33,7 +33,7 @@ func BuildCat(log *zerolog.Logger, data *data.Buffer) CatCmd {
 		log:  log,
 	}
 
-	c.RunE = c.Main()
+	c.RunE = LifeTimeMiddleware(log, "cat", c.Main())
 
 	log.Trace().Msg("the 'cat' command has been created")
 
@@ -42,11 +42,7 @@ func BuildCat(log *zerolog.Logger, data *data.Buffer) CatCmd {
 
 func (c CatCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		defer c.log.Trace().Msg("command 'cat' life ended")
-
 		nbOfArgs := len(args)
-
-		c.log.Trace().Int("nb of args", nbOfArgs).Msgf("'cat' command has been called")
 
 		for i, arg := range args {
 			c.log.Trace().Msgf("searching key or tag '%s', %d/%d", arg, i+1, nbOfArgs)

@@ -40,7 +40,7 @@ func BuildRm(log *zerolog.Logger, config *config.Core, data *data.Buffer) *RmCmd
 		log:    log,
 	}
 
-	c.RunE = c.Main()
+	c.RunE = LifeTimeMiddleware(log, "rm", c.Main())
 
 	log.Trace().Msg("the 'rm' command has been created")
 
@@ -51,10 +51,6 @@ func BuildRm(log *zerolog.Logger, config *config.Core, data *data.Buffer) *RmCmd
 
 func (c *RmCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		defer c.log.Trace().Msg("command 'rm' life ended")
-
-		c.log.Trace().Int("nb of args", len(args)).Msgf("'rm' command has been called")
-
 		repo := store.NewNotesRepository(c.data)
 
 		keys := make([]string, 0, len(args))

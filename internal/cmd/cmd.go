@@ -72,6 +72,16 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 	return root.ExecuteContext(ctx)
 }
 
+func LifeTimeMiddleware(log *zerolog.Logger, commandName string, script Scriptor) Scriptor {
+	return func(cmd *cobra.Command, args []string) error {
+		defer log.Trace().Msgf("command '%s' life ended", commandName)
+
+		log.Trace().Int("nb of args", len(args)).Msgf("'%s' command has been called", commandName)
+
+		return script(cmd, args)
+	}
+}
+
 /*
 
 	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {

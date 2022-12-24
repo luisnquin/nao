@@ -40,7 +40,7 @@ func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCm
 		log:    log,
 	}
 
-	c.RunE = c.Main()
+	c.RunE = LifeTimeMiddleware(log, "new", c.Main())
 
 	log.Trace().Msg("the 'new' command has been created")
 
@@ -54,10 +54,6 @@ func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCm
 
 func (c *NewCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		defer c.log.Trace().Msg("command 'new' life ended")
-
-		c.log.Trace().Int("nb of args", len(args)).Msgf("'new' command has been called")
-
 		notesRepo := store.NewNotesRepository(c.data)
 
 		if len(args) != 0 && c.tag == "" {

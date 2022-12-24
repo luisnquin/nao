@@ -48,7 +48,7 @@ func BuildVersion(log *zerolog.Logger, config *config.Core) VersionCmd {
 	}
 
 	c.PreRunE = c.EnsureVersionFile()
-	c.RunE = c.Main()
+	c.RunE = LifeTimeMiddleware(log, "version", c.Main())
 
 	log.Trace().Msg("the 'version' command has been created")
 
@@ -57,10 +57,6 @@ func BuildVersion(log *zerolog.Logger, config *config.Core) VersionCmd {
 
 func (c VersionCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		defer c.log.Trace().Msg("command 'version' life ended")
-
-		c.log.Trace().Int("nb of args", len(args)).Msgf("'version' command has been called")
-
 		var b strings.Builder
 
 		b.WriteString("nao (")
