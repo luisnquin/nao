@@ -7,9 +7,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"runtime"
+	"strings"
 
 	"github.com/ProtonMail/go-appdir"
-
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/rs/zerolog"
@@ -23,6 +24,8 @@ type Core struct {
 	Command CommandOptions `yaml:"-"`
 	FS      FSConfig       `yaml:"-"`
 	Colors  ui.Colors      `yaml:"-"` // ???
+
+	log *zerolog.Logger
 }
 
 type FSConfig struct {
@@ -88,7 +91,7 @@ type (
 */
 
 func New(logger *zerolog.Logger) (*Core, error) {
-	var config Core
+	config := Core{log: logger}
 
 	if err := config.Load(); err != nil {
 		logger.Error().Err(err).Msg("an error occurred while loading configuration")
@@ -153,29 +156,49 @@ func (c *Core) Load() error {
 		DataDir:    dataDir,
 	}
 
-	info, err := os.Stat(c.FS.ConfigFile)
-	if err != nil {
-		return err
+	files := []string{c.FS.ConfigFile}
+
+	if strings.HasPrefix(runtime.GOOS, "linux") {
+		files = append(files, "/etc/nao/config.yml")
 	}
 
-	if info.IsDir() {
-		ui.Fatalf("config file %s is a directory", c.FS.ConfigFile).
-			Suggest("delete the directory")
+	c.log.Trace().Strs("target configuration files", files).Msg("reading...")
 
-		os.Exit(1)
-	}
+	for _, file := range files {
+		info, err := os.Stat(file)
+		if err != nil {
+			c.log.Err(err).Str("file", file).Msg("failed attempt to stat, skipping...")
 
-	data, err := os.ReadFile(c.FS.ConfigFile)
-	if err != nil && !errors.Is(err, io.EOF) {
-		return err
-	}
+			continue
+		}
 
-	err = yaml.Unmarshal(data, c)
-	if err != nil {
-		ui.Fatalf("config file %s is not a valid yaml", c.FS.ConfigFile).
-			Suggest("fix or delete the file")
+		if info.IsDir() {
+			c.log.Trace().Msg("why is the config file a directory? exiting...")
 
-		os.Exit(1)
+			ui.Fatalf("config file %s is a directory", file).Suggest("delete the directory")
+			os.Exit(1)
+		}
+
+		c.log.Trace().Str("file", file).Msg("loading configuration file...")
+
+		data, err := os.ReadFile(file)
+		if err != nil && !errors.Is(err, io.EOF) {
+			c.log.Err(err).Msg("unexpected error")
+
+			return err
+		}
+
+		c.log.Trace().Msg("encoding configuration file data...")
+
+		err = yaml.Unmarshal(data, c)
+		if err != nil {
+			c.log.Trace().Str("file", file).Msg("config file is not a valid yaml")
+
+			ui.Fatalf("config file %s is not a valid yaml", file).Suggest("fix or delete the file")
+			os.Exit(1)
+		}
+
+		c.log.Trace().Msg("file loaded into memory successfully")
 	}
 
 	return nil
@@ -198,6 +221,8 @@ func (c *Core) fillOrFix() {
 	if !utils.Contains(ui.Themes, c.Theme) {
 		c.Theme = "default"
 	}
+
+	c.log.Trace().Str("editor", c.Editor.Name).Str("theme", c.Theme).Send()
 }
 
 func (c *Core) adoptTheme(theme *ui.Colors) {
