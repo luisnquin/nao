@@ -72,7 +72,11 @@ func (c *LsCmd) Main() Scriptor {
 			keySize = c.config.Command.Ls.KeySize
 		}
 
+		c.log.Trace().Int("key size", keySize).Send()
+
 		if c.quiet {
+			c.log.Trace().Msg("listing all the note keys in quiet mode...")
+
 			for key := range notesRepo.IterKey() {
 				if c.long {
 					fmt.Fprintln(os.Stdout, key)
@@ -94,7 +98,13 @@ func (c *LsCmd) Main() Scriptor {
 		//	}
 		//}
 
+		c.log.Trace().Strs("ls columns", c.config.Command.Ls.Columns)
+
+		c.log.Trace().Msg("fetching notes from store")
+
 		notes := notesRepo.Slice()
+
+		c.log.Trace().Msg("loading printers faces of all available columns")
 
 		colors := map[string]color.PrinterFace{
 			"ID":            c.ColorOrNop(c.config.Colors.Three),
@@ -106,9 +116,13 @@ func (c *LsCmd) Main() Scriptor {
 			"VERSION":       c.ColorOrNop(c.config.Colors.Nine),
 		}
 
+		c.log.Trace().Msg("sorting notes by last update")
+
 		sort.SliceStable(notes, func(i, j int) bool {
 			return notes[i].LastUpdate.After(notes[j].LastUpdate)
 		})
+
+		c.log.Trace().Msg("creating table rows from notes, printer faces and configuration")
 
 		rows := make([]table.Row, len(notes))
 
@@ -144,6 +158,8 @@ func (c *LsCmd) Main() Scriptor {
 			rows[i] = row
 		}
 
+		c.log.Trace().Msg("creating table header")
+
 		// We prepare the header and rows
 		header := make(table.Row, len(c.config.Command.Ls.Columns))
 		headerColorizer := c.ColorOrNop(c.config.Colors.Two)
@@ -151,6 +167,8 @@ func (c *LsCmd) Main() Scriptor {
 		for i, column := range c.config.Command.Ls.Columns {
 			header[i] = headerColorizer.Sprint(column)
 		}
+
+		c.log.Trace().Msg("creating table")
 
 		// Table build and render
 		t := table.NewWriter()
@@ -166,6 +184,8 @@ func (c *LsCmd) Main() Scriptor {
 			},
 			Options: table.OptionsNoBordersAndSeparators,
 		})
+
+		c.log.Trace().Msg("rendering table...")
 
 		t.Render()
 
