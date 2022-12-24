@@ -5,6 +5,6 @@ editor:
     extraArgs: []
 # Possible values: default, nord, part, beach-day, skip
 theme: default
-# Your default keystore tool will provide us a key to 
-# decrypt and encrypt your content
+# Your default keystore tool will provide us a key to  decrypt and encrypt your content
+# To see more about the supported wallets, see: https://github.com/99designs/keyring
 encrypt: false

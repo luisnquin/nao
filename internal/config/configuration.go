@@ -9,6 +9,7 @@ import (
 	"path"
 
 	"github.com/ProtonMail/go-appdir"
+
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/rs/zerolog"
@@ -60,6 +61,31 @@ type (
 		Ommit bool   `yaml:"ommit"`
 	}
 )
+
+/*
+	go get github.com/99designs/keyring@latest
+	go get "github.com/google/uuid@latest
+
+	keyStore, err := keyring.Open(keyring.Config{
+		ServiceName: "nao",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = keyStore.Set(keyring.Item{
+		Key:  "secret-key",
+		Data: []byte(uuid.NewString()),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	item, err := keyStore.Get("secret-key")
+	if err != nil {
+		return nil, err
+	}
+*/
 
 func New(logger *zerolog.Logger) (*Core, error) {
 	var config Core
