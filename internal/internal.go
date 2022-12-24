@@ -20,9 +20,8 @@ var (
 
 // Global flags.
 var (
-	ConfigFile string
-	NoColor    bool
-	Debug      bool = utils.Contains(os.Args, "--debug")
+	NoColor bool
+	Debug   bool = utils.Contains(os.Args, "--debug")
 )
 
 const (

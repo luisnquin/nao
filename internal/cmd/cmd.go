@@ -43,7 +43,6 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 
 	permFlags := root.PersistentFlags()
 	permFlags.BoolVar(new(bool), "debug", false, "enable debug output, everything is written to stderr")
-	permFlags.StringVar(&internal.ConfigFile, "file", "", "specify an alternate config file")
 	permFlags.BoolVar(&internal.NoColor, "no-color", false, "disable colorized output")
 
 	log.Trace().Msg("debug, file, no-color has been added as persistent flags")
