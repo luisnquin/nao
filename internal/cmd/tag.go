@@ -3,20 +3,24 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/store"
 	"github.com/luisnquin/nao/v3/internal/store/tagutils"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type TagCmd struct {
 	*cobra.Command
+
+	log    *zerolog.Logger
 	config *config.Core
 	data   *data.Buffer
 }
 
-func BuildTag(config *config.Core, data *data.Buffer) TagCmd {
+func BuildTag(log *zerolog.Logger, config *config.Core, data *data.Buffer) TagCmd {
 	c := TagCmd{
 		Command: &cobra.Command{
 			Use:           "tag <old> <new>",
@@ -30,6 +34,7 @@ func BuildTag(config *config.Core, data *data.Buffer) TagCmd {
 		},
 		config: config,
 		data:   data,
+		log:    log,
 	}
 
 	c.RunE = c.Main()
@@ -47,7 +52,7 @@ func (c *TagCmd) Main() Scriptor {
 			return fmt.Errorf("tag %s is not valid: %w", args[1], err)
 		}
 
-		key, err := SearchByPattern(args[0], c.data)
+		key, err := internal.SearchByPattern(args[0], c.data)
 		if err != nil {
 			return err
 		}

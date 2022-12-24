@@ -15,19 +15,22 @@ import (
 	"github.com/luisnquin/nao/v3/internal/store"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"github.com/xeonx/timeago"
 )
 
 type LsCmd struct {
 	*cobra.Command
+
+	log    *zerolog.Logger
 	config *config.Core
 	data   *data.Buffer
 	quiet  bool
 	long   bool
 }
 
-func BuildLs(config *config.Core, data *data.Buffer) LsCmd {
+func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd {
 	c := LsCmd{
 		Command: &cobra.Command{
 			Use:           "ls",
@@ -41,6 +44,7 @@ func BuildLs(config *config.Core, data *data.Buffer) LsCmd {
 		},
 		config: config,
 		data:   data,
+		log:    log,
 	}
 
 	c.RunE = c.Main()

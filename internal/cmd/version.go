@@ -12,12 +12,15 @@ import (
 	"github.com/gookit/color"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/ui"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type VersionCmd struct {
 	// config *config.ConfigV2
 	*cobra.Command
+
+	log    *zerolog.Logger
 	config *config.Core
 }
 
@@ -35,7 +38,7 @@ const (
 	version = "v3.0.0"
 )
 
-func BuildVersion(config *config.Core) VersionCmd {
+func BuildVersion(log *zerolog.Logger, config *config.Core) VersionCmd {
 	c := VersionCmd{
 		Command: &cobra.Command{
 			Use:     "version",
@@ -44,6 +47,7 @@ func BuildVersion(config *config.Core) VersionCmd {
 			PreRunE: nil,
 		},
 		config: config,
+		log:    log,
 	}
 
 	c.PreRunE = c.EnsureVersionFile()

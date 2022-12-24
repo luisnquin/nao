@@ -4,22 +4,26 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/store"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type RmCmd struct {
 	*cobra.Command
+
+	log    *zerolog.Logger
 	config *config.Core
 	data   *data.Buffer
 	yes    bool
 }
 
-func BuildRm(config *config.Core, data *data.Buffer) *RmCmd {
+func BuildRm(log *zerolog.Logger, config *config.Core, data *data.Buffer) *RmCmd {
 	c := &RmCmd{
 		Command: &cobra.Command{
 			Use:           "rm [<id> | <tag>]...",
@@ -33,6 +37,7 @@ func BuildRm(config *config.Core, data *data.Buffer) *RmCmd {
 		},
 		config: config,
 		data:   data,
+		log:    log,
 	}
 
 	c.RunE = c.Main()
@@ -52,7 +57,7 @@ func (r *RmCmd) Main() Scriptor {
 		maxSize := 0
 
 		for _, arg := range args {
-			key, err := SearchByPattern(arg, r.data)
+			key, err := internal.SearchByPattern(arg, r.data)
 			if err != nil {
 				return err
 			}

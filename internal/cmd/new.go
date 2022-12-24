@@ -7,14 +7,18 @@ import (
 	"time"
 
 	"github.com/cip8/autoname"
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/store"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type NewCmd struct {
 	*cobra.Command
+
+	log    *zerolog.Logger
 	config *config.Core
 	data   *data.Buffer
 	editor string
@@ -22,7 +26,7 @@ type NewCmd struct {
 	tag    string
 }
 
-func BuildNew(config *config.Core, data *data.Buffer) NewCmd {
+func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCmd {
 	c := NewCmd{
 		Command: &cobra.Command{
 			Use:           "new",
@@ -33,6 +37,7 @@ func BuildNew(config *config.Core, data *data.Buffer) NewCmd {
 		},
 		config: config,
 		data:   data,
+		log:    log,
 	}
 
 	c.RunE = c.Main()
@@ -73,7 +78,7 @@ func (n *NewCmd) Main() Scriptor {
 		defer os.Remove(path)
 
 		if n.from != "" {
-			key, err := SearchByPattern(n.from, n.data)
+			key, err := internal.SearchByPattern(n.from, n.data)
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,6 @@
 package store
 
 import (
-	"errors"
 	"sync"
 	"time"
 
@@ -10,11 +9,6 @@ import (
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/models"
 	"github.com/luisnquin/nao/v3/internal/store/tagutils"
-)
-
-var (
-	ErrNoAvailableNotes = errors.New("no available notes available")
-	ErrNoteNotFound     = errors.New("note not found")
 )
 
 type NotesRepository struct {
@@ -32,7 +26,7 @@ func NewNotesRepository(data *data.Buffer) NotesRepository {
 func (r NotesRepository) LastAccessed() (models.Note, error) {
 	note, ok := r.data.Notes[r.data.Metadata.LastAccess.Key]
 	if !ok {
-		return note, ErrNoteNotFound
+		return note, internal.ErrNoteNotFound
 	}
 
 	note.Key = r.data.Metadata.LastAccess.Key
@@ -118,13 +112,13 @@ func (r NotesRepository) Random() (models.Note, error) {
 		return note, nil
 	}
 
-	return models.Note{}, ErrNoAvailableNotes
+	return models.Note{}, internal.ErrNoAvailableNotes
 }
 
 func (r NotesRepository) Get(key string) (models.Note, error) {
 	note, ok := r.data.Notes[key]
 	if !ok {
-		return note, ErrNoteNotFound
+		return note, internal.ErrNoteNotFound
 	}
 
 	r.data.Metadata.LastAccess = data.KeyTag{
@@ -196,7 +190,7 @@ func (r NotesRepository) New(content string, options ...Option) (string, error) 
 func (r NotesRepository) Replace(key string, note models.Note) error {
 	_, ok := r.data.Notes[key]
 	if !ok {
-		return ErrNoteNotFound
+		return internal.ErrNoteNotFound
 	}
 
 	r.data.Notes[key] = note
@@ -207,7 +201,7 @@ func (r NotesRepository) Replace(key string, note models.Note) error {
 func (r NotesRepository) ModifyContent(key, content string, timeSpent time.Duration) error {
 	note, ok := r.data.Notes[key]
 	if !ok {
-		return ErrNoteNotFound
+		return internal.ErrNoteNotFound
 	}
 
 	note.LastUpdate = time.Now()
@@ -223,7 +217,7 @@ func (r NotesRepository) ModifyContent(key, content string, timeSpent time.Durat
 func (r NotesRepository) ModifyTag(key, tag string) error {
 	note, ok := r.data.Notes[key]
 	if !ok {
-		return ErrNoteNotFound
+		return internal.ErrNoteNotFound
 	}
 
 	if err := r.tag.IsValidAsNew(tag); err != nil {
@@ -242,7 +236,7 @@ func (r NotesRepository) ModifyTag(key, tag string) error {
 func (r NotesRepository) Delete(key string) error {
 	_, ok := r.data.Notes[key]
 	if !ok {
-		return ErrNoteNotFound
+		return internal.ErrNoteNotFound
 	}
 
 	delete(r.data.Notes, key)

@@ -5,22 +5,26 @@ import (
 	"os"
 	"time"
 
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/models"
 	"github.com/luisnquin/nao/v3/internal/store"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type ModCmd struct {
 	*cobra.Command
+
+	log    *zerolog.Logger
 	config *config.Core
 	data   *data.Buffer
 	latest bool
 	editor string
 }
 
-func BuildMod(config *config.Core, data *data.Buffer) ModCmd {
+func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCmd {
 	c := ModCmd{
 		Command: &cobra.Command{
 			Use:   "mod [<id> | <tag>]",
@@ -34,6 +38,7 @@ func BuildMod(config *config.Core, data *data.Buffer) ModCmd {
 		},
 		config: config,
 		data:   data,
+		log:    log,
 	}
 
 	c.RunE = c.Main()
@@ -56,7 +61,7 @@ func (e *ModCmd) Main() Scriptor {
 
 		switch {
 		case len(args) == 1:
-			key, err := SearchByPattern(args[0], e.data)
+			key, err := internal.SearchByPattern(args[0], e.data)
 			if err != nil {
 				return err
 			}

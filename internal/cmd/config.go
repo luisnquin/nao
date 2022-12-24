@@ -11,15 +11,18 @@ import (
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/manifoldco/promptui"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type ConfigCmd struct {
 	*cobra.Command
+
 	config *config.Core
+	log    *zerolog.Logger
 }
 
-func BuildConfig(config *config.Core) ConfigCmd {
+func BuildConfig(log *zerolog.Logger, config *config.Core) ConfigCmd {
 	c := ConfigCmd{
 		Command: &cobra.Command{
 			Use:           "config",
@@ -29,6 +32,7 @@ func BuildConfig(config *config.Core) ConfigCmd {
 			SilenceUsage:  true,
 		},
 		config: config,
+		log:    log,
 	}
 
 	c.RunE = c.Main()

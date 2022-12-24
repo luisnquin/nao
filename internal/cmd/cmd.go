@@ -49,14 +49,14 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 	log.Trace().Msg("adding commands to root")
 
 	root.AddCommand(
-		BuildCat(data).Command,
-		BuildConfig(config).Command,
-		BuildLs(config, data).Command,
-		BuildMod(config, data).Command,
-		BuildNew(config, data).Command,
-		BuildRm(config, data).Command,
-		BuildTag(config, data).Command,
-		BuildVersion(config).Command,
+		BuildCat(log, data).Command,
+		BuildConfig(log, config).Command,
+		BuildLs(log, config, data).Command,
+		BuildMod(log, config, data).Command,
+		BuildNew(log, config, data).Command,
+		BuildRm(log, config, data).Command,
+		BuildTag(log, config, data).Command,
+		BuildVersion(log, config).Command,
 	)
 
 	log.Trace().Msgf("%d children have been added to the root command", len(root.Commands()))
