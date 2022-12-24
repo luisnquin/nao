@@ -35,20 +35,33 @@ func BuildCat(log *zerolog.Logger, data *data.Buffer) CatCmd {
 
 	c.RunE = c.Main()
 
-	log.Trace().Msg("the cat command has been created")
+	log.Trace().Msg("the 'cat' command has been created")
 
 	return c
 }
 
 func (c CatCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		for _, arg := range args {
+		defer c.log.Trace().Msg("command 'cat' life ended")
+
+		nbOfArgs := len(args)
+
+		c.log.Trace().Int("nb of args", nbOfArgs).Msgf("'cat' command has been called")
+
+		for i, arg := range args {
+			c.log.Trace().Msgf("searching key or tag '%s', %d/%d", arg, i+1, nbOfArgs)
+
 			key, err := internal.SearchByPattern(arg, c.data)
 			if err != nil {
+				c.log.Err(err).Msgf("an error occurred while searching key/tag '%s", arg)
+
 				return err
 			}
 
 			note := c.data.Notes[key]
+
+			c.log.Trace().Str("key", key).Str("tag", note.Tag).Send()
+			c.log.Trace().Msg("sending note content to stdout...")
 
 			fmt.Fprintln(os.Stdout, note.Content)
 		}

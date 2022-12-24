@@ -49,6 +49,8 @@ func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd 
 
 	c.RunE = c.Main()
 
+	log.Trace().Msg("the 'ls' command has been created")
+
 	flags := c.Flags()
 	flags.BoolVarP(&c.long, "long", "l", false, "display the content as long as possible")
 	flags.BoolVarP(&c.quiet, "quiet", "q", false, "only display file ID's")
@@ -58,6 +60,10 @@ func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd 
 
 func (c *LsCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
+		defer c.log.Trace().Msg("command 'ls' life ended")
+
+		c.log.Trace().Int("nb of args", len(args)).Msgf("'ls' command has been called")
+
 		notesRepo := store.NewNotesRepository(c.data)
 
 		keySize := 10

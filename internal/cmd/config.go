@@ -36,14 +36,19 @@ func BuildConfig(log *zerolog.Logger, config *config.Core) ConfigCmd {
 	}
 
 	c.RunE = c.Main()
+	c.AddCommand(c.GetCommand(), c.SetCommand()) // TODO: inject logger
 
-	c.AddCommand(c.GetCommand(), c.SetCommand())
+	log.Trace().Msg("the 'config' command has been created")
 
 	return c
 }
 
 func (c *ConfigCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
+		defer c.log.Trace().Msg("command 'config' life ended")
+
+		c.log.Trace().Int("nb of args", len(args)).Msgf("'config' command has been called")
+
 		sort.SliceStable(ui.Themes, func(i, j int) bool {
 			return ui.Themes[i] == c.config.Theme
 		})

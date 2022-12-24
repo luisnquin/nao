@@ -39,11 +39,17 @@ func BuildTag(log *zerolog.Logger, config *config.Core, data *data.Buffer) TagCm
 
 	c.RunE = c.Main()
 
+	log.Trace().Msg("the 'tag' command has been created")
+
 	return c
 }
 
 func (c *TagCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
+		defer c.log.Trace().Msg("command 'tag' life ended")
+
+		c.log.Trace().Int("nb of args", len(args)).Msgf("'tag' command has been called")
+
 		notesRepo := store.NewNotesRepository(c.data)
 		tagutil := tagutils.New(c.data)
 

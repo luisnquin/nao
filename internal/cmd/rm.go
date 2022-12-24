@@ -42,14 +42,20 @@ func BuildRm(log *zerolog.Logger, config *config.Core, data *data.Buffer) *RmCmd
 
 	c.RunE = c.Main()
 
+	log.Trace().Msg("the 'rm' command has been created")
+
 	c.Flags().BoolVarP(&c.yes, "yes", "y", false, "to pretend to be sure")
 
 	return c
 }
 
-func (r *RmCmd) Main() Scriptor {
+func (c *RmCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		repo := store.NewNotesRepository(r.data)
+		defer c.log.Trace().Msg("command 'rm' life ended")
+
+		c.log.Trace().Int("nb of args", len(args)).Msgf("'rm' command has been called")
+
+		repo := store.NewNotesRepository(c.data)
 
 		keys := make([]string, 0, len(args))
 		tags := make([]string, 0, len(args))
@@ -57,7 +63,7 @@ func (r *RmCmd) Main() Scriptor {
 		maxSize := 0
 
 		for _, arg := range args {
-			key, err := internal.SearchByPattern(arg, r.data)
+			key, err := internal.SearchByPattern(arg, c.data)
 			if err != nil {
 				return err
 			}
@@ -73,17 +79,17 @@ func (r *RmCmd) Main() Scriptor {
 			keys = append(keys, key)
 		}
 
-		if !r.yes {
+		if !c.yes {
 			if len(keys) == 1 {
-				ui.YesOrNoPrompt(&r.yes, "Are you sure you want to delete this note %s(%s/%s)?", tags[0], keys[0][:10], utils.SizeToStorageUnits(maxSize))
+				ui.YesOrNoPrompt(&c.yes, "Are you sure you want to delete this note %s(%s/%s)?", tags[0], keys[0][:10], utils.SizeToStorageUnits(maxSize))
 			} else if len(keys) < 6 {
-				ui.YesOrNoPrompt(&r.yes, "Are you sure you want to delete %d notes(%s) %v?", len(keys), utils.SizeToStorageUnits(maxSize), tags)
+				ui.YesOrNoPrompt(&c.yes, "Are you sure you want to delete %d notes(%s) %v?", len(keys), utils.SizeToStorageUnits(maxSize), tags)
 			} else {
-				ui.YesOrNoPrompt(&r.yes, "Are you sure you want to delete %d notes(%s)?", len(keys), utils.SizeToStorageUnits(maxSize))
+				ui.YesOrNoPrompt(&c.yes, "Are you sure you want to delete %d notes(%s)?", len(keys), utils.SizeToStorageUnits(maxSize))
 			}
 		}
 
-		if !r.yes {
+		if !c.yes {
 			return nil
 		}
 

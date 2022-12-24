@@ -42,6 +42,8 @@ func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCm
 
 	c.RunE = c.Main()
 
+	log.Trace().Msg("the 'new' command has been created")
+
 	flags := c.Flags()
 	flags.StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
 	flags.StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
@@ -50,35 +52,39 @@ func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCm
 	return c
 }
 
-func (n *NewCmd) Main() Scriptor {
+func (c *NewCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		notesRepo := store.NewNotesRepository(n.data)
+		defer c.log.Trace().Msg("command 'new' life ended")
 
-		if len(args) != 0 && n.tag == "" {
-			n.tag = args[0]
+		c.log.Trace().Int("nb of args", len(args)).Msgf("'new' command has been called")
+
+		notesRepo := store.NewNotesRepository(c.data)
+
+		if len(args) != 0 && c.tag == "" {
+			c.tag = args[0]
 		}
 
-		if notesRepo.TagExists(n.tag) {
-			if n.data.Metadata.LastCreated.Tag == n.tag {
-				return fmt.Errorf("recently created tag, try 'nao mod %s' or remove it", n.tag)
+		if notesRepo.TagExists(c.tag) {
+			if c.data.Metadata.LastCreated.Tag == c.tag {
+				return fmt.Errorf("recently created tag, try 'nao mod %s' or remove it", c.tag)
 			}
 
-			return fmt.Errorf("tag already exists, try 'nao mod %s'", n.tag)
+			return fmt.Errorf("tag already exists, try 'nao mod %s'", c.tag)
 		}
 
 		// TODO: cobra.Max and with 'from'
 
 		// TODO: from, title
 
-		path, err := NewFileCached(n.config, "")
+		path, err := NewFileCached(c.config, "")
 		if err != nil {
 			return err
 		}
 
 		defer os.Remove(path)
 
-		if n.from != "" {
-			key, err := internal.SearchByPattern(n.from, n.data)
+		if c.from != "" {
+			key, err := internal.SearchByPattern(c.from, c.data)
 			if err != nil {
 				return err
 			}
@@ -96,7 +102,7 @@ func (n *NewCmd) Main() Scriptor {
 
 		start := time.Now()
 
-		err = RunEditor(cmd.Context(), n.getEditorName(), path)
+		err = RunEditor(cmd.Context(), c.getEditorName(), path)
 		if err != nil {
 			return err
 		}
@@ -110,11 +116,11 @@ func (n *NewCmd) Main() Scriptor {
 			return fmt.Errorf("empty content, will not be saved")
 		}
 
-		if n.tag == "" {
-			n.tag = autoname.Generate("-")
+		if c.tag == "" {
+			c.tag = autoname.Generate("-")
 		}
 
-		key, err := notesRepo.New(string(content), store.WithTag(n.tag), store.WithSpentTime(time.Now().Sub(start)))
+		key, err := notesRepo.New(string(content), store.WithTag(c.tag), store.WithSpentTime(time.Now().Sub(start)))
 		if err != nil {
 			return err
 		}

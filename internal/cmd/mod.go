@@ -42,6 +42,7 @@ func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCm
 	}
 
 	c.RunE = c.Main()
+	log.Trace().Msg("the 'mod' command has been created")
 
 	flags := c.Flags()
 	if !c.latest {
@@ -53,15 +54,19 @@ func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCm
 	return c
 }
 
-func (e *ModCmd) Main() Scriptor {
+func (c *ModCmd) Main() Scriptor {
 	return func(cmd *cobra.Command, args []string) error {
-		notesRepo := store.NewNotesRepository(e.data)
+		defer c.log.Trace().Msg("command 'mod' life ended")
+
+		c.log.Trace().Int("nb of args", len(args)).Msgf("'mod' command has been called")
+
+		notesRepo := store.NewNotesRepository(c.data)
 
 		var note models.Note
 
 		switch {
 		case len(args) == 1:
-			key, err := internal.SearchByPattern(args[0], e.data)
+			key, err := internal.SearchByPattern(args[0], c.data)
 			if err != nil {
 				return err
 			}
@@ -71,7 +76,7 @@ func (e *ModCmd) Main() Scriptor {
 				return err
 			}
 
-		case e.latest:
+		case c.latest:
 			var err error
 
 			note, err = notesRepo.LastAccessed()
@@ -83,14 +88,14 @@ func (e *ModCmd) Main() Scriptor {
 			return cmd.Usage()
 		}
 
-		filePath, err := NewFileCached(e.config, note.Content)
+		filePath, err := NewFileCached(c.config, note.Content)
 		cobra.CheckErr(err)
 
 		defer func() { cobra.CheckErr(os.Remove(filePath)) }()
 
 		start := time.Now()
 
-		err = RunEditor(cmd.Context(), e.getEditorName(), filePath) // args[1:]...)
+		err = RunEditor(cmd.Context(), c.getEditorName(), filePath) // args[1:]...)
 		if err != nil {
 			return err
 		}
