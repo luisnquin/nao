@@ -24,6 +24,11 @@ var (
 	Debug      bool = utils.Contains(os.Args, "--debug")
 )
 
+const (
+	Kind    = "azoricum"
+	Version = "v3.0.0"
+)
+
 func NewKey() string {
 	return strings.ReplaceAll(uuid.NewString(), "-", "")
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/goccy/go-json"
 	"github.com/gookit/color"
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/rs/zerolog"
@@ -32,11 +33,7 @@ type githubTagInfo struct {
 	Name string `json:"name"`
 }
 
-const (
-	tagsUrl = "https://api.github.com/repos/luisnquin/nao/tags"
-	kind    = "azoricum"
-	version = "v3.0.0"
-)
+const tagsUrl = "https://api.github.com/repos/luisnquin/nao/tags"
 
 func BuildVersion(log *zerolog.Logger, config *config.Core) VersionCmd {
 	c := VersionCmd{
@@ -61,9 +58,9 @@ func (c VersionCmd) Main() Scriptor {
 		var b strings.Builder
 
 		b.WriteString("nao (")
-		b.WriteString(kind)
+		b.WriteString(internal.Kind)
 		b.WriteString(") ")
-		b.WriteString(version)
+		b.WriteString(internal.Version)
 		b.WriteString(", ")
 
 		f, err := os.Open(path.Join(c.config.FS.CacheDir, "version_info.json"))
@@ -80,7 +77,7 @@ func (c VersionCmd) Main() Scriptor {
 				return err
 			}
 
-			binaryVersion := semver.MustParse(version)
+			binaryVersion := semver.MustParse(internal.Version)
 
 			if remoteVersion.GreaterThan(binaryVersion) {
 				b.WriteString("outdated ")

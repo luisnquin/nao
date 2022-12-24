@@ -74,8 +74,6 @@ func New(logger *zerolog.Logger) (*Core, error) {
 
 	config.Schema = "https://github.com/luisnquin/nao/docs/schema.json" // ! deprecated
 
-	logger.Trace().Msg("loading configuration...")
-
 	if err := config.Load(); err != nil {
 		logger.Error().Err(err).Msg("an error occurred while loading configuration")
 
@@ -120,7 +118,7 @@ func New(logger *zerolog.Logger) (*Core, error) {
 		config.adoptTheme(ui.BeachDayTheme)
 	default:
 		logger.Trace().Msg("apparently the default theme")
-	
+
 		config.adoptTheme(ui.DefaultTheme)
 	}
 

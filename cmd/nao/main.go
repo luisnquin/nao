@@ -30,8 +30,16 @@ func main() {
 
 	ctx := context.Background()
 
+	logger.Trace().
+		Str("version", internal.Version).
+		Str("kind", internal.Kind).Send()
+
+	logger.Trace().Msg("loading configuration...")
+
 	config, err := config.New(&logger)
 	if err != nil {
+		logger.Err(err).Msg("an error was encountered while loading configuration...")
+
 		ui.Error(err.Error())
 		os.Exit(1)
 	}
@@ -40,6 +48,8 @@ func main() {
 
 	data, err := data.NewBuffer(config)
 	if err != nil {
+		logger.Err(err).Msg("an error was encountered while loading data...")
+
 		ui.Error(err.Error())
 		os.Exit(1)
 	}
