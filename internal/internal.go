@@ -7,10 +7,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/agnivade/levenshtein"
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/utils"
-	"github.com/sc0vu/didyoumean"
 )
 
 var (
@@ -78,10 +78,34 @@ func SearchByPattern(pattern string, data *data.Buffer) (string, error) {
 		opts = append(opts, n.Tag)
 	}
 
-	bestMatch := didyoumean.FirstMatch(pattern, opts)
+	bestMatch := BestMatch(opts, pattern)
 	if bestMatch != "" {
 		return "", fmt.Errorf("key not found, did you mean '%s'?", bestMatch)
 	}
 
 	return "", ErrNoteNotFound
+}
+
+// Using the levenshtein distance algorithm, it returns
+// the best candidate between the options to match with
+// the argument of `toInspect`.
+//
+// If returns an empty result in case the nearest distance
+// is greater than 3.
+func BestMatch(options []string, toInspect string) string {
+	bestCandidate, nearestDistance := "", 100
+
+	for _, opt := range options {
+		currentDistance := levenshtein.ComputeDistance(toInspect, opt)
+
+		if currentDistance < nearestDistance {
+			bestCandidate, nearestDistance = opt, currentDistance
+		}
+	}
+
+	if nearestDistance <= 3 {
+		return bestCandidate
+	}
+
+	return ""
 }

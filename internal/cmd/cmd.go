@@ -8,7 +8,6 @@ import (
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/rs/zerolog"
-	"github.com/sc0vu/didyoumean"
 	"github.com/spf13/cobra"
 )
 
@@ -35,11 +34,6 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 	}
 
 	log.Trace().Msg("root command has been created")
-
-	didyoumean.ThresholdRate = 0.9
-
-	log.Trace().Float64("threshold rate", didyoumean.ThresholdRate).
-		Msg("modified 'didyomean' threshold rate")
 
 	permFlags := root.PersistentFlags()
 	permFlags.BoolVar(new(bool), "debug", false, "enable debug output, everything is written to stderr")
