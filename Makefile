@@ -1,5 +1,3 @@
-last_tag_released=$(shell git tag | tail -n 1)
-
 .PHONY: build
 build:
 	@go build  -o ./build/nao ./cmd/nao/
@@ -16,8 +14,8 @@ sync:
 install:
 	@go install ./cmd/nao/
 
-install-remote:
-	@go install github.com/luisnquin/nao/v3/cmd/nao/@$(last_tag_released)
+uninstall:
+	@rm -f ~/go/bin/nao
 
 style: 
 	@gofumpt -w ./internal
