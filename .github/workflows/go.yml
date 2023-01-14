@@ -1,10 +1,6 @@
 name: Go
 
-on:
-    push:
-        branches: ['main', 'dev']
-    pull_request:
-        branches: ['main']
+on: [push, pull_request]
 
 permissions:
     # required for all workflows
@@ -28,13 +24,23 @@ jobs:
 
             - name: Build
               run: go build -v ./...
-    test:
-        name: tests
-        runs-on: ubuntu-20.04
-        # permissions:
-        #     # required for all workflows
-        #     security-events: write
 
+    gofumpt:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-go@v2
+              with:
+                  go-version: latest
+            - name: Install gofumpt
+              run: |
+                  go get -u mvdan.cc/gofumpt
+            - name: Check and format .go files
+              run: |
+                  gofumpt -s -d *.go
+                  gofumpt -w *.go
+    test:
+        runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v3
             - name: Set up Go
