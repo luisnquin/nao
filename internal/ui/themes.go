@@ -1,33 +1,56 @@
 package ui
 
-type (
-	Colors struct {
-		One   string // Version
-		Two   string // Header
-		Three string // Tag
-		Four  string // ID
-		Five  string // LastUpdate
-		Six   string // Size
-		Seven string // Version
-		Eight string
-		Nine  string
-	}
+type Colors struct {
+	One   string
+	Two   string
+	Three string
+	Four  string
+	Five  string
+	Six   string
+	Seven string
+	Eight string
+	Nine  string
+}
+
+func (c *Colors) Schema() []string {
+	return []string{c.One, c.Two, c.Three, c.Four, c.Five, c.Six, c.Seven, c.Eight, c.Nine}
+}
+
+// Theme names.
+const (
+	RosePineDawn = "rose-pine-dawn"
+	RosePineMoon = "rose-pine-moon"
+	BeachDay     = "beach-day"
+	StdRosePine  = "rose-pine"
+	Nop          = "no-theme"
+	Default      = "default"
+	Party        = "party"
+	Nord         = "nord"
 )
 
-var Themes = []string{"default", "party", "nord", "beach-day", "skip"}
+func GetThemesList() []string {
+	return []string{
+		Default, Party, Nord, BeachDay, RosePineDawn,
+		RosePineMoon, StdRosePine, Nop,
+	}
+}
 
-var (
-	DefaultTheme = &Colors{
+var NoTheme = new(Colors)
+
+func GetDefaultTheme() *Colors {
+	return &Colors{
 		One:   "#5ec2d6",
-		Two:   "#715399",
-		Three: "#89bfc9",
+		Two:   "#7a4de3",
+		Three: "#5094d9",
 		Four:  "#ded9d9",
 		Five:  "#ded9d9",
 		Six:   "#ded9d9",
 		Seven: "#CBC5EA",
 	}
+}
 
-	NordTheme = &Colors{
+func GetNordTheme() *Colors {
+	return &Colors{
 		One:   "#5E81AC",
 		Two:   "#88C0D0",
 		Three: "#5E81AC",
@@ -36,8 +59,10 @@ var (
 		Six:   "#95969c",
 		Seven: "#8FBCBB",
 	}
+}
 
-	PartyTheme = &Colors{
+func GetPartyTheme() *Colors {
+	return &Colors{
 		One:   "#F7DB69",
 		Two:   "#2bd7e0",
 		Three: "#F7DB69",
@@ -46,8 +71,10 @@ var (
 		Six:   "#ba88db",
 		Seven: "#EC1B4B",
 	}
+}
 
-	BeachDayTheme = &Colors{
+func GetBeachDayTheme() *Colors {
+	return &Colors{
 		One:   "#7cebe9",
 		Two:   "#e0ffcd",
 		Three: "#fbfae1",
@@ -56,6 +83,50 @@ var (
 		Six:   "#ffcab0",
 		Seven: "#f1efb9",
 	}
+}
 
-	NoTheme = new(Colors)
-)
+// Rose pine reference: https://rosepinetheme.com/palette
+
+func GetRosePineTheme() *Colors {
+	return &Colors{
+		One:   "#ebbcba", // Rose
+		Two:   "#9ccfd8", // Foam
+		Three: "#f6c177", // Gold
+		Four:  "#c4a7e7", // Iris
+		Five:  "#e1e8e4", // Custom(like gray)
+		Six:   "#e0def4", // Text
+		Seven: "#eb6f92", // Love
+		Eight: "#31748f", // Pine
+		Nine:  "#908caa", // Subtle
+	}
+}
+
+func GetRosePineDawnTheme() *Colors {
+	return &Colors{
+		One:   "#ea9a97", // Rose
+		Two:   "#9ccfd8", // Foam
+		Three: "#f6c177", // Gold
+		Four:  "#c4a7e7", // Iris
+		Five:  "#e1e8e4", // Custom(like gray)
+		Six:   "#e0def4", // Text
+		Seven: "#eb6f92", // Love
+		Eight: "#3e8fb0", // Pine
+		Nine:  "#908caa", // Subtle
+	}
+}
+
+// Awful theme, fix
+
+func GetRosePineMoonTheme() *Colors {
+	return &Colors{
+		One:   "#d7827e", // Rose
+		Two:   "#56949f", // Foam
+		Three: "#ea9d34", // Gold
+		Four:  "#907aa9", // Iris
+		Five:  "#f2e9e1", // Overlay
+		Six:   "#575279", // Text
+		Seven: "#b4637a", // Love
+		Eight: "#286983", // Pine
+		Nine:  "#797593", // Subtle
+	}
+}
