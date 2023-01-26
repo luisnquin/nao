@@ -103,7 +103,7 @@ func New(logger *zerolog.Logger) (*Core, error) {
 			config.fillOrFix()
 
 			logger.Debug().Msg("configuring theme...")
-			config.adoptTheme(ui.DefaultTheme)
+			// config.adoptTheme(ui.GetDefaultTheme())
 
 			logger.Debug().Msg("saving default configuration...")
 
@@ -127,18 +127,24 @@ func New(logger *zerolog.Logger) (*Core, error) {
 	logger.Trace().Msgf("loading '%s' theme or default", config.Theme)
 
 	switch config.Theme { // The configuration should not be updated for this
-	case "nord":
-		config.adoptTheme(ui.NordTheme)
-	case "skip":
+	case ui.Nord:
+		config.adoptTheme(ui.GetNordTheme())
+	case ui.Nop:
 		config.adoptTheme(ui.NoTheme)
-	case "party":
-		config.adoptTheme(ui.PartyTheme)
-	case "beach-day":
-		config.adoptTheme(ui.BeachDayTheme)
+	case ui.Party:
+		config.adoptTheme(ui.GetPartyTheme())
+	case ui.BeachDay:
+		config.adoptTheme(ui.GetBeachDayTheme())
+	case ui.StdRosePine:
+		config.adoptTheme(ui.GetRosePineTheme())
+	case ui.RosePineDawn:
+		config.adoptTheme(ui.GetRosePineDawnTheme())
+	case ui.RosePineMoon:
+		config.adoptTheme(ui.GetRosePineMoonTheme())
 	default:
 		logger.Trace().Msg("apparently the default theme")
 
-		config.adoptTheme(ui.DefaultTheme)
+		config.adoptTheme(ui.GetDefaultTheme())
 	}
 
 	return &config, nil
@@ -218,8 +224,8 @@ func (c *Core) fillOrFix() {
 		c.Editor.Name = "nano"
 	}
 
-	if !utils.Contains(ui.Themes, c.Theme) {
-		c.Theme = "default"
+	if !utils.Contains(ui.GetThemesList(), c.Theme) {
+		c.Theme = ui.Default
 	}
 
 	c.log.Trace().Str("editor", c.Editor.Name).Str("theme", c.Theme).Send()
