@@ -1,6 +1,9 @@
 package ui
 
+import "strings"
+
 type Colors struct {
+	Name  string
 	One   string
 	Two   string
 	Three string
@@ -12,8 +15,18 @@ type Colors struct {
 	Nine  string
 }
 
-func (c *Colors) Schema() []string {
+func (c *Colors) SchemaList() []string {
 	return []string{c.One, c.Two, c.Three, c.Four, c.Five, c.Six, c.Seven, c.Eight, c.Nine}
+}
+
+func (c *Colors) PrettySchema() string {
+	var b strings.Builder
+
+	for _, color := range c.SchemaList() {
+		b.WriteString(GetPrinter(color).Sprint("███"))
+	}
+
+	return b.String()
 }
 
 // Theme names.
@@ -21,17 +34,35 @@ const (
 	RosePineDawn = "rose-pine-dawn"
 	RosePineMoon = "rose-pine-moon"
 	BeachDay     = "beach-day"
-	StdRosePine  = "rose-pine"
+	RosePine     = "rose-pine"
 	Nop          = "no-theme"
 	Default      = "default"
 	Party        = "party"
 	Nord         = "nord"
 )
 
-func GetThemesList() []string {
+func GetThemeNames() []string {
 	return []string{
-		Default, Party, Nord, BeachDay, RosePineDawn,
-		RosePineMoon, StdRosePine, Nop,
+		Default,
+		Party,
+		Nord,
+		BeachDay,
+		RosePineDawn,
+		RosePineMoon,
+		RosePine,
+		Nop,
+	}
+}
+
+func GetThemes() []*Colors {
+	return []*Colors{
+		GetDefaultTheme(),
+		GetNordTheme(),
+		GetPartyTheme(),
+		GetBeachDayTheme(),
+		GetRosePineTheme(),
+		GetRosePineDawnTheme(),
+		GetRosePineMoonTheme(),
 	}
 }
 
@@ -39,6 +70,7 @@ var NoTheme = new(Colors)
 
 func GetDefaultTheme() *Colors {
 	return &Colors{
+		Name:  Default,
 		One:   "#5ec2d6",
 		Two:   "#7a4de3",
 		Three: "#5094d9",
@@ -51,6 +83,7 @@ func GetDefaultTheme() *Colors {
 
 func GetNordTheme() *Colors {
 	return &Colors{
+		Name:  Nord,
 		One:   "#5E81AC",
 		Two:   "#88C0D0",
 		Three: "#5E81AC",
@@ -63,6 +96,7 @@ func GetNordTheme() *Colors {
 
 func GetPartyTheme() *Colors {
 	return &Colors{
+		Name:  Party,
 		One:   "#F7DB69",
 		Two:   "#2bd7e0",
 		Three: "#F7DB69",
@@ -75,6 +109,7 @@ func GetPartyTheme() *Colors {
 
 func GetBeachDayTheme() *Colors {
 	return &Colors{
+		Name:  BeachDay,
 		One:   "#7cebe9",
 		Two:   "#e0ffcd",
 		Three: "#fbfae1",
@@ -89,6 +124,7 @@ func GetBeachDayTheme() *Colors {
 
 func GetRosePineTheme() *Colors {
 	return &Colors{
+		Name:  RosePine,
 		One:   "#ebbcba", // Rose
 		Two:   "#9ccfd8", // Foam
 		Three: "#f6c177", // Gold
@@ -103,6 +139,7 @@ func GetRosePineTheme() *Colors {
 
 func GetRosePineDawnTheme() *Colors {
 	return &Colors{
+		Name:  RosePineDawn,
 		One:   "#ea9a97", // Rose
 		Two:   "#9ccfd8", // Foam
 		Three: "#f6c177", // Gold
@@ -119,6 +156,7 @@ func GetRosePineDawnTheme() *Colors {
 
 func GetRosePineMoonTheme() *Colors {
 	return &Colors{
+		Name:  RosePineMoon,
 		One:   "#d7827e", // Rose
 		Two:   "#56949f", // Foam
 		Three: "#ea9d34", // Gold
