@@ -2,7 +2,7 @@ package ui
 
 import "strings"
 
-type Colors struct {
+type ColorScheme struct {
 	Name  string
 	One   string
 	Two   string
@@ -15,14 +15,14 @@ type Colors struct {
 	Nine  string
 }
 
-func (c *Colors) SchemaList() []string {
+func (c *ColorScheme) List() []string {
 	return []string{c.One, c.Two, c.Three, c.Four, c.Five, c.Six, c.Seven, c.Eight, c.Nine}
 }
 
-func (c *Colors) PrettySchema() string {
+func (c *ColorScheme) Pretty() string {
 	var b strings.Builder
 
-	for _, color := range c.SchemaList() {
+	for _, color := range c.List() {
 		b.WriteString(GetPrinter(color).Sprint("███"))
 	}
 
@@ -54,8 +54,8 @@ func GetThemeNames() []string {
 	}
 }
 
-func GetThemes() []*Colors {
-	return []*Colors{
+func GetThemes() []*ColorScheme {
+	return []*ColorScheme{
 		GetDefaultTheme(),
 		GetNordTheme(),
 		GetPartyTheme(),
@@ -66,10 +66,10 @@ func GetThemes() []*Colors {
 	}
 }
 
-var NoTheme = new(Colors)
+var NoTheme = new(ColorScheme)
 
-func GetDefaultTheme() *Colors {
-	return &Colors{
+func GetDefaultTheme() *ColorScheme {
+	return &ColorScheme{
 		Name:  Default,
 		One:   "#5ec2d6",
 		Two:   "#7a4de3",
@@ -81,8 +81,8 @@ func GetDefaultTheme() *Colors {
 	}
 }
 
-func GetNordTheme() *Colors {
-	return &Colors{
+func GetNordTheme() *ColorScheme {
+	return &ColorScheme{
 		Name:  Nord,
 		One:   "#5E81AC",
 		Two:   "#88C0D0",
@@ -94,8 +94,8 @@ func GetNordTheme() *Colors {
 	}
 }
 
-func GetPartyTheme() *Colors {
-	return &Colors{
+func GetPartyTheme() *ColorScheme {
+	return &ColorScheme{
 		Name:  Party,
 		One:   "#F7DB69",
 		Two:   "#2bd7e0",
@@ -107,8 +107,8 @@ func GetPartyTheme() *Colors {
 	}
 }
 
-func GetBeachDayTheme() *Colors {
-	return &Colors{
+func GetBeachDayTheme() *ColorScheme {
+	return &ColorScheme{
 		Name:  BeachDay,
 		One:   "#7cebe9",
 		Two:   "#e0ffcd",
@@ -122,8 +122,8 @@ func GetBeachDayTheme() *Colors {
 
 // Rose pine reference: https://rosepinetheme.com/palette
 
-func GetRosePineTheme() *Colors {
-	return &Colors{
+func GetRosePineTheme() *ColorScheme {
+	return &ColorScheme{
 		Name:  RosePine,
 		One:   "#ebbcba", // Rose
 		Two:   "#9ccfd8", // Foam
@@ -137,8 +137,8 @@ func GetRosePineTheme() *Colors {
 	}
 }
 
-func GetRosePineDawnTheme() *Colors {
-	return &Colors{
+func GetRosePineDawnTheme() *ColorScheme {
+	return &ColorScheme{
 		Name:  RosePineDawn,
 		One:   "#ea9a97", // Rose
 		Two:   "#9ccfd8", // Foam
@@ -154,8 +154,8 @@ func GetRosePineDawnTheme() *Colors {
 
 // Awful theme, fix
 
-func GetRosePineMoonTheme() *Colors {
-	return &Colors{
+func GetRosePineMoonTheme() *ColorScheme {
+	return &ColorScheme{
 		Name:  RosePineMoon,
 		One:   "#d7827e", // Rose
 		Two:   "#56949f", // Foam
