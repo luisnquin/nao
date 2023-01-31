@@ -2,6 +2,7 @@ package config
 
 import (
 	"os/exec"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -44,12 +45,22 @@ func (c configItem) Title() string       { return c.title }
 func (c configItem) Description() string { return c.desc }
 func (c configItem) FilterValue() string { return c.title }
 
-func getEditorItems() []list.Item {
+func getDefaultPanelItems() []list.Item {
+	return []list.Item{
+		configItem{title: Editor, desc: "Select the terminal editor of your preference"},
+		configItem{title: Themes, desc: "Explore dream options"},
+	}
+}
+
+func getEditorItems(c *Core) []list.Item {
 	editors := []string{"nano", "nvim", "vim"}
 	listItems := make([]list.Item, len(editors))
 
 	for i, name := range editors {
 		_, err := exec.LookPath(name)
+		if name == c.Editor.Name {
+			name += ui.GetPrinter(c.Colors.One).Sprint(" (current)")
+		}
 
 		listItems[i] = editorItem{
 			name:   name,
@@ -60,13 +71,19 @@ func getEditorItems() []list.Item {
 	return listItems
 }
 
-func getThemeItems() []list.Item {
+func getThemeItems(c *Core) []list.Item {
 	themes := ui.GetThemes()
 	listItems := make([]list.Item, len(themes))
 
 	for i, theme := range themes {
+		name := theme.Name
+
+		if name == c.Theme {
+			name += ui.GetPrinter(c.Colors.One).Sprint(" (current)")
+		}
+
 		listItems[i] = themeItem{
-			name:   theme.Name,
+			name:   name,
 			schema: theme.Pretty(),
 		}
 	}
@@ -99,10 +116,7 @@ func InitPanel(core *Core) error {
 func initConfigPanel(core *Core) configPanel {
 	p := configPanel{
 		Core: core,
-		list: list.New([]list.Item{
-			configItem{title: Editor, desc: "Select the terminal editor of your preference"},
-			configItem{title: Themes, desc: "Explore dream options"},
-		}, list.NewDefaultDelegate(), 0, 0),
+		list: list.New(getDefaultPanelItems(), list.NewDefaultDelegate(), 0, 0),
 	}
 
 	p.list.Title = "Configuration panel"
@@ -118,48 +132,57 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
-		case tea.KeyCtrlC:
+		case tea.KeyCtrlC, 'q', 'Q':
 			return c, tea.Quit
 
-		case tea.KeyEnter:
+		case tea.KeyEsc, tea.KeyLeft:
+			cmd := c.list.SetItems(getDefaultPanelItems())
+			c.list.ResetSelected()
+			c.currentView = ""
+			c.cursor = 0
+
+			return c, cmd
+
+		case tea.KeyEnter, tea.KeyRight:
+			selectedItem := c.list.VisibleItems()[c.cursor].FilterValue()
+
 			switch c.currentView {
 			case Editor:
-				c.Editor.Name = c.list.VisibleItems()[c.cursor].FilterValue()
-				if err := c.Save(); err != nil {
-					panic(err)
+				if !strings.HasSuffix(selectedItem, "(current)") {
+					c.Editor.Name = selectedItem
+					if err := c.Save(); err != nil {
+						panic(err)
+					}
 				}
 
 				return c, tea.Quit
 
 			case Themes:
-				theme := c.list.VisibleItems()[c.cursor].FilterValue()
-				// c.UpdateTheme(theme)
-
-				c.Theme = theme
-				if err := c.Save(); err != nil {
-					panic(err)
+				if !strings.HasSuffix(selectedItem, "(current)") {
+					// c.UpdateTheme(theme)
+					c.Theme = selectedItem
+					if err := c.Save(); err != nil {
+						panic(err)
+					}
 				}
 
 				return c, tea.Quit
 
 			default:
-				switch c.list.VisibleItems()[c.cursor].FilterValue() {
+				switch selectedItem {
 				case Editor:
 					c.currentView = Editor
 
-					return c, c.list.SetItems(getEditorItems())
+					return c, c.list.SetItems(getEditorItems(c.Core))
 
 				case Themes:
 					c.currentView = Themes
 
-					return c, c.list.SetItems(getThemeItems())
+					return c, c.list.SetItems(getThemeItems(c.Core))
 				default:
 					panic("unknown panel option")
 				}
 			}
-
-		case tea.KeyLeft:
-			c.currentView = ""
 
 		case tea.KeyUp, tea.KeyType('k'):
 			if c.cursor > 0 {
