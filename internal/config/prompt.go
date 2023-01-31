@@ -14,7 +14,7 @@ var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 // Config panel views.
 const (
-	Editor = "Default editor"
+	Editor = "Editor"
 	Themes = "Themes"
 )
 
@@ -148,7 +148,7 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			switch c.currentView {
 			case Editor:
-				if !strings.HasSuffix(selectedItem, "(current)") {
+				if !strings.Contains(selectedItem, "(current)") {
 					c.Editor.Name = selectedItem
 					if err := c.Save(); err != nil {
 						panic(err)
@@ -158,7 +158,7 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return c, tea.Quit
 
 			case Themes:
-				if !strings.HasSuffix(selectedItem, "(current)") {
+				if !strings.Contains(selectedItem, "(current)") {
 					// c.UpdateTheme(theme)
 					c.Theme = selectedItem
 					if err := c.Save(); err != nil {
