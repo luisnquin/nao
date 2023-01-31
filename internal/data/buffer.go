@@ -3,6 +3,7 @@ package data
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/rand"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -36,7 +37,58 @@ type KeyTag struct {
 func NewBuffer(config *config.Core) (*Buffer, error) {
 	data := Buffer{config: config}
 
+	/*
+		config.Encrypt = true
+
+		if config.Encrypt {
+			keyStore, err := keyring.Open(keyring.Config{ServiceName: "nao"})
+			if err != nil {
+				return nil, err
+			}
+
+			item, err := keyStore.Get("secret-key")
+			if err != nil {
+				if errors.Is(err, keyring.ErrKeyNotFound) {
+					keyStore.Set(keyring.Item{
+						Key:         "secret-key",
+						Data:        generateRandomKey(),
+						Label:       "",
+						Description: "",
+					})
+				} else {
+					return nil, err
+				}
+			}
+
+			fmt.Println(item, string(item.Data))
+		}
+	*/
+
 	return &data, data.Reload()
+}
+
+// Caution, It only should be called for testing.
+func (b *Buffer) AddConfig(config *config.Core) {
+	b.config = config
+}
+
+// Generates secure URL-friendly unique ID.
+func generateRandomKey() []byte {
+	size := 32
+
+	bts := make([]byte, size)
+
+	if _, err := rand.Read(bts); err != nil {
+		panic(err)
+	}
+
+	id := make([]rune, size)
+
+	for i := 0; i < size; i++ {
+		id[i] = []rune("..0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")[bts[i]&61]
+	}
+
+	return []byte(string(id[:size]))
 }
 
 /*
