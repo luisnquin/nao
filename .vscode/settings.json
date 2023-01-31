@@ -6,7 +6,15 @@
         "internal": "Src",
         "nao": "App",
         "store": "Json",
-        "ui": "Theme",
+        "ui": "Theme"
     },
+    "go.liveErrors": {
+        "enabled": false,
+        "delay": 500
+    },
+    "go.lintTool": "golangci-lint",
+    // "go.lintFlags": ["--fast"],
+    "go.formatTool": "gofumpt",
+    "editor.rulers": [125],
     "go.diagnostic.vulncheck": "Imports"
 }
