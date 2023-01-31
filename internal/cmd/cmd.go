@@ -27,11 +27,18 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 
 			return cmd.Usage()
 		},
+		// CompletionOptions:  cobra.CompletionOptions{},
+		// ValidArgsFunction:  nil,
 		DisableFlagParsing: false,
 		TraverseChildren:   false,
+		// DisableAutoGenTag:  false,
 		// Levenshtein distance implementation not the best
+		DisableSuggestions:         false,
 		SuggestionsMinimumDistance: 2,
 	}
+
+	// root.CompletionOptions = cobra.CompletionOptions{}
+	// root.ValidArgsFunction
 
 	log.Trace().Msg("root command has been created")
 
