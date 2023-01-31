@@ -27,7 +27,6 @@ func BuildConfig(log *zerolog.Logger, config *config.Core) ConfigCmd {
 	}
 
 	c.RunE = LifeTimeWrapper(log, "config", c.Main())
-	c.AddCommand(c.GetCommand(), c.SetCommand()) // TODO: inject logger
 
 	log.Trace().Msg("the 'config' command has been created")
 
@@ -41,26 +40,6 @@ func (c *ConfigCmd) Main() Scriptor {
 }
 
 // set theme asdasd
-
-func (c *ConfigCmd) GetCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:           "get",
-		Short:         "get your config values in a jsonpath style",
-		Args:          cobra.ExactArgs(1),
-		SilenceErrors: true,
-		SilenceUsage:  true,
-	}
-}
-
-func (c *ConfigCmd) SetCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:           "set",
-		Short:         "modify your config values in a jsonpath style",
-		Args:          cobra.ExactArgs(2),
-		SilenceErrors: true,
-		SilenceUsage:  true,
-	}
-}
 
 /*
 
