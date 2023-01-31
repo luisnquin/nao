@@ -23,7 +23,7 @@ type Core struct {
 	Theme   string         `yaml:"theme"`
 	Command CommandOptions `yaml:"-"`
 	FS      FSConfig       `yaml:"-"`
-	Colors  ui.Colors      `yaml:"-"` // ???
+	Colors  ui.ColorScheme `yaml:"-"` // ???
 
 	log *zerolog.Logger
 }
@@ -126,26 +126,7 @@ func New(logger *zerolog.Logger) (*Core, error) {
 
 	logger.Trace().Msgf("loading '%s' theme or default", config.Theme)
 
-	switch config.Theme { // The configuration should not be updated for this
-	case ui.Nord:
-		config.adoptTheme(ui.GetNordTheme())
-	case ui.Nop:
-		config.adoptTheme(ui.NoTheme)
-	case ui.Party:
-		config.adoptTheme(ui.GetPartyTheme())
-	case ui.BeachDay:
-		config.adoptTheme(ui.GetBeachDayTheme())
-	case ui.StdRosePine:
-		config.adoptTheme(ui.GetRosePineTheme())
-	case ui.RosePineDawn:
-		config.adoptTheme(ui.GetRosePineDawnTheme())
-	case ui.RosePineMoon:
-		config.adoptTheme(ui.GetRosePineMoonTheme())
-	default:
-		logger.Trace().Msg("apparently the default theme")
-
-		config.adoptTheme(ui.GetDefaultTheme())
-	}
+	config.UpdateTheme(config.Theme)
 
 	return &config, nil
 }
@@ -224,13 +205,34 @@ func (c *Core) fillOrFix() {
 		c.Editor.Name = "nano"
 	}
 
-	if !utils.Contains(ui.GetThemesList(), c.Theme) {
+	if !utils.Contains(ui.GetThemeNames(), c.Theme) {
 		c.Theme = ui.Default
 	}
 
 	c.log.Trace().Str("editor", c.Editor.Name).Str("theme", c.Theme).Send()
 }
 
-func (c *Core) adoptTheme(theme *ui.Colors) {
+func (c *Core) adoptTheme(theme *ui.ColorScheme) {
 	c.Colors = *theme
+}
+
+func (c *Core) UpdateTheme(name string) {
+	switch name { // The configuration should not be updated for this
+	case ui.Nord:
+		c.adoptTheme(ui.GetNordTheme())
+	case ui.Nop:
+		c.adoptTheme(ui.NoTheme)
+	case ui.Party:
+		c.adoptTheme(ui.GetPartyTheme())
+	case ui.BeachDay:
+		c.adoptTheme(ui.GetBeachDayTheme())
+	case ui.RosePine:
+		c.adoptTheme(ui.GetRosePineTheme())
+	case ui.RosePineDawn:
+		c.adoptTheme(ui.GetRosePineDawnTheme())
+	case ui.RosePineMoon:
+		c.adoptTheme(ui.GetRosePineMoonTheme())
+	default:
+		c.adoptTheme(ui.GetDefaultTheme())
+	}
 }
