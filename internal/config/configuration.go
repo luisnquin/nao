@@ -18,12 +18,12 @@ import (
 )
 
 type Core struct {
-	Encrypt bool           `yaml:"encrypt"`
-	Editor  EditorConfig   `yaml:"editor"`
-	Theme   string         `yaml:"theme"`
-	Command CommandOptions `yaml:"-"`
-	FS      FSConfig       `yaml:"-"`
-	Colors  ui.ColorScheme `yaml:"-"` // ???
+	Encrypt bool           `json:"encrypt" yaml:"encrypt"`
+	Editor  EditorConfig   `json:"editor" yaml:"editor"`
+	Theme   string         `json:"theme" yaml:"theme"`
+	Command CommandOptions `json:"-" yaml:"-"`
+	FS      FSConfig       `json:"-" yaml:"-"`
+	Colors  ui.ColorScheme `json:"-" yaml:"-"` // ???
 
 	log *zerolog.Logger
 }
@@ -37,8 +37,8 @@ type FSConfig struct {
 }
 
 type EditorConfig struct {
-	Name      string   `yaml:"name"`
-	ExtraArgs []string `yaml:"extraArgs"`
+	Name      string   `json:"name" yaml:"name"`
+	ExtraArgs []string `json:"extraArgs" yaml:"extraArgs"`
 }
 
 type (
