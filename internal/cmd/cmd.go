@@ -29,7 +29,6 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 		DisableFlagParsing: false,
 		TraverseChildren:   false,
 		// DisableAutoGenTag:  false,
-		// Levenshtein distance implementation not the best
 		DisableSuggestions:         false,
 		SuggestionsMinimumDistance: 2,
 	}
@@ -44,8 +43,7 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 	permFlags.BoolVar(new(bool), "debug", false, "enable debug output, everything is written to stderr")
 	permFlags.MarkHidden("debug")
 
-	log.Trace().Msg("debug, file, no-color has been added as persistent flags")
-
+	log.Trace().Msg("debug, file, no-color has been added as persistent flags but debug flag is hidden")
 	log.Trace().Msg("adding commands to root")
 
 	root.AddCommand(
@@ -89,43 +87,3 @@ func PreRunWrapper(log *zerolog.Logger, script cobra.PositionalArgs) cobra.Posit
 		return script(cmd, args)
 	}
 }
-
-/*
-
-	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		if configPathInFlag == "" {
-			info, err := os.Stat(configPathInFlag)
-			if err != nil {
-				return err
-			}
-
-			if info.IsDir() {
-				return fmt.Errorf("the config file provided is a directory, lol")
-			}
-		}
-
-		return nil
-	}
-
-*/
-
-// config.FS.CacheDir
-
-// buildServer().Command,
-
-// model, err := tea.NewProgram(initialConfigSelector()).Run()
-// fmt.Println(model, err)
-
-/*
-	// TODO: configurable
-	cc.Init(&cc.Config{
-		Commands:        cc.HiCyan,
-		ExecName:        cc.HiRed + cc.Italic,
-		Flags:           cc.HiMagenta,
-		FlagsDataType:   cc.Underline,
-		FlagsDescr:      cc.HiWhite,
-		Headings:        cc.HiWhite + cc.Underline,
-		NoExtraNewlines: true,
-		RootCmd:         root,
-	})
-*/

@@ -18,7 +18,6 @@ import (
 )
 
 type VersionCmd struct {
-	// config *config.ConfigV2
 	*cobra.Command
 
 	log    *zerolog.Logger
@@ -26,10 +25,6 @@ type VersionCmd struct {
 }
 
 type githubTagInfo struct {
-	// NodeID     string            `json:"node_id"`
-	// ZipBallUrl string            `json:"zipball_url"`
-	// TarBallUrl string            `json:"tarball_url"`
-	// Commit     map[string]string `json:"commit"`
 	Name string `json:"name"`
 }
 
