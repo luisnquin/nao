@@ -91,42 +91,6 @@ func generateRandomKey() []byte {
 	return []byte(string(id[:size]))
 }
 
-/*
-w, err := fsnotify.NewWatcher()
-	if err != nil {
-		return nil, err
-	}
-
-	err = w.Add(config.FS.DataFile)
-	if err != nil {
-		return nil, err
-	}
-
-	go func() {
-		for {
-			select {
-			case event, ok := <-w.Events:
-				if !ok {
-					continue
-				}
-
-				if event.Op == fsnotify.Write {
-					if err := data.Reload(); err != nil {
-						panic(err)
-					}
-				}
-
-			case err, ok := <-w.Errors:
-				if !ok {
-					continue
-				}
-
-				panic(err)
-			}
-		}
-	}()
-*/
-
 var (
 	bytes = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 0o5}
 	key   = "ebee6254-d04e-4e51-be09-d0c7c8d4"
