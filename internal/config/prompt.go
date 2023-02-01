@@ -45,51 +45,6 @@ func (c configItem) Title() string       { return c.title }
 func (c configItem) Description() string { return c.desc }
 func (c configItem) FilterValue() string { return c.title }
 
-func getDefaultPanelItems() []list.Item {
-	return []list.Item{
-		configItem{title: Editor, desc: "Select the terminal editor of your preference"},
-		configItem{title: Themes, desc: "Explore dream options"},
-	}
-}
-
-func getEditorItems(c *Core) []list.Item {
-	editors := []string{"nano", "nvim", "vim"}
-	listItems := make([]list.Item, len(editors))
-
-	for i, name := range editors {
-		_, err := exec.LookPath(name)
-		if name == c.Editor.Name {
-			name += ui.GetPrinter(c.Colors.One).Sprint(" (current)")
-		}
-
-		listItems[i] = editorItem{
-			name:   name,
-			usable: err == nil,
-		}
-	}
-
-	return listItems
-}
-
-func getThemeItems(c *Core) []list.Item {
-	themes := ui.GetThemes()
-	listItems := make([]list.Item, len(themes))
-
-	for i, theme := range themes {
-		name := theme.Name
-
-		if name == c.Theme {
-			name += ui.GetPrinter(c.Colors.One).Sprint(" (current)")
-		}
-
-		listItems[i] = themeItem{
-			name:   name,
-			schema: theme.Pretty(),
-		}
-	}
-
-	return listItems
-}
 func (e editorItem) Title() string { return e.name }
 func (e editorItem) Description() string {
 	if !e.usable {
@@ -204,4 +159,50 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	c.list, cmd = c.list.Update(msg)
 
 	return c, cmd
+}
+
+func getDefaultPanelItems() []list.Item {
+	return []list.Item{
+		configItem{title: Editor, desc: "Select the terminal editor of your preference"},
+		configItem{title: Themes, desc: "Explore dream options"},
+	}
+}
+
+func getEditorItems(c *Core) []list.Item {
+	editors := []string{"nano", "nvim", "vim"}
+	listItems := make([]list.Item, len(editors))
+
+	for i, name := range editors {
+		_, err := exec.LookPath(name)
+		if name == c.Editor.Name {
+			name += ui.GetPrinter(c.Colors.One).Sprint(" (current)")
+		}
+
+		listItems[i] = editorItem{
+			name:   name,
+			usable: err == nil,
+		}
+	}
+
+	return listItems
+}
+
+func getThemeItems(c *Core) []list.Item {
+	themes := ui.GetThemes()
+	listItems := make([]list.Item, len(themes))
+
+	for i, theme := range themes {
+		name := theme.Name
+
+		if name == c.Theme {
+			name += ui.GetPrinter(c.Colors.One).Sprint(" (current)")
+		}
+
+		listItems[i] = themeItem{
+			name:   name,
+			schema: theme.Pretty(),
+		}
+	}
+
+	return listItems
 }
