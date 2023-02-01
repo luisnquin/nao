@@ -44,7 +44,7 @@ func BuildTag(log *zerolog.Logger, config *config.Core, data *data.Buffer) TagCm
 	return c
 }
 
-func (c *TagCmd) Main() Scriptor {
+func (c *TagCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
 		tagutil := tagutils.New(c.data)

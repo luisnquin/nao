@@ -40,7 +40,7 @@ func BuildCat(log *zerolog.Logger, data *data.Buffer) CatCmd {
 	return c
 }
 
-func (c CatCmd) Main() Scriptor {
+func (c CatCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		nbOfArgs := len(args)
 

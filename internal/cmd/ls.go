@@ -26,8 +26,8 @@ type LsCmd struct {
 	log    *zerolog.Logger
 	config *config.Core
 	data   *data.Buffer
-	quiet  bool
-	long   bool
+	Quiet  bool
+	Long   bool
 }
 
 func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd {
@@ -52,13 +52,13 @@ func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd 
 	log.Trace().Msg("the 'ls' command has been created")
 
 	flags := c.Flags()
-	flags.BoolVarP(&c.long, "long", "l", false, "display the content as long as possible")
-	flags.BoolVarP(&c.quiet, "quiet", "q", false, "only display file ID's")
+	flags.BoolVarP(&c.Long, "long", "l", false, "display the content as long as possible")
+	flags.BoolVarP(&c.Quiet, "quiet", "q", false, "only display file ID's")
 
 	return c
 }
 
-func (c *LsCmd) Main() Scriptor {
+func (c *LsCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
 
@@ -70,11 +70,11 @@ func (c *LsCmd) Main() Scriptor {
 
 		c.log.Trace().Int("key size", keySize).Send()
 
-		if c.quiet {
+		if c.Quiet {
 			c.log.Trace().Msg("listing all the note keys in quiet mode...")
 
 			for key := range notesRepo.IterKey() {
-				if c.long {
+				if c.Long {
 					fmt.Fprintln(os.Stdout, key)
 				} else {
 					fmt.Fprintln(os.Stdout, key[:keySize])
@@ -123,7 +123,7 @@ func (c *LsCmd) Main() Scriptor {
 		rows := make([]table.Row, len(notes))
 
 		for i, n := range notes {
-			if !c.long {
+			if !c.Long {
 				n.Key = n.Key[:keySize]
 			}
 

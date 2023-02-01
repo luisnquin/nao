@@ -11,9 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Type that satisfies cobra.Command.RunE.
-type Scriptor func(cmd *cobra.Command, args []string) error
-
 func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data *data.Buffer) error {
 	log.Trace().Msg("configuring cli...")
 
@@ -43,8 +40,9 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 	log.Trace().Msg("root command has been created")
 
 	permFlags := root.PersistentFlags()
-	permFlags.BoolVar(new(bool), "debug", false, "enable debug output, everything is written to stderr")
 	permFlags.BoolVar(&internal.NoColor, "no-color", false, "disable colorized output")
+	permFlags.BoolVar(new(bool), "debug", false, "enable debug output, everything is written to stderr")
+	permFlags.MarkHidden("debug")
 
 	log.Trace().Msg("debug, file, no-color has been added as persistent flags")
 
@@ -72,7 +70,7 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 	return root.ExecuteContext(ctx)
 }
 
-func LifeTimeWrapper(log *zerolog.Logger, commandName string, script Scriptor) Scriptor {
+func LifeTimeWrapper(log *zerolog.Logger, commandName string, script cobra.PositionalArgs) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		defer log.Trace().Msgf("command '%s' life ended", commandName)
 
@@ -82,7 +80,7 @@ func LifeTimeWrapper(log *zerolog.Logger, commandName string, script Scriptor) S
 	}
 }
 
-func PreRunWrapper(log *zerolog.Logger, script Scriptor) Scriptor {
+func PreRunWrapper(log *zerolog.Logger, script cobra.PositionalArgs) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		defer log.Trace().Msgf("preload script execution finished")
 

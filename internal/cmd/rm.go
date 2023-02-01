@@ -49,7 +49,7 @@ func BuildRm(log *zerolog.Logger, config *config.Core, data *data.Buffer) *RmCmd
 	return c
 }
 
-func (c *RmCmd) Main() Scriptor {
+func (c *RmCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		repo := store.NewNotesRepository(c.data)
 

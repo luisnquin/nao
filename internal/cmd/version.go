@@ -55,7 +55,7 @@ func BuildVersion(log *zerolog.Logger, config *config.Core) VersionCmd {
 	return c
 }
 
-func (c VersionCmd) Main() Scriptor {
+func (c VersionCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		var b strings.Builder
 
@@ -154,7 +154,7 @@ func (c VersionCmd) Main() Scriptor {
 	}
 }
 
-func (c VersionCmd) EnsureVersionFile() Scriptor {
+func (c VersionCmd) EnsureVersionFile() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		client := http.Client{Timeout: time.Second}
 		hoursToDeemItObsolete := time.Hour * 12

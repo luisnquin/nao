@@ -52,7 +52,7 @@ func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCm
 	return c
 }
 
-func (c *NewCmd) Main() Scriptor {
+func (c *NewCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
 
