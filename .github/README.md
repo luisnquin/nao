@@ -1,3 +1,6 @@
+
+![anyway-removebg-preview (1)](https://user-images.githubusercontent.com/86449787/216045021-2a8d3a1c-1bbc-497b-97aa-74c9dc399616.png)
+
 # nao
 
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
@@ -23,13 +26,6 @@
         $ git clone https://github.com/luisnquin/nao.git
         $ cd nao
         $ make build
-    ```
-
-- Via [Nix](https://nix.dev/)
-
-    ```bash
-        # ❄️
-        $ nix-env -iA nixpkgs.nao
     ```
 
 ## Some basic commands
