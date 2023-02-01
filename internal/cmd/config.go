@@ -1,9 +1,16 @@
 package cmd
 
 import (
+	"bytes"
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/goccy/go-json"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 type ConfigCmd struct {
@@ -11,6 +18,7 @@ type ConfigCmd struct {
 
 	config *config.Core
 	log    *zerolog.Logger
+	list   bool
 }
 
 func BuildConfig(log *zerolog.Logger, config *config.Core) ConfigCmd {
@@ -28,111 +36,116 @@ func BuildConfig(log *zerolog.Logger, config *config.Core) ConfigCmd {
 
 	c.RunE = LifeTimeWrapper(log, "config", c.Main())
 
+	c.Flags().BoolVarP(&c.list, "list", "l", false, " List all variables set in config file, along with their values")
+
 	log.Trace().Msg("the 'config' command has been created")
 
 	return c
 }
 
-func (c *ConfigCmd) Main() Scriptor {
+func (c *ConfigCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		return config.InitPanel(c.config)
-	}
-}
+		const maxNbOfArgs = 2
 
-// set theme asdasd
-
-/*
-
-type configSelector struct {
-	options  []string
-	selected map[int]struct{}
-	cursor   int
-}
-
-func initialConfigSelector() configSelector {
-	return configSelector{
-		options:  []string{"themes", "editor", "nothing"},
-		selected: make(map[int]struct{}),
-	}
-}
-
-func (s configSelector) Init() tea.Cmd {
-	return nil
-}
-
-func (s configSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	// Is it a key press?
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return s, tea.Quit
-
-		// The "up" and "k" keys move the cursor up
-		case "up", "k":
-			if s.cursor > 0 {
-				s.cursor--
+		if c.list {
+			result, err := yaml.Marshal(c.config)
+			if err != nil {
+				return err
 			}
 
-		// The "down" and "j" keys move the cursor down
-		case "down", "j":
-			if s.cursor < len(s.options)-1 {
-				s.cursor++
+			fmt.Fprintf(os.Stdout, "%s\n", result)
+
+			return nil
+		}
+
+		if l := len(args); l == 0 {
+			return config.InitPanel(c.config)
+		} else if l > maxNbOfArgs {
+			return fmt.Errorf("accepts at most %d arg(s), received %d", maxNbOfArgs, len(args))
+		} else if l == 1 {
+			value, err := NavigateMapAndGet(c.getConfigAsMap(), args[0])
+			if err != nil {
+				return err
 			}
 
-		case "enter", " ":
-			_, ok := s.selected[s.cursor]
-			if ok {
-				delete(s.selected, s.cursor)
-			} else {
-				s.selected[s.cursor] = struct{}{}
-			}
+			fmt.Fprintln(os.Stdout, value)
+
+			return nil
 		}
+
+		configMap := c.getConfigAsMap()
+
+		err := NavigateMapAndSet(configMap, args[0], args[1]) // TODO: validation
+		if err != nil {
+			return err
+		}
+
+		b := new(bytes.Buffer)
+		json.NewEncoder(b).Encode(configMap)
+
+		if err := json.NewDecoder(b).Decode(c.config); err != nil {
+			return err
+		}
+
+		return c.config.Save()
 	}
-	return s, nil
 }
 
-func (s configSelector) View() string {
-	label := "What would you like to change"
+func (c ConfigCmd) getConfigAsMap() map[string]any {
+	b := new(bytes.Buffer)
 
-	// Iterate over our choices
-	for i, choice := range s.options {
-
-		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
-		if s.cursor == i {
-			cursor = ">" // cursor!
-		}
-
-		// Is this choice selected?
-		checked := " " // not selected
-		if _, ok := s.selected[i]; ok {
-			checked = "x" // selected!
-		}
-
-		// Render the row
-		label += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+	if err := json.NewEncoder(b).Encode(c.config); err != nil {
+		panic(err)
 	}
 
-	// The footer
-	label += "\nPress q to quit.\n"
+	var result map[string]any
 
-	return label
+	if err := json.NewDecoder(b).Decode(&result); err != nil {
+		panic(err)
+	}
+
+	return result
 }
-*/
 
-/*
-type Model interface {
-    // Init is the first function that will be called. It returns an optional
-    // initial command. To not perform an initial command return nil.
-    Init() Cmd
+func NavigateMapAndSet(m map[string]any, path string, value any) error {
+	parts := strings.Split(path, ".")
 
-    // Update is called when a message is received. Use it to inspect messages
-    // and, in response, update the model and/or send a command.
-    Update(Msg) (Model, Cmd)
+	for i, part := range parts {
+		i++
 
-    // View renders the program's UI, which is just a string. The view is
-    // rendered after every Update.
-    View() string
+		if len(parts) == i {
+			m[part] = value
+
+			return nil
+		}
+
+		v, ok := m[part].(map[string]any)
+		if ok {
+			m = v
+		}
+	}
+
+	return fmt.Errorf("key doesn't contain a section: %s", parts[len(parts)-1])
 }
-*/
+
+func NavigateMapAndGet(m map[string]any, path string) (string, error) {
+	var result any = m
+
+	parts := strings.Split(path, ".")
+
+	for _, p := range parts {
+		if v, ok := result.(map[string]any); ok {
+			result = v[p]
+		} else {
+			return "", nil
+		}
+	}
+
+	if result == nil {
+		return "", fmt.Errorf("key doesn't contain a section: %s", parts[len(parts)-1])
+	}
+
+	content, _ := yaml.Marshal(result)
+
+	return string(content), nil
+}
