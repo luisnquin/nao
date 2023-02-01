@@ -55,6 +55,8 @@ func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCm
 	return c
 }
 
+// TODO: Keys in use for non-parallel use of notes
+
 func (c *ModCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
