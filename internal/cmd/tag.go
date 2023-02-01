@@ -3,20 +3,24 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/luisnquin/nao/v2/internal/config"
-	"github.com/luisnquin/nao/v2/internal/data"
-	"github.com/luisnquin/nao/v2/internal/store"
-	"github.com/luisnquin/nao/v2/internal/store/tagutils"
+	"github.com/luisnquin/nao/v3/internal"
+	"github.com/luisnquin/nao/v3/internal/config"
+	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/luisnquin/nao/v3/internal/store"
+	"github.com/luisnquin/nao/v3/internal/store/tagutils"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type TagCmd struct {
 	*cobra.Command
-	config *config.AppConfig
+
+	log    *zerolog.Logger
+	config *config.Core
 	data   *data.Buffer
 }
 
-func BuildTag(config *config.AppConfig, data *data.Buffer) TagCmd {
+func BuildTag(log *zerolog.Logger, config *config.Core, data *data.Buffer) TagCmd {
 	c := TagCmd{
 		Command: &cobra.Command{
 			Use:           "tag <old> <new>",
@@ -30,14 +34,17 @@ func BuildTag(config *config.AppConfig, data *data.Buffer) TagCmd {
 		},
 		config: config,
 		data:   data,
+		log:    log,
 	}
 
-	c.RunE = c.Main()
+	c.RunE = LifeTimeWrapper(log, "tag", c.Main())
+
+	log.Trace().Msg("the 'tag' command has been created")
 
 	return c
 }
 
-func (c *TagCmd) Main() scriptor {
+func (c *TagCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := store.NewNotesRepository(c.data)
 		tagutil := tagutils.New(c.data)
@@ -47,6 +54,11 @@ func (c *TagCmd) Main() scriptor {
 			return fmt.Errorf("tag %s is not valid: %w", args[1], err)
 		}
 
-		return notesRepo.ModifyTag(SearchKeyByPattern(args[0], c.data), args[1])
+		key, err := internal.SearchByPattern(args[0], c.data)
+		if err != nil {
+			return err
+		}
+
+		return notesRepo.ModifyTag(key, args[1])
 	}
 }

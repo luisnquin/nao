@@ -1,27 +1,87 @@
 name: Go
 
-on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
+on: [push, pull_request]
+
+permissions:
+    # required for all workflows
+    security-events: write
+    #  privileged: true
 
 jobs:
     build:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
+        name: build
+        runs-on: ubuntu-20.04
 
+        steps:
+            - uses: actions/checkout@v3
             - name: Set up Go
-              uses: actions/setup-go@v3.2.0
+              uses: actions/setup-go@v3
               with:
-                  go-version: 1.18.2
-                  check-latest: true
-                  go-version-file: ./go.mod
                   cache-dependency-path: ./go.sum
+                  go-version-file: ./go.mod
+                  go-version: '>=1.18.0'
+                  check-latest: false
 
             - name: Build
               run: go build -v ./...
 
+    gofumpt:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-go@v2
+              with:
+                  go-version: latest
+            - name: Install gofumpt
+              run: |
+                  go get -u mvdan.cc/gofumpt
+            - name: Check and format .go files
+              run: |
+                  gofumpt -s -d *.go
+                  gofumpt -w *.go
+    test:
+        runs-on: ubuntu-20.04
+        steps:
+            - uses: actions/checkout@v3
+            - name: Set up Go
+              uses: actions/setup-go@v3
+              with:
+                  cache-dependency-path: ./go.sum
+                  go-version-file: ./go.mod
+                  go-version: '>=1.18.0'
+                  check-latest: false
             - name: Tests
               run: go test -v ./...
+
+    #golangci:
+    #    name: lint
+    #    runs-on: ubuntu-20.04
+    #    steps:
+    #        - uses: actions/setup-go@v3
+    #          with:
+    #              go-version: '>=1.18.0'
+    #        - uses: actions/checkout@v3
+    #        - name: golangci-lint
+    #          uses: golangci/golangci-lint-action@v3
+    #          with:
+    #              # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
+    #              version: v1.29
+
+    # Optional: working directory, useful for monorepos
+    # working-directory: somedir
+
+    # Optional: golangci-lint command line arguments.
+    # args: --issues-exit-code=0
+
+    # Optional: show only new issues if it's a pull request. The default value is `false`.
+    # only-new-issues: true
+
+    # Optional: if set to true then the all caching functionality will be complete disabled,
+    #           takes precedence over all other caching options.
+    # skip-cache: true
+
+    # Optional: if set to true then the action don't cache or restore ~/go/pkg.
+    # skip-pkg-cache: true
+
+    # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
+    # skip-build-cache: true

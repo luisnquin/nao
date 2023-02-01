@@ -1,10 +1,20 @@
 {
     "material-icon-theme.folders.associations": {
-        "helper": "Controller",
-        "internal": "Src",
-        "store": "Json",
         "api": "Server",
         "cmd": "Core",
+        "helper": "Controller",
+        "internal": "Src",
         "nao": "App",
-    }
+        "store": "Json",
+        "ui": "Theme"
+    },
+    "go.liveErrors": {
+        "enabled": false,
+        "delay": 500
+    },
+    "go.lintTool": "golangci-lint",
+    // "go.lintFlags": ["--fast"],
+    "go.formatTool": "gofumpt",
+    "editor.rulers": [125],
+    "go.diagnostic.vulncheck": "Imports"
 }

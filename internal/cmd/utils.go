@@ -8,12 +8,17 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/luisnquin/nao/v2/internal/config"
-	"github.com/luisnquin/nao/v2/internal/data"
+	"github.com/luisnquin/nao/v3/internal/config"
+	"github.com/luisnquin/nao/v3/internal/data"
 )
 
 func RunEditor(ctx context.Context, editor, filePath string, subCommands ...string) error {
-	_, err := os.Stat(filePath)
+	_, err := exec.LookPath(editor)
+	if err != nil {
+		return fmt.Errorf("unable to start editor, reason: %s", err.Error())
+	}
+
+	_, err = os.Stat(filePath)
 	if err != nil {
 		return fmt.Errorf("unable to stat file: %w", err)
 	}
@@ -29,13 +34,13 @@ func RunEditor(ctx context.Context, editor, filePath string, subCommands ...stri
 	return bin.Run()
 }
 
-func NewFileCached(config *config.AppConfig, content string) (string, error) {
-	err := os.MkdirAll(config.Paths.CacheDir, os.ModePerm)
+func NewFileCached(config *config.Core, content string) (string, error) {
+	err := os.MkdirAll(config.FS.CacheDir, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
 
-	f, err := os.Create(config.Paths.CacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
+	f, err := os.Create(config.FS.CacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
 	if err != nil {
 		return "", err
 	}
@@ -46,24 +51,6 @@ func NewFileCached(config *config.AppConfig, content string) (string, error) {
 	}
 
 	return f.Name(), f.Close()
-}
-
-func SearchKeyByPattern(pattern string, data *data.Buffer) string {
-	var result string
-
-	// We look for the pattern most similar to the availables keys/tags
-	for key, note := range data.Notes {
-		if strings.HasPrefix(note.Tag, pattern) && len(note.Tag) > len(result) ||
-			strings.HasPrefix(key, pattern) && len(key) > len(result) {
-			result = key
-
-			if note.Tag == pattern || key == pattern {
-				break
-			}
-		}
-	}
-
-	return result
 }
 
 func SearchKeyTagsByPattern(pattern string, data *data.Buffer) []string {

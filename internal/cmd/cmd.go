@@ -1,47 +1,131 @@
 package cmd
 
 import (
-	"github.com/luisnquin/nao/v2/internal/config"
-	"github.com/luisnquin/nao/v2/internal/data"
+	"context"
+	"io"
+
+	"github.com/luisnquin/nao/v3/internal"
+	"github.com/luisnquin/nao/v3/internal/config"
+	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
-type scriptor func(cmd *cobra.Command, args []string) error
+func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data *data.Buffer) error {
+	log.Trace().Msg("configuring cli...")
 
-var root = &cobra.Command{
-	Use:   config.AppName,
-	Short: config.AppName + " is a tool to manage your notes",
-	Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return cmd.Usage()
-	},
-	TraverseChildren: false,
-}
+	root := cobra.Command{
+		Use:   "nao",
+		Short: "nao is a tool to manage your notes",
+		Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			log.Debug().Strs("args", args).
+				Msg("no command specified, returning usage...")
 
-func Execute() {
-	cobra.CheckErr(root.Execute())
-}
-
-func init() {
-	config, err := config.New()
-	if err != nil {
-		panic(err)
+			return cmd.Usage()
+		},
+		// CompletionOptions:  cobra.CompletionOptions{},
+		// ValidArgsFunction:  nil,
+		DisableFlagParsing: false,
+		TraverseChildren:   false,
+		// DisableAutoGenTag:  false,
+		// Levenshtein distance implementation not the best
+		DisableSuggestions:         false,
+		SuggestionsMinimumDistance: 2,
 	}
 
-	data, err := data.NewBuffer(config)
-	if err != nil {
-		panic(err)
-	}
+	// root.CompletionOptions = cobra.CompletionOptions{}
+	// root.ValidArgsFunction
+
+	log.Trace().Msg("root command has been created")
+
+	permFlags := root.PersistentFlags()
+	permFlags.BoolVar(&internal.NoColor, "no-color", false, "disable colorized output")
+	permFlags.BoolVar(new(bool), "debug", false, "enable debug output, everything is written to stderr")
+	permFlags.MarkHidden("debug")
+
+	log.Trace().Msg("debug, file, no-color has been added as persistent flags")
+
+	log.Trace().Msg("adding commands to root")
 
 	root.AddCommand(
-		BuildCat(data).Command,
-		BuildMod(config, data).Command,
-		BuildNew(config, data).Command,
-		BuildTag(config, data).Command,
-		BuildLs(config, data).Command,
-		BuildRm(config, data).Command,
-		BuildVersion().Command,
+		BuildCat(log, data).Command,
+		BuildConfig(log, config).Command,
+		BuildLs(log, config, data).Command,
+		BuildMod(log, config, data).Command,
+		BuildNew(log, config, data).Command,
+		BuildRm(log, config, data).Command,
+		BuildTag(log, config, data).Command,
+		BuildVersion(log, config).Command,
 	)
+
+	log.Trace().Msgf("%d children have been added to the root command", len(root.Commands()))
+
+	// Errors are also returned by execute context
+	root.SetErr(io.Discard)
+	log.Trace().Msg("all cobra errors will be sent to /dev/null")
+
+	log.Trace().Bool("¿context == nil?", ctx == nil).Msg("executing root command with context...")
+
+	return root.ExecuteContext(ctx)
 }
 
-// buildServer().cmd,
+func LifeTimeWrapper(log *zerolog.Logger, commandName string, script cobra.PositionalArgs) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		defer log.Trace().Msgf("command '%s' life ended", commandName)
+
+		log.Trace().Int("nb of args", len(args)).Msgf("'%s' command has been called", commandName)
+
+		return script(cmd, args)
+	}
+}
+
+func PreRunWrapper(log *zerolog.Logger, script cobra.PositionalArgs) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		defer log.Trace().Msgf("preload script execution finished")
+
+		log.Trace().Msg("executing preload script...")
+
+		return script(cmd, args)
+	}
+}
+
+/*
+
+	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		if configPathInFlag == "" {
+			info, err := os.Stat(configPathInFlag)
+			if err != nil {
+				return err
+			}
+
+			if info.IsDir() {
+				return fmt.Errorf("the config file provided is a directory, lol")
+			}
+		}
+
+		return nil
+	}
+
+*/
+
+// config.FS.CacheDir
+
+// buildServer().Command,
+
+// model, err := tea.NewProgram(initialConfigSelector()).Run()
+// fmt.Println(model, err)
+
+/*
+	// TODO: configurable
+	cc.Init(&cc.Config{
+		Commands:        cc.HiCyan,
+		ExecName:        cc.HiRed + cc.Italic,
+		Flags:           cc.HiMagenta,
+		FlagsDataType:   cc.Underline,
+		FlagsDescr:      cc.HiWhite,
+		Headings:        cc.HiWhite + cc.Underline,
+		NoExtraNewlines: true,
+		RootCmd:         root,
+	})
+*/

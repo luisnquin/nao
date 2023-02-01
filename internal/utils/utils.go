@@ -20,3 +20,7 @@ func IsDirectory(path string) (bool, error) {
 
 	return fi.IsDir(), nil
 }
+
+func Ptr[T any](v T) *T {
+	return &v
+}

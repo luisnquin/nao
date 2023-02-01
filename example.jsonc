@@ -1,0 +1,45 @@
+{
+    "$schema": "./docs/schema.json",
+    "theme": "default",
+    "editor": {
+        "name": "nano"
+    },
+    "commandOptions": {
+        "version": {
+            "noColor": false,
+            "color": "#56f591"
+        },
+        "ls": {
+            "keyLength": 10,
+            "noColor": false,
+            "columns": {
+                "id": {
+                    "alias": "",
+                    "color": "yellow",
+                    "ommit": false
+                },
+                "tag": {
+                    "alias": "",
+                    "color": "14",
+                    "ommit": false
+                },
+                "lastUpdate": {
+                    "alias": "",
+                    "color": "blue",
+                    "ommit": false
+                },
+                "size": {
+                    "alias": "",
+                    "color": "black",
+                    "ommit": false
+                },
+                "version": {
+                    "alias": "",
+                    "color": "blue",
+                    "ommit": false
+                }
+            }
+        },
+        "server": {}
+    }
+}

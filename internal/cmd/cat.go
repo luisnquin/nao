@@ -4,17 +4,20 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luisnquin/nao/v2/internal/data"
-	"github.com/luisnquin/nao/v2/internal/store/keyutils"
+	"github.com/luisnquin/nao/v3/internal"
+	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type CatCmd struct {
 	*cobra.Command
+
+	log  *zerolog.Logger
 	data *data.Buffer
 }
 
-func BuildCat(data *data.Buffer) CatCmd {
+func BuildCat(log *zerolog.Logger, data *data.Buffer) CatCmd {
 	c := CatCmd{
 		Command: &cobra.Command{
 			Use:           "cat",
@@ -27,22 +30,34 @@ func BuildCat(data *data.Buffer) CatCmd {
 			},
 		},
 		data: data,
+		log:  log,
 	}
 
-	c.RunE = c.Main()
+	c.RunE = LifeTimeWrapper(log, "cat", c.Main())
+
+	log.Trace().Msg("the 'cat' command has been created")
 
 	return c
 }
 
-func (c CatCmd) Main() scriptor {
+func (c CatCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		for _, arg := range args {
-			key := SearchKeyByPattern(arg, c.data)
-			if key == "" {
-				return keyutils.ErrKeyNotFound
+		nbOfArgs := len(args)
+
+		for i, arg := range args {
+			c.log.Trace().Msgf("searching key or tag '%s', %d/%d", arg, i+1, nbOfArgs)
+
+			key, err := internal.SearchByPattern(arg, c.data)
+			if err != nil {
+				c.log.Err(err).Msgf("an error occurred while searching key/tag '%s", arg)
+
+				return err
 			}
 
 			note := c.data.Notes[key]
+
+			c.log.Trace().Str("key", key).Str("tag", note.Tag).Send()
+			c.log.Trace().Msg("sending note content to stdout...")
 
 			fmt.Fprintln(os.Stdout, note.Content)
 		}

@@ -4,82 +4,83 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/cip8/autoname"
-	"github.com/luisnquin/nao/v2/internal/config"
-	"github.com/luisnquin/nao/v2/internal/data"
-	"github.com/luisnquin/nao/v2/internal/store"
-	"github.com/luisnquin/nao/v2/internal/store/keyutils"
+	"github.com/luisnquin/nao/v3/internal"
+	"github.com/luisnquin/nao/v3/internal/config"
+	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/luisnquin/nao/v3/internal/store"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type NewCmd struct {
 	*cobra.Command
-	config *config.AppConfig
+
+	log    *zerolog.Logger
+	config *config.Core
 	data   *data.Buffer
 	editor string
 	from   string
 	tag    string
-	title  string
 }
 
-func BuildNew(config *config.AppConfig, data *data.Buffer) NewCmd {
+func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCmd {
 	c := NewCmd{
 		Command: &cobra.Command{
-			Use:   "new",
-			Short: "Creates a new nao file",
-			Args:  cobra.MinimumNArgs(1), // TODO: cobra.Max and with 'from'
-			// TODO: new without args but before to close assign a name or not
+			Use:           "new",
+			Short:         "Creates a new nao file",
+			Args:          cobra.MaximumNArgs(1),
 			SilenceErrors: true,
 			SilenceUsage:  true,
 		},
 		config: config,
 		data:   data,
+		log:    log,
 	}
 
-	c.RunE = c.Main()
+	c.RunE = LifeTimeWrapper(log, "new", c.Main())
+
+	log.Trace().Msg("the 'new' command has been created")
 
 	flags := c.Flags()
 	flags.StringVar(&c.editor, "editor", "", "change the default code editor (ignoring configuration file)")
 	flags.StringVarP(&c.from, "from", "f", "", "create a copy of another file by ID or tag to edit on it")
 	flags.StringVarP(&c.tag, "tag", "t", "", "assigns a tag to the new file")
-	flags.StringVar(&c.title, "title", "", "assigns a title to the file")
 
 	return c
 }
 
-func (c *NewCmd) getEditorName() string {
-	if c.editor != "" {
-		return c.editor
-	}
-
-	if c.config.Editor.Name != "" {
-		return c.config.Editor.Name
-	}
-
-	return "nano"
-}
-
-func (n *NewCmd) Main() scriptor {
+func (c *NewCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		notesRepo := store.NewNotesRepository(n.data)
-		keyutil := keyutils.NewDispatcher(n.data)
+		notesRepo := store.NewNotesRepository(c.data)
 
-		if args != nil && n.tag == "" {
-			n.tag = args[0]
+		if len(args) != 0 && c.tag == "" {
+			c.tag = args[0]
 		}
+
+		if notesRepo.TagExists(c.tag) {
+			if c.data.Metadata.LastCreated.Tag == c.tag {
+				return fmt.Errorf("recently created tag, try 'nao mod %s' or remove it", c.tag)
+			}
+
+			return fmt.Errorf("tag already exists, try 'nao mod %s'", c.tag)
+		}
+
+		// TODO: cobra.Max and with 'from'
 
 		// TODO: from, title
 
-		path, err := NewFileCached(n.config, "")
+		path, err := NewFileCached(c.config, "")
 		if err != nil {
 			return err
 		}
 
 		defer os.Remove(path)
 
-		if n.from != "" {
-			key, err := keyutil.Like(n.from)
+		if c.from != "" {
+			key, err := internal.SearchByPattern(c.from, c.data)
 			if err != nil {
 				return err
 			}
@@ -95,7 +96,9 @@ func (n *NewCmd) Main() scriptor {
 			}
 		}
 
-		err = RunEditor(cmd.Context(), n.getEditorName(), path)
+		start := time.Now()
+
+		err = RunEditor(cmd.Context(), c.getEditorName(), path)
 		if err != nil {
 			return err
 		}
@@ -106,14 +109,14 @@ func (n *NewCmd) Main() scriptor {
 		}
 
 		if len(content) == 0 {
-			return fmt.Errorf("Empty content, will not be saved")
+			return fmt.Errorf("empty content, will not be saved")
 		}
 
-		if n.tag == "" {
-			n.tag = autoname.Generate("-")
+		if c.tag == "" {
+			c.tag = autoname.Generate("-")
 		}
 
-		key, err := notesRepo.New(string(content), n.tag)
+		key, err := notesRepo.New(string(content), store.WithTag(c.tag), store.WithSpentTime(time.Now().Sub(start)))
 		if err != nil {
 			return err
 		}
@@ -122,4 +125,16 @@ func (n *NewCmd) Main() scriptor {
 
 		return nil
 	}
+}
+
+func (c *NewCmd) getEditorName() string {
+	if c.editor != "" {
+		return c.editor
+	}
+
+	if c.config.Editor.Name != "" {
+		return c.config.Editor.Name
+	}
+
+	return "nano"
 }
