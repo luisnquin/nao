@@ -128,7 +128,7 @@ func (r NotesRepository) Get(key string) (models.Note, error) {
 
 	note.Key = key
 
-	return note, r.data.Save()
+	return note, r.data.Save(key)
 }
 
 func (r NotesRepository) TagExists(tag string) bool {
@@ -184,7 +184,7 @@ func (r NotesRepository) New(content string, options ...Option) (string, error) 
 
 	r.data.Notes[key] = note
 
-	return key, r.data.Save()
+	return key, r.data.Save(key)
 }
 
 func (r NotesRepository) Replace(key string, note models.Note) error {
@@ -195,7 +195,7 @@ func (r NotesRepository) Replace(key string, note models.Note) error {
 
 	r.data.Notes[key] = note
 
-	return r.data.Save()
+	return r.data.Save(key)
 }
 
 func (r NotesRepository) ModifyContent(key, content string, options ...Option) error {
@@ -214,7 +214,7 @@ func (r NotesRepository) ModifyContent(key, content string, options ...Option) e
 
 	r.data.Notes[key] = note
 
-	return r.data.Save()
+	return r.data.Save(key)
 }
 
 func (r NotesRepository) ModifyTag(key, tag string) error {
@@ -233,7 +233,7 @@ func (r NotesRepository) ModifyTag(key, tag string) error {
 
 	r.data.Notes[key] = note
 
-	return r.data.Save()
+	return r.data.Save(key)
 }
 
 func (r NotesRepository) Delete(key string) error {
@@ -244,5 +244,5 @@ func (r NotesRepository) Delete(key string) error {
 
 	delete(r.data.Notes, key)
 
-	return r.data.Save()
+	return r.data.Save(key)
 }

@@ -134,7 +134,23 @@ var (
 
 // Saves the current state of the data in the file. If the file
 // doesn't exists then it will be created.
-func (b *Buffer) Save() error {
+func (b *Buffer) Save(keyToCare string) error {
+	note := b.Notes[keyToCare]
+	md := b.Metadata
+
+	if err := b.Reload(); err != nil {
+		return err
+	}
+
+	if keyToCare != "" {
+		if b.Notes == nil {
+			b.Notes = make(map[string]models.Note, 1)
+		}
+
+		b.Notes[keyToCare] = note
+		b.Metadata = md
+	}
+
 	content, err := json.MarshalIndent(b, "", "\t")
 	if err != nil {
 		return fmt.Errorf("unexpected error, can't format data buffer to json: %w", err)
@@ -201,7 +217,7 @@ func (b *Buffer) Load() error {
 	if b.Notes == nil {
 		b.Notes = make(map[string]models.Note)
 
-		if err = b.Save(); err != nil {
+		if err = b.Save(""); err != nil {
 			return err
 		}
 	}
