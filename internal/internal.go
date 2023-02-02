@@ -13,6 +13,13 @@ import (
 	"github.com/luisnquin/nao/v3/internal/utils"
 )
 
+const (
+	Kind    = "azoricum"
+	Version = "v3.0.0"
+)
+
+const PermReadWrite = 0o600
+
 var (
 	ErrNoAvailableNotes = errors.New("no available notes available")
 	ErrNoteNotFound     = errors.New("note not found")
@@ -22,11 +29,6 @@ var (
 var (
 	NoColor bool
 	Debug   bool = utils.Contains(os.Args, "--debug")
-)
-
-const (
-	Kind    = "azoricum"
-	Version = "v3.0.0"
 )
 
 func NewKey() string {

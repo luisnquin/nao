@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"io"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/cmd"
@@ -21,13 +23,20 @@ func main() {
 		}
 	}()
 
+	logFile, err := os.OpenFile("/tmp/nao.log", os.O_CREATE|os.O_RDWR|os.O_APPEND, internal.PermReadWrite)
+	if err != nil {
+		panic(err)
+	}
+
 	var logger zerolog.Logger
 
 	if internal.Debug {
-		logger = zerolog.New(os.Stderr)
+		logger = zerolog.New(io.MultiWriter(logFile, os.Stderr))
 	} else {
-		logger = zerolog.Nop()
+		logger = zerolog.New(logFile)
 	}
+
+	logger.Trace().Str("new program call", strings.Repeat("-x+", 10*2)).Send()
 
 	ctx := context.Background()
 
