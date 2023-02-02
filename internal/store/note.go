@@ -155,6 +155,12 @@ func WithSpentTime(duration time.Duration) Option {
 	}
 }
 
+func WithContent(content string) Option {
+	return func(n *models.Note) {
+		n.Content = content
+	}
+}
+
 func (r NotesRepository) New(content string, options ...Option) (string, error) {
 	key := internal.NewKey()
 
@@ -198,7 +204,7 @@ func (r NotesRepository) Replace(key string, note models.Note) error {
 	return r.data.Save(key)
 }
 
-func (r NotesRepository) ModifyContent(key, content string, options ...Option) error {
+func (r NotesRepository) Update(key string, options ...Option) error {
 	note, ok := r.data.Notes[key]
 	if !ok {
 		return internal.ErrNoteNotFound
@@ -209,7 +215,6 @@ func (r NotesRepository) ModifyContent(key, content string, options ...Option) e
 	}
 
 	note.LastUpdate = time.Now()
-	note.Content = content
 	note.Version++
 
 	r.data.Notes[key] = note

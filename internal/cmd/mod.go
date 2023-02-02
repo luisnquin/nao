@@ -140,13 +140,15 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 			return err
 		}
 
-		if string(content) == note.Content {
-			c.log.Trace().Msg("no new content was written to the temporary file, note will not be updated")
+		opts := []store.Option{store.WithSpentTime(time.Since(start))}
 
-			return nil
+		if string(content) != note.Content {
+			opts = append(opts, store.WithContent(string(content)))
+		} else {
+			c.log.Trace().Msg("no new content was written to the temporary file, note will not be updated")
 		}
 
-		return notesRepo.ModifyContent(note.Key, string(content), store.WithSpentTime(time.Now().Sub(start)))
+		return notesRepo.Update(note.Key, opts...)
 	}
 }
 
