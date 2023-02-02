@@ -1,8 +1,12 @@
 package cmd
 
 import (
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/luisnquin/nao/v3/internal"
@@ -11,6 +15,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal/models"
 	"github.com/luisnquin/nao/v3/internal/store"
 	"github.com/luisnquin/nao/v3/internal/ui"
+	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -101,6 +106,17 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 			return cmd.Usage()
 		}
 
+		unlog, err := c.logKeyInUse(note.Key)
+		if err != nil {
+			return err
+		}
+
+		defer func() {
+			if err := unlog(); err != nil {
+				panic(err)
+			}
+		}()
+
 		c.log.Trace().Msg("creating temporary file")
 
 		filePath, err := NewFileCached(c.config, note.Content)
@@ -150,6 +166,66 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 
 		return notesRepo.Update(note.Key, opts...)
 	}
+}
+
+func (c ModCmd) openKeysInUseFile() (*os.File, error) {
+	return os.OpenFile(
+		path.Join(c.config.FS.CacheDir, "keys-in-use.txt"),
+		os.O_CREATE|os.O_APPEND|os.O_RDWR, internal.PermReadWrite,
+	)
+}
+
+func (c ModCmd) logKeyInUse(key string) (remove func() error, err error) {
+	f, err := c.openKeysInUseFile()
+	if err != nil {
+		return nil, err
+	}
+
+	content, err := io.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+
+	if utils.Contains(strings.Split(string(content), ","), key) {
+		return nil, fmt.Errorf("key '%s' already in use", key)
+	}
+
+	_, err = f.Seek(0, io.SeekEnd)
+	if err != nil {
+		return nil, err
+	}
+
+	f.WriteString("," + key)
+
+	return func() error {
+		f, err = c.openKeysInUseFile()
+		if err != nil {
+			return err
+		}
+
+		content, err := io.ReadAll(f)
+		if err != nil {
+			return err
+		}
+
+		keys := strings.Split(string(content), ",")
+
+		updatedKeys := make([]string, 0, len(keys)-1)
+
+		for _, k := range keys {
+			if k != key {
+				updatedKeys = append(updatedKeys, k)
+			}
+		}
+
+		if err := f.Truncate(0); err != nil {
+			return err
+		}
+
+		f.WriteString(strings.Join(updatedKeys, ","))
+
+		return f.Close()
+	}, f.Close()
 }
 
 func (c *ModCmd) getEditorName() string {
