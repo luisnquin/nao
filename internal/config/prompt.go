@@ -14,8 +14,11 @@ var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 // Config panel views.
 const (
-	Editor = "Editor"
-	Themes = "Themes"
+	Encryption = "Encryption"
+	Language   = "Language"
+	Editor     = "Editor"
+	Themes     = "Themes"
+	Exit       = "Exit"
 )
 
 type configPanel struct {
@@ -69,12 +72,14 @@ func InitPanel(core *Core) error {
 }
 
 func initConfigPanel(core *Core) configPanel {
+	delegate := list.NewDefaultDelegate()
+
 	p := configPanel{
 		Core: core,
-		list: list.New(getDefaultPanelItems(), list.NewDefaultDelegate(), 0, 0),
+		list: list.New(getDefaultPanelItems(), delegate, 0, 0),
 	}
 
-	p.list.Title = "Configuration panel"
+	p.list.Title = "--- Configuration panel ---"
 
 	return p
 }
@@ -134,6 +139,13 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					c.currentView = Themes
 
 					return c, c.list.SetItems(getThemeItems(c.Core))
+
+				case Language, Encryption:
+					return c, tea.Quit
+
+				case Exit:
+					return c, tea.Quit
+
 				default:
 					panic("unknown panel option")
 				}
@@ -164,7 +176,10 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func getDefaultPanelItems() []list.Item {
 	return []list.Item{
 		configItem{title: Editor, desc: "Select the terminal editor of your preference"},
-		configItem{title: Themes, desc: "Explore dream options"},
+		configItem{title: Language, desc: "Set your preferred language for program output"},
+		configItem{title: Encryption, desc: "Protect confidential data files with encryption by using a keyring tool 🔑"},
+		configItem{title: Themes, desc: "Explore dream options 🌌"},
+		configItem{title: Exit, desc: "Secret ending"},
 	}
 }
 
@@ -182,7 +197,7 @@ func getEditorItems(c *Core) []list.Item {
 			name:   name,
 			usable: err == nil,
 		}
-	}
+	} 
 
 	return listItems
 }
