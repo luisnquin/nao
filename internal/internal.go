@@ -14,7 +14,7 @@ const (
 
 // Supported terminal editors.
 const (
-	Neovim = "neovim"
+	Neovim = "nvim"
 	Nano   = "nano"
 	Vim    = "vim"
 )
