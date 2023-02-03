@@ -84,7 +84,7 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 		case len(args) == 1:
 			c.log.Trace().Str("key/tag provided", args[0]).Send()
 
-			key, err := internal.SearchByPattern(args[0], c.data)
+			key, err := note.SearchByPattern(args[0], c.data)
 			if err != nil {
 				c.log.Err(err).Str("arg", args[0]).Msg("error with the argument supplied")
 

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/note"
@@ -53,7 +52,7 @@ func (c *TagCmd) Main() cobra.PositionalArgs {
 			return fmt.Errorf("tag %s is not valid: %w", args[1], err)
 		}
 
-		key, err := internal.SearchByPattern(args[0], c.data)
+		key, err := note.SearchByPattern(args[0], c.data)
 		if err != nil {
 			return err
 		}

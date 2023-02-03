@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/luisnquin/nao/v3/internal/note"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -47,7 +47,7 @@ func (c CatCmd) Main() cobra.PositionalArgs {
 		for i, arg := range args {
 			c.log.Trace().Msgf("searching key or tag '%s', %d/%d", arg, i+1, nbOfArgs)
 
-			key, err := internal.SearchByPattern(arg, c.data)
+			key, err := note.SearchByPattern(arg, c.data)
 			if err != nil {
 				c.log.Err(err).Msgf("an error occurred while searching key/tag '%s", arg)
 

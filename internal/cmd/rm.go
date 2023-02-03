@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/note"
@@ -59,7 +58,7 @@ func (c *RmCmd) Main() cobra.PositionalArgs {
 		maxSize := 0
 
 		for _, arg := range args {
-			key, err := internal.SearchByPattern(arg, c.data)
+			key, err := note.SearchByPattern(arg, c.data)
 			if err != nil {
 				return err
 			}

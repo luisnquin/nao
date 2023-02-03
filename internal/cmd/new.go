@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/cip8/autoname"
-	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/note"
@@ -80,7 +79,7 @@ func (c *NewCmd) Main() cobra.PositionalArgs {
 		defer os.Remove(path)
 
 		if c.from != "" {
-			key, err := internal.SearchByPattern(c.from, c.data)
+			key, err := note.SearchByPattern(c.from, c.data)
 			if err != nil {
 				return err
 			}
