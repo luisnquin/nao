@@ -22,21 +22,21 @@ func NewRepository(data *data.Buffer) NotesRepository {
 	}
 }
 
-type Option func(*models.Note)
+type ModifyOption func(*models.Note)
 
-func WithTag(tag string) Option {
+func WithTag(tag string) ModifyOption {
 	return func(n *models.Note) {
 		n.Tag = tag
 	}
 }
 
-func WithSpentTime(duration time.Duration) Option {
+func WithSpentTime(duration time.Duration) ModifyOption {
 	return func(n *models.Note) {
 		n.TimeSpent += duration
 	}
 }
 
-func WithContent(content string) Option {
+func WithContent(content string) ModifyOption {
 	return func(n *models.Note) {
 		n.Content = content
 	}
@@ -58,7 +58,7 @@ func (r NotesRepository) Get(key string) (models.Note, error) {
 	return note, r.data.Save(key)
 }
 
-func (r NotesRepository) New(content string, options ...Option) (string, error) {
+func (r NotesRepository) New(content string, modifiers ...ModifyOption) (string, error) {
 	key := utils.NewKey()
 
 	note := models.Note{
@@ -68,7 +68,7 @@ func (r NotesRepository) New(content string, options ...Option) (string, error) 
 		Version:    1,
 	}
 
-	for _, option := range options {
+	for _, option := range modifiers {
 		option(&note)
 	}
 
@@ -90,13 +90,13 @@ func (r NotesRepository) New(content string, options ...Option) (string, error) 
 	return key, r.data.Save(key)
 }
 
-func (r NotesRepository) Update(key string, options ...Option) error {
+func (r NotesRepository) Update(key string, modifiers ...ModifyOption) error {
 	note, ok := r.data.Notes[key]
 	if !ok {
 		return ErrNoteNotFound
 	}
 
-	for _, option := range options {
+	for _, option := range modifiers {
 		option(&note)
 	}
 
