@@ -162,25 +162,6 @@ func (r NotesRepository) IterKey() <-chan string {
 	return ch
 }
 
-func (r NotesRepository) ModifyTag(key, tag string) error {
-	note, ok := r.data.Notes[key]
-	if !ok {
-		return ErrNoteNotFound
-	}
-
-	if err := r.tag.IsValidAsNew(tag); err != nil {
-		return err
-	}
-
-	note.LastUpdate = time.Now()
-	note.Tag = tag
-	note.Version++
-
-	r.data.Notes[key] = note
-
-	return r.data.Save(key)
-}
-
 func (r NotesRepository) TagExists(tag string) bool {
 	for _, note := range r.data.Notes {
 		if note.Tag == tag {

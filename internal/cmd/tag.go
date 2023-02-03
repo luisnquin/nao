@@ -57,6 +57,6 @@ func (c *TagCmd) Main() cobra.PositionalArgs {
 			return err
 		}
 
-		return notesRepo.ModifyTag(key, args[1])
+		return notesRepo.Update(key, note.WithTag(args[1]))
 	}
 }
