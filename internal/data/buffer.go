@@ -16,89 +16,40 @@ import (
 	"github.com/luisnquin/nao/v3/internal/models"
 )
 
-type Buffer struct {
-	Notes    map[string]models.Note `json:"notes"`
-	Metadata Metadata               `json:"metadata"`
-	config   *config.Core
-}
-
-type Metadata struct {
-	// The key of the last accessed note.
-	LastCreated KeyTag `json:"lastCreated,omitempty"`
-	// The key of the last accessed/modified note.
-	LastAccess KeyTag `json:"lastAccess,omitempty"`
-}
-
-type KeyTag struct {
-	Key string `json:"key"`
-	Tag string `json:"tag"`
-}
-
-func NewBuffer(config *config.Core) (*Buffer, error) {
-	data := Buffer{config: config}
-
-	/*
-		config.Encrypt = true
-
-		if config.Encrypt {
-			keyStore, err := keyring.Open(keyring.Config{ServiceName: "nao"})
-			if err != nil {
-				return nil, err
-			}
-
-			item, err := keyStore.Get("secret-key")
-			if err != nil {
-				if errors.Is(err, keyring.ErrKeyNotFound) {
-					keyStore.Set(keyring.Item{
-						Key:         "secret-key",
-						Data:        generateRandomKey(),
-						Label:       "",
-						Description: "",
-					})
-				} else {
-					return nil, err
-				}
-			}
-
-			fmt.Println(item, string(item.Data))
-		}
-	*/
-
-	return &data, data.Reload()
-}
-
-// Caution, It only should be called for testing.
-func (b *Buffer) AddConfig(config *config.Core) {
-	b.config = config
-}
-
-// Generates secure URL-friendly unique ID.
-func generateRandomKey() []byte {
-	size := 32
-
-	bts := make([]byte, size)
-
-	if _, err := rand.Read(bts); err != nil {
-		panic(err)
+type (
+	Buffer struct {
+		Notes    map[string]models.Note `json:"notes"`
+		Metadata Metadata               `json:"metadata"`
+		config   *config.Core
 	}
 
-	id := make([]rune, size)
-
-	for i := 0; i < size; i++ {
-		id[i] = []rune("..0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")[bts[i]&61]
+	Metadata struct {
+		// The key of the last accessed note.
+		LastCreated KeyTag `json:"lastCreated,omitempty"`
+		// The key of the last accessed/modified note.
+		LastAccess KeyTag `json:"lastAccess,omitempty"`
 	}
 
-	return []byte(string(id[:size]))
-}
+	KeyTag struct {
+		Key string `json:"key"`
+		Tag string `json:"tag"`
+	}
+)
 
 var (
 	bytes = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 0o5}
 	key   = "ebee6254-d04e-4e51-be09-d0c7c8d4"
 )
 
+func NewBuffer(config *config.Core) (*Buffer, error) {
+	data := Buffer{config: config}
+
+	return &data, data.Reload()
+}
+
 // Saves the current state of the data in the file. If the file
 // doesn't exists then it will be created.
-func (b *Buffer) Save(keyToCare string) error {
+func (b *Buffer) Commit(keyToCare string) error {
 	note := b.Notes[keyToCare]
 	md := b.Metadata
 
@@ -111,7 +62,7 @@ func (b *Buffer) Save(keyToCare string) error {
 			b.Notes = make(map[string]models.Note, 1)
 		}
 
-		b.Notes[keyToCare] = note
+		b.Notes[keyToCare] = note // TODO: suspect this
 		b.Metadata = md
 	}
 
@@ -181,7 +132,7 @@ func (b *Buffer) Load() error {
 	if b.Notes == nil {
 		b.Notes = make(map[string]models.Note)
 
-		if err = b.Save(""); err != nil {
+		if err = b.Commit(""); err != nil {
 			return err
 		}
 	}
@@ -224,3 +175,48 @@ func encryptAndEncode(plainText []byte, key string) ([]byte, error) {
 
 	return []byte(base64.StdEncoding.EncodeToString(cipherText)), nil
 }
+
+// Generates secure URL-friendly unique ID.
+func generateRandomKey() []byte {
+	size := 32
+
+	bts := make([]byte, size)
+
+	if _, err := rand.Read(bts); err != nil {
+		panic(err)
+	}
+
+	id := make([]rune, size)
+
+	for i := 0; i < size; i++ {
+		id[i] = []rune("..0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")[bts[i]&61]
+	}
+
+	return []byte(string(id[:size]))
+}
+
+/*
+	config.Encrypt = true
+
+	if config.Encrypt {
+		keyStore, err := keyring.Open(keyring.Config{ServiceName: "nao"})
+		if err != nil {
+			return nil, err
+		}
+
+		item, err := keyStore.Get("secret-key")
+		if err != nil {
+			if errors.Is(err, keyring.ErrKeyNotFound) {
+				keyStore.Set(keyring.Item{
+					Key:         "secret-key",
+					Data:        generateRandomKey(),
+					Label:       "",
+					Description: "",
+				})
+			} else {
+				return nil, err
+			}
+		}
+
+		fmt.Println(item, string(item.Data))		}
+*/

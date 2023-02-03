@@ -55,7 +55,7 @@ func (r NotesRepository) Get(key string) (models.Note, error) {
 
 	note.Key = key
 
-	return note, r.data.Save(key)
+	return note, r.data.Commit(key)
 }
 
 func (r NotesRepository) New(content string, modifiers ...ModifyOption) (string, error) {
@@ -87,7 +87,7 @@ func (r NotesRepository) New(content string, modifiers ...ModifyOption) (string,
 
 	r.data.Notes[key] = note
 
-	return key, r.data.Save(key)
+	return key, r.data.Commit(key)
 }
 
 func (r NotesRepository) Update(key string, modifiers ...ModifyOption) error {
@@ -105,7 +105,7 @@ func (r NotesRepository) Update(key string, modifiers ...ModifyOption) error {
 
 	r.data.Notes[key] = note
 
-	return r.data.Save(key)
+	return r.data.Commit(key)
 }
 
 func (r NotesRepository) Delete(key string) error {
@@ -116,7 +116,7 @@ func (r NotesRepository) Delete(key string) error {
 
 	delete(r.data.Notes, key)
 
-	return r.data.Save(key)
+	return r.data.Commit(key)
 }
 
 func (r NotesRepository) Slice() []models.Note {
