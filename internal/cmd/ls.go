@@ -12,7 +12,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
-	"github.com/luisnquin/nao/v3/internal/store"
+	"github.com/luisnquin/nao/v3/internal/note"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/rs/zerolog"
@@ -60,7 +60,7 @@ func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd 
 
 func (c *LsCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		notesRepo := store.NewNotesRepository(c.data)
+		notesRepo := note.NewRepository(c.data)
 
 		keySize := 10
 

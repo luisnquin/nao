@@ -6,7 +6,8 @@
         "internal": "Src",
         "nao": "App",
         "store": "Json",
-        "ui": "Theme"
+        "ui": "Theme",
+        "note": "Helper"
     },
     "go.liveErrors": {
         "enabled": false,

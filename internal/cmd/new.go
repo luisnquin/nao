@@ -10,7 +10,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
-	"github.com/luisnquin/nao/v3/internal/store"
+	"github.com/luisnquin/nao/v3/internal/note"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -54,7 +54,7 @@ func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCm
 
 func (c *NewCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		notesRepo := store.NewNotesRepository(c.data)
+		notesRepo := note.NewRepository(c.data)
 
 		if len(args) != 0 && c.tag == "" {
 			c.tag = args[0]
@@ -116,7 +116,7 @@ func (c *NewCmd) Main() cobra.PositionalArgs {
 			c.tag = autoname.Generate("-")
 		}
 
-		key, err := notesRepo.New(string(content), store.WithTag(c.tag), store.WithSpentTime(time.Now().Sub(start)))
+		key, err := notesRepo.New(string(content), note.WithTag(c.tag), note.WithSpentTime(time.Now().Sub(start)))
 		if err != nil {
 			return err
 		}

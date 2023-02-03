@@ -1,4 +1,4 @@
-package store
+package note
 
 import (
 	"sync"
@@ -8,17 +8,16 @@ import (
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/models"
-	"github.com/luisnquin/nao/v3/internal/store/tagutils"
 )
 
 type NotesRepository struct {
 	data *data.Buffer
-	tag  tagutils.Tag
+	tag  Tagger
 }
 
-func NewNotesRepository(data *data.Buffer) NotesRepository {
+func NewRepository(data *data.Buffer) NotesRepository {
 	return NotesRepository{
-		tag:  tagutils.New(data),
+		tag:  NewTagger(data),
 		data: data,
 	}
 }
@@ -46,12 +45,6 @@ func (r NotesRepository) Slice() []models.Note {
 	}
 
 	return notes
-}
-
-func (r NotesRepository) Exists(key string) bool {
-	_, ok := r.data.Notes[key]
-
-	return ok
 }
 
 func (r NotesRepository) Iter() <-chan models.Note {

@@ -7,7 +7,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
-	"github.com/luisnquin/nao/v3/internal/store"
+	"github.com/luisnquin/nao/v3/internal/note"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/rs/zerolog"
@@ -51,7 +51,7 @@ func BuildRm(log *zerolog.Logger, config *config.Core, data *data.Buffer) *RmCmd
 
 func (c *RmCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		repo := store.NewNotesRepository(c.data)
+		repo := note.NewRepository(c.data)
 
 		keys := make([]string, 0, len(args))
 		tags := make([]string, 0, len(args))

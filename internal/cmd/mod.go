@@ -13,7 +13,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/models"
-	"github.com/luisnquin/nao/v3/internal/store"
+	"github.com/luisnquin/nao/v3/internal/note"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/rs/zerolog"
@@ -64,9 +64,9 @@ func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCm
 
 func (c *ModCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		notesRepo := store.NewNotesRepository(c.data)
+		notesRepo := note.NewRepository(c.data)
 
-		var note models.Note
+		var nt models.Note
 
 		switch {
 		case c.latest: // mandatory
@@ -74,7 +74,7 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 
 			c.log.Trace().Msg("the last note accessed has been requested")
 
-			note, err = notesRepo.LastAccessed()
+			nt, err = notesRepo.LastAccessed()
 			if err != nil {
 				c.log.Err(err).Msg("error encountered when trying to access the last accessed note")
 
@@ -93,7 +93,7 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 
 			c.log.Trace().Str("key found", key).Send()
 
-			note, err = notesRepo.Get(key)
+			nt, err = notesRepo.Get(key)
 			if err != nil {
 				c.log.Err(err).Msg("unexpected error trying to get a previously found note")
 
@@ -106,7 +106,7 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 			return cmd.Usage()
 		}
 
-		unlog, err := c.logKeyInUse(note.Key)
+		unlog, err := c.logKeyInUse(nt.Key)
 		if err != nil {
 			return err
 		}
@@ -119,7 +119,7 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 
 		c.log.Trace().Msg("creating temporary file")
 
-		filePath, err := NewFileCached(c.config, note.Content)
+		filePath, err := NewFileCached(c.config, nt.Content)
 		if err != nil {
 			return err
 		}
@@ -156,15 +156,15 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 			return err
 		}
 
-		opts := []store.Option{store.WithSpentTime(time.Since(start))}
+		opts := []note.Option{note.WithSpentTime(time.Since(start))}
 
-		if string(content) != note.Content {
-			opts = append(opts, store.WithContent(string(content)))
+		if string(content) != nt.Content {
+			opts = append(opts, note.WithContent(string(content)))
 		} else {
 			c.log.Trace().Msg("no new content was written to the temporary file, note will not be updated")
 		}
 
-		return notesRepo.Update(note.Key, opts...)
+		return notesRepo.Update(nt.Key, opts...)
 	}
 }
 

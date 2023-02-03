@@ -6,8 +6,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
-	"github.com/luisnquin/nao/v3/internal/store"
-	"github.com/luisnquin/nao/v3/internal/store/tagutils"
+	"github.com/luisnquin/nao/v3/internal/note"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -46,10 +45,10 @@ func BuildTag(log *zerolog.Logger, config *config.Core, data *data.Buffer) TagCm
 
 func (c *TagCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		notesRepo := store.NewNotesRepository(c.data)
-		tagutil := tagutils.New(c.data)
+		notesRepo := note.NewRepository(c.data)
+		tagUtil := note.NewTagger(c.data)
 
-		err := tagutil.IsValidAsNew(args[1])
+		err := tagUtil.IsValidAsNew(args[1])
 		if err != nil {
 			return fmt.Errorf("tag %s is not valid: %w", args[1], err)
 		}
