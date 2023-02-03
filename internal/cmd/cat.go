@@ -33,7 +33,7 @@ func BuildCat(log *zerolog.Logger, data *data.Buffer) CatCmd {
 		log:  log,
 	}
 
-	c.RunE = LifeTimeWrapper(log, "cat", c.Main())
+	c.RunE = LifeTimeDecorator(log, "cat", c.Main())
 
 	log.Trace().Msg("the 'cat' command has been created")
 

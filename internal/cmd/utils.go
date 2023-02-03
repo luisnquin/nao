@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
+	"gopkg.in/yaml.v3"
 )
 
 func RunEditor(ctx context.Context, editor, filePath string, subCommands ...string) error {
@@ -67,4 +68,47 @@ func SearchKeyTagsByPattern(pattern string, data *data.Buffer) []string {
 	}
 
 	return results
+}
+
+func NavigateMapAndSet(m map[string]any, path string, value any) error {
+	parts := strings.Split(path, ".")
+
+	for i, part := range parts {
+		i++
+
+		if len(parts) == i {
+			m[part] = value
+
+			return nil
+		}
+
+		v, ok := m[part].(map[string]any)
+		if ok {
+			m = v
+		}
+	}
+
+	return fmt.Errorf("key doesn't contain a section: %s", parts[len(parts)-1])
+}
+
+func NavigateMapAndGet(m map[string]any, path string) (string, error) {
+	var result any = m
+
+	parts := strings.Split(path, ".")
+
+	for _, p := range parts {
+		if v, ok := result.(map[string]any); ok {
+			result = v[p]
+		} else {
+			return "", nil
+		}
+	}
+
+	if result == nil {
+		return "", fmt.Errorf("key doesn't contain a section: %s", parts[len(parts)-1])
+	}
+
+	content, _ := yaml.Marshal(result)
+
+	return string(content), nil
 }

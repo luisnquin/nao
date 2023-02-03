@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/goccy/go-json"
 	"github.com/luisnquin/nao/v3/internal/config"
@@ -34,7 +33,7 @@ func BuildConfig(log *zerolog.Logger, config *config.Core) ConfigCmd {
 		log:    log,
 	}
 
-	c.RunE = LifeTimeWrapper(log, "config", c.Main())
+	c.RunE = LifeTimeDecorator(log, "config", c.Main())
 
 	c.Flags().BoolVarP(&c.list, "list", "l", false, " List all variables set in config file, along with their values")
 
@@ -105,47 +104,4 @@ func (c ConfigCmd) getConfigAsMap() map[string]any {
 	}
 
 	return result
-}
-
-func NavigateMapAndSet(m map[string]any, path string, value any) error {
-	parts := strings.Split(path, ".")
-
-	for i, part := range parts {
-		i++
-
-		if len(parts) == i {
-			m[part] = value
-
-			return nil
-		}
-
-		v, ok := m[part].(map[string]any)
-		if ok {
-			m = v
-		}
-	}
-
-	return fmt.Errorf("key doesn't contain a section: %s", parts[len(parts)-1])
-}
-
-func NavigateMapAndGet(m map[string]any, path string) (string, error) {
-	var result any = m
-
-	parts := strings.Split(path, ".")
-
-	for _, p := range parts {
-		if v, ok := result.(map[string]any); ok {
-			result = v[p]
-		} else {
-			return "", nil
-		}
-	}
-
-	if result == nil {
-		return "", fmt.Errorf("key doesn't contain a section: %s", parts[len(parts)-1])
-	}
-
-	content, _ := yaml.Marshal(result)
-
-	return string(content), nil
 }

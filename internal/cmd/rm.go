@@ -39,7 +39,7 @@ func BuildRm(log *zerolog.Logger, config *config.Core, data *data.Buffer) *RmCmd
 		log:    log,
 	}
 
-	c.RunE = LifeTimeWrapper(log, "rm", c.Main())
+	c.RunE = LifeTimeDecorator(log, "rm", c.Main())
 
 	log.Trace().Msg("the 'rm' command has been created")
 

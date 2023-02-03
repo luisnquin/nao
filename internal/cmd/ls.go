@@ -47,7 +47,7 @@ func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd 
 		log:    log,
 	}
 
-	c.RunE = LifeTimeWrapper(log, "ls", c.Main())
+	c.RunE = LifeTimeDecorator(log, "ls", c.Main())
 
 	log.Trace().Msg("the 'ls' command has been created")
 

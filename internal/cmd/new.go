@@ -39,7 +39,7 @@ func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCm
 		log:    log,
 	}
 
-	c.RunE = LifeTimeWrapper(log, "new", c.Main())
+	c.RunE = LifeTimeDecorator(log, "new", c.Main())
 
 	log.Trace().Msg("the 'new' command has been created")
 
