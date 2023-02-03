@@ -46,7 +46,7 @@ func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCm
 		log:    log,
 	}
 
-	c.RunE = LifeTimeDecorator(log, "mod", c.Main())
+	c.RunE = c.Main()
 	log.Trace().Msg("the 'mod' command has been created")
 
 	flags := c.Flags()

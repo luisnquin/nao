@@ -19,8 +19,7 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 		Short: "nao is a tool to manage your notes",
 		Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log.Debug().Strs("args", args).
-				Msg("no command specified, returning usage...")
+			log.Debug().Strs("args", args).Msg("no command specified, returning usage...")
 
 			return cmd.Usage()
 		},
@@ -38,10 +37,10 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 
 	log.Trace().Msg("root command has been created")
 
-	permFlags := root.PersistentFlags()
-	permFlags.BoolVar(&internal.NoColor, "no-color", false, "disable colorized output")
-	permFlags.BoolVar(new(bool), "debug", false, "enable debug output, everything is written to stderr")
-	permFlags.MarkHidden("debug")
+	gFlags := root.PersistentFlags()
+	gFlags.BoolVar(&internal.NoColor, "no-color", false, "disable colorized output")
+	gFlags.BoolVar(new(bool), "debug", false, "enable debug output, everything is written to stderr")
+	gFlags.MarkHidden("debug")
 
 	log.Trace().Msg("debug, file, no-color has been added as persistent flags but debug flag is hidden")
 	log.Trace().Msg("adding commands to root")
@@ -58,6 +57,16 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 	)
 
 	log.Trace().Msgf("%d children have been added to the root command", len(root.Commands()))
+
+	for _, command := range root.Commands() {
+		name := command.Name() // What a fear in my heart
+
+		if command.PreRunE != nil {
+			command.PreRunE = PreRunDecorator(log, command.PreRunE)
+		}
+
+		command.RunE = LifeTimeDecorator(log, name, command.RunE)
+	}
 
 	// Errors are also returned by execute context
 	root.SetErr(io.Discard)

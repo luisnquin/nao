@@ -33,7 +33,7 @@ func BuildConfig(log *zerolog.Logger, config *config.Core) ConfigCmd {
 		log:    log,
 	}
 
-	c.RunE = LifeTimeDecorator(log, "config", c.Main())
+	c.RunE = c.Main()
 
 	c.Flags().BoolVarP(&c.list, "list", "l", false, " List all variables set in config file, along with their values")
 
