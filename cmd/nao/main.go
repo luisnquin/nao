@@ -41,7 +41,7 @@ func main() {
 	ctx := context.Background()
 
 	logger.Trace().
-		Str("version", internal.Version).Str("kind", internal.Kind).
+		Str("app", internal.AppName).Str("version", internal.Version).Str("kind", internal.Kind).
 		Str("runtime", runtime.Version()).Str("os", runtime.GOOS).Str("arch", runtime.GOARCH).Send()
 
 	logger.Trace().Msg("loading configuration...")

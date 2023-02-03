@@ -8,6 +8,7 @@ import (
 
 // Program metadata.
 const (
+	AppName = "nao"
 	Kind    = "azoricum"
 	Version = "v3.0.0"
 )
