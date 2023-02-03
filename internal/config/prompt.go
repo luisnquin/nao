@@ -42,6 +42,10 @@ type (
 	themeItem struct {
 		name, schema string
 	}
+
+	languageItem struct {
+		name, description string
+	}
 )
 
 func (c configItem) Title() string       { return c.title }
@@ -61,6 +65,10 @@ func (e editorItem) FilterValue() string { return e.name }
 func (t themeItem) Title() string       { return t.name }
 func (t themeItem) Description() string { return t.schema }
 func (t themeItem) FilterValue() string { return t.name }
+
+func (l languageItem) Title() string       { return l.name }
+func (l languageItem) Description() string { return l.description }
+func (l languageItem) FilterValue() string { return l.name }
 
 // Creates a new interactive configuration panel.
 func InitPanel(core *Core) error {
@@ -128,6 +136,9 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return c, tea.Quit
 
+			case Language:
+				return c, tea.Quit
+
 			default:
 				switch selectedItem {
 				case Editor:
@@ -140,10 +151,10 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					return c, c.list.SetItems(getThemeItems(c.Core))
 
-				case Language, Encryption:
-					return c, tea.Quit
+				case Language:
+					return c, c.list.SetItems(getLanguageItems())
 
-				case Exit:
+				case Encryption, Exit:
 					return c, tea.Quit
 
 				default:
@@ -197,7 +208,7 @@ func getEditorItems(c *Core) []list.Item {
 			name:   name,
 			usable: err == nil,
 		}
-	} 
+	}
 
 	return listItems
 }
@@ -217,6 +228,30 @@ func getThemeItems(c *Core) []list.Item {
 			name:   name,
 			schema: theme.Pretty(),
 		}
+	}
+
+	return listItems
+}
+
+func getLanguageItems() []list.Item {
+	languages := []languageItem{
+		{
+			name:        "English - en",
+			description: "whoami",
+		},
+		{
+			name:        "Spanish - es",
+			description: "quiénsoy",
+		},
+		{
+			name:        "French - fr",
+			description: "quisuisje",
+		},
+	}
+
+	listItems := make([]list.Item, len(languages))
+	for i, lang := range languages {
+		listItems[i] = lang
 	}
 
 	return listItems
