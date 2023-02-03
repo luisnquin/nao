@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -60,8 +59,6 @@ func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCm
 	return c
 }
 
-// TODO: Keys in use for non-parallel use of notes
-
 func (c *ModCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		notesRepo := note.NewRepository(c.data)
@@ -106,16 +103,24 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 			return cmd.Usage()
 		}
 
+		editorName := c.getEditorName()
+
+		var editorArgs []string
+
 		unlog, err := c.logKeyInUse(nt.Key)
 		if err != nil {
-			return err
-		}
-
-		defer func() {
-			if err := unlog(); err != nil {
-				panic(err)
+			if !c.config.ReadOnlyOnConflict {
+				return err
 			}
-		}()
+
+			editorArgs = append(editorArgs, getReadOnlyFlag(editorName))
+		} else {
+			defer func() {
+				if err := unlog(); err != nil {
+					panic(err)
+				}
+			}()
+		}
 
 		c.log.Trace().Msg("creating temporary file")
 
@@ -136,11 +141,11 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 			}
 		}()
 
-		start, editorName := time.Now(), c.getEditorName()
+		start := time.Now()
 
-		c.log.Trace().Str("editor", editorName).Msg("running editor...")
+		c.log.Trace().Str("editor", editorName).Strs("flags", editorArgs).Msg("running editor...")
 
-		err = RunEditor(cmd.Context(), editorName, filePath) // args[1:]...)
+		err = RunEditor(cmd.Context(), editorName, filePath, editorArgs...)
 		if err != nil {
 			c.log.Err(err).Msg("error running the editor")
 
@@ -149,7 +154,7 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 
 		c.log.Trace().Msg("reading content of temporary file...")
 
-		content, err := ioutil.ReadFile(filePath)
+		content, err := os.ReadFile(filePath)
 		if err != nil {
 			c.log.Err(err).Msg("error reading content of temporary file")
 
@@ -237,5 +242,5 @@ func (c *ModCmd) getEditorName() string {
 		return c.config.Editor.Name
 	}
 
-	return "nano"
+	return internal.Nano
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/ui"
 )
 
@@ -14,11 +15,18 @@ var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 // Config panel views.
 const (
-	Encryption = "Encryption"
-	Language   = "Language"
-	Editor     = "Editor"
-	Themes     = "Themes"
-	Exit       = "Exit"
+	FileConflict = "File conflict resolution"
+	Encryption   = "Encryption"
+	Language     = "Language"
+	Editor       = "Editor"
+	Themes       = "Themes"
+	Exit         = "Exit"
+)
+
+// File conflict resolution options.
+const (
+	UseInReadOnlyMode = "Use in read-only mode"
+	ExitProgram       = "Exit program"
 )
 
 type configPanel struct {
@@ -44,7 +52,11 @@ type (
 	}
 
 	languageItem struct {
-		name, description string
+		name, desc string
+	}
+
+	genericItem struct { // TODO: enforce use of this
+		name, desc string
 	}
 )
 
@@ -67,8 +79,12 @@ func (t themeItem) Description() string { return t.schema }
 func (t themeItem) FilterValue() string { return t.name }
 
 func (l languageItem) Title() string       { return l.name }
-func (l languageItem) Description() string { return l.description }
+func (l languageItem) Description() string { return l.desc }
 func (l languageItem) FilterValue() string { return l.name }
+
+func (g genericItem) Title() string       { return g.name }
+func (g genericItem) Description() string { return g.desc }
+func (g genericItem) FilterValue() string { return g.name }
 
 // Creates a new interactive configuration panel.
 func InitPanel(core *Core) error {
@@ -136,6 +152,14 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return c, tea.Quit
 
+			case FileConflict:
+				c.Core.ReadOnlyOnConflict = selectedItem == UseInReadOnlyMode
+				if err := c.Save(); err != nil {
+					panic(err)
+				}
+
+				return c, tea.Quit
+
 			case Language:
 				return c, tea.Quit
 
@@ -150,6 +174,11 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					c.currentView = Themes
 
 					return c, c.list.SetItems(getThemeItems(c.Core))
+
+				case FileConflict:
+					c.currentView = FileConflict
+
+					return c, c.list.SetItems(getFileConflictResolutionOpts())
 
 				case Language:
 					return c, c.list.SetItems(getLanguageItems())
@@ -186,6 +215,7 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func getDefaultPanelItems() []list.Item {
 	return []list.Item{
+		configItem{title: FileConflict, desc: "Prevent multiple instances of the same file from opening the file in read-only mode or exit with an error"},
 		configItem{title: Editor, desc: "Select the terminal editor of your preference"},
 		configItem{title: Language, desc: "Set your preferred language for program output"},
 		configItem{title: Encryption, desc: "Protect confidential data files with encryption by using a keyring tool 🔑"},
@@ -194,8 +224,15 @@ func getDefaultPanelItems() []list.Item {
 	}
 }
 
+func getFileConflictResolutionOpts() []list.Item {
+	return []list.Item{
+		genericItem{name: UseInReadOnlyMode, desc: "Open the file in read-only mode without editing anything"},
+		genericItem{name: ExitProgram, desc: "Only exit with an error when this event is detected"},
+	}
+}
+
 func getEditorItems(c *Core) []list.Item {
-	editors := []string{"nano", "nvim", "vim"}
+	editors := []string{internal.Nano, internal.Neovim, internal.Vim}
 	listItems := make([]list.Item, len(editors))
 
 	for i, name := range editors {
@@ -234,25 +271,18 @@ func getThemeItems(c *Core) []list.Item {
 }
 
 func getLanguageItems() []list.Item {
-	languages := []languageItem{
-		{
-			name:        "English - en",
-			description: "whoami",
+	return []list.Item{
+		languageItem{
+			name: "English - en",
+			desc: "whoami",
 		},
-		{
-			name:        "Spanish - es",
-			description: "quiénsoy",
+		languageItem{
+			name: "Spanish - es",
+			desc: "quiénsoy",
 		},
-		{
-			name:        "French - fr",
-			description: "quisuisje",
+		languageItem{
+			name: "French - fr",
+			desc: "quisuisje",
 		},
 	}
-
-	listItems := make([]list.Item, len(languages))
-	for i, lang := range languages {
-		listItems[i] = lang
-	}
-
-	return listItems
 }

@@ -18,12 +18,13 @@ import (
 )
 
 type Core struct {
-	Encrypt bool           `json:"encrypt" yaml:"encrypt"`
-	Editor  EditorConfig   `json:"editor" yaml:"editor"`
-	Theme   string         `json:"theme" yaml:"theme"`
-	Command CommandOptions `json:"-" yaml:"-"`
-	FS      FSConfig       `json:"-" yaml:"-"`
-	Colors  ui.ColorScheme `json:"-" yaml:"-"` // ???
+	Encrypt            bool           `json:"encrypt" yaml:"encrypt"`
+	Editor             EditorConfig   `json:"editor" yaml:"editor"`
+	Theme              string         `json:"theme" yaml:"theme"`
+	ReadOnlyOnConflict bool           `json:"readOnlyOnConflict" yaml:"readOnlyOnConflict"`
+	Command            CommandOptions `json:"-" yaml:"-"`
+	FS                 FSConfig       `json:"-" yaml:"-"`
+	Colors             ui.ColorScheme `json:"-" yaml:"-"` // ???
 
 	log *zerolog.Logger
 }

@@ -8,12 +8,13 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"gopkg.in/yaml.v3"
 )
 
-func RunEditor(ctx context.Context, editor, filePath string, subCommands ...string) error {
+func RunEditor(ctx context.Context, editor, filePath string, args ...string) error {
 	_, err := exec.LookPath(editor)
 	if err != nil {
 		return fmt.Errorf("unable to start editor, reason: %s", err.Error())
@@ -24,10 +25,9 @@ func RunEditor(ctx context.Context, editor, filePath string, subCommands ...stri
 		return fmt.Errorf("unable to stat file: %w", err)
 	}
 
-	subCommands = append([]string{filePath}, subCommands...)
+	args = append(args, filePath)
 
-	bin := exec.CommandContext(ctx, editor, subCommands...)
-
+	bin := exec.CommandContext(ctx, editor, args...)
 	bin.Stderr = os.Stderr
 	bin.Stdout = os.Stdout
 	bin.Stdin = os.Stdin
@@ -111,4 +111,22 @@ func NavigateMapAndGet(m map[string]any, path string) (string, error) {
 	content, _ := yaml.Marshal(result)
 
 	return string(content), nil
+}
+
+func getReadOnlyFlag(editor string) string {
+	switch editor {
+	case internal.Nano:
+		return "-v"
+	case internal.Neovim, internal.Vim:
+		return "-R"
+	}
+	return ""
+}
+
+func getSupportedEditors() []string { // TODO: use it to validate editor
+	return []string{
+		internal.Neovim,
+		internal.Nano,
+		internal.Vim,
+	}
 }

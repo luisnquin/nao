@@ -12,6 +12,13 @@ const (
 	Version = "v3.0.0"
 )
 
+// Supported terminal editors.
+const (
+	Neovim = "neovim"
+	Nano   = "nano"
+	Vim    = "vim"
+)
+
 // Read write permissions for current user.
 const PermReadWrite = 0o600
 
