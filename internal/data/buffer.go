@@ -7,14 +7,11 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/user"
 
 	"github.com/goccy/go-json"
-	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/models"
 	"github.com/luisnquin/nao/v3/internal/security"
-	"github.com/zalando/go-keyring"
 )
 
 type (
@@ -68,12 +65,12 @@ func (b *Buffer) Commit(keyToCare string) error {
 	}
 
 	if b.config.Encrypt {
-		key, err := security.GetSecretFromKeyring()
+		secret, err := security.GetSecretFromKeyring()
 		if err != nil {
 			return err
 		}
 
-		data, err = security.EncryptAndEncode(data, key)
+		data, err = security.EncryptAndEncode(data, secret)
 		if err != nil {
 			return err
 		}
@@ -123,17 +120,12 @@ func (b *Buffer) Load() error {
 	}
 
 	if b.config.Encrypt {
-		caller, err := user.Current()
-		if err != nil {
-			panic(err)
-		}
-
-		key, err := keyring.Get(internal.AppName, caller.Username)
+		secret, err := security.GetSecretFromKeyring()
 		if err != nil {
 			return err
 		}
 
-		data, err = security.DecryptAndDecode(data, key)
+		data, err = security.DecryptAndDecode(data, secret)
 		if err != nil {
 			return err
 		}
