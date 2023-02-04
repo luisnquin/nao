@@ -68,12 +68,7 @@ func (b *Buffer) Commit(keyToCare string) error {
 	}
 
 	if b.config.Encrypt {
-		caller, err := user.Current()
-		if err != nil {
-			panic(err)
-		}
-
-		key, err := keyring.Get(internal.AppName, caller.Username)
+		key, err := security.GetSecretFromKeyring()
 		if err != nil {
 			return err
 		}
