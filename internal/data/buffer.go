@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/goccy/go-json"
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/models"
 	"github.com/luisnquin/nao/v3/internal/security"
@@ -76,7 +77,7 @@ func (b *Buffer) Commit(keyToCare string) error {
 		}
 	}
 
-	return ioutil.WriteFile(b.config.FS.DataFile, data, 0o644)
+	return ioutil.WriteFile(b.config.FS.DataFile, data, internal.PermReadWrite)
 }
 
 // First data load, if there's no file to load then it creates it.
