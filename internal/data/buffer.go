@@ -96,6 +96,10 @@ func (b *Buffer) Reload() error {
 				return fmt.Errorf("unable to create data file %s: %v", b.config.FS.DataFile, err)
 			}
 
+			if !b.config.Encrypt {
+				file.WriteString("{}") // Of course an empty file will never be a valid JSON
+			}
+
 			err = file.Close()
 			if err != nil {
 				return err
