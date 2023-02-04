@@ -8,16 +8,36 @@ import (
 	"github.com/luisnquin/nao/v3/internal/utils"
 )
 
-func SearchByPattern(pattern string, data *data.Buffer) (string, error) {
+func SearchKeyTagsByPrefix(prefix string, data *data.Buffer) []string {
+	var results []string
+
+	for key, note := range data.Notes {
+		if strings.HasPrefix(note.Tag, prefix) {
+			results = append(results, note.Tag)
+		}
+
+		if strings.HasPrefix(key, prefix) {
+			if len(key) >= 10 {
+				results = append(results, key[:10])
+			} else {
+				results = append(results, key)
+			}
+		}
+	}
+
+	return results
+}
+
+func SearchByPrefix(prefix string, data *data.Buffer) (string, error) {
 	var result string
 
 	// We look for the pattern most similar to the availables keys/tags
 	for key, note := range data.Notes {
-		if strings.HasPrefix(note.Tag, pattern) && len(note.Tag) > len(result) ||
-			strings.HasPrefix(key, pattern) && len(key) > len(result) {
+		if strings.HasPrefix(note.Tag, prefix) && len(note.Tag) > len(result) ||
+			strings.HasPrefix(key, prefix) && len(key) > len(result) {
 			result = key
 
-			if note.Tag == pattern || key == pattern {
+			if note.Tag == prefix || key == prefix {
 				break
 			}
 		}
@@ -34,7 +54,7 @@ func SearchByPattern(pattern string, data *data.Buffer) (string, error) {
 		opts = append(opts, n.Tag)
 	}
 
-	bestMatch := utils.BestMatch(opts, pattern)
+	bestMatch := utils.BestMatch(opts, prefix)
 	if bestMatch != "" {
 		return "", fmt.Errorf("key not found, did you mean '%s'?", bestMatch)
 	}

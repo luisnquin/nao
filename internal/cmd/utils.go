@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
-	"github.com/luisnquin/nao/v3/internal/data"
 	"gopkg.in/yaml.v3"
 )
 
@@ -52,22 +51,6 @@ func NewFileCached(config *config.Core, content string) (string, error) {
 	}
 
 	return f.Name(), f.Close()
-}
-
-func SearchKeyTagsByPattern(pattern string, data *data.Buffer) []string {
-	var results []string
-
-	for key, note := range data.Notes {
-		if strings.HasPrefix(note.Tag, pattern) {
-			results = append(results, note.Tag)
-		}
-
-		if strings.HasPrefix(key, pattern) {
-			results = append(results, key)
-		}
-	}
-
-	return results
 }
 
 func NavigateMapAndSet(m map[string]any, path string, value any) error {

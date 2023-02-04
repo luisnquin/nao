@@ -79,7 +79,7 @@ func (c *NewCmd) Main() cobra.PositionalArgs {
 		defer os.Remove(path)
 
 		if c.from != "" {
-			key, err := note.SearchByPattern(c.from, c.data)
+			key, err := note.SearchByPrefix(c.from, c.data)
 			if err != nil {
 				return err
 			}

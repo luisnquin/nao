@@ -31,7 +31,7 @@ func BuildRm(log *zerolog.Logger, config *config.Core, data *data.Buffer) *RmCmd
 			SilenceUsage:  true,
 			SilenceErrors: true,
 			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return SearchKeyTagsByPattern(toComplete, data), cobra.ShellCompDirectiveNoFileComp
+				return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
 			},
 		},
 		config: config,
@@ -58,7 +58,7 @@ func (c *RmCmd) Main() cobra.PositionalArgs {
 		maxSize := 0
 
 		for _, arg := range args {
-			key, err := note.SearchByPattern(arg, c.data)
+			key, err := note.SearchByPrefix(arg, c.data)
 			if err != nil {
 				return err
 			}

@@ -39,7 +39,7 @@ func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd 
 			SilenceUsage:  true,
 			SilenceErrors: true,
 			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return SearchKeyTagsByPattern(toComplete, data), cobra.ShellCompDirectiveNoFileComp
+				return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
 			},
 		},
 		config: config,

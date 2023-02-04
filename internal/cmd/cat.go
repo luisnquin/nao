@@ -26,7 +26,7 @@ func BuildCat(log *zerolog.Logger, data *data.Buffer) CatCmd {
 			SilenceErrors: true,
 			SilenceUsage:  true,
 			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return SearchKeyTagsByPattern(toComplete, data), cobra.ShellCompDirectiveNoFileComp
+				return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
 			},
 		},
 		data: data,
@@ -47,7 +47,7 @@ func (c CatCmd) Main() cobra.PositionalArgs {
 		for i, arg := range args {
 			c.log.Trace().Msgf("searching key or tag '%s', %d/%d", arg, i+1, nbOfArgs)
 
-			key, err := note.SearchByPattern(arg, c.data)
+			key, err := note.SearchByPrefix(arg, c.data)
 			if err != nil {
 				c.log.Err(err).Msgf("an error occurred while searching key/tag '%s", arg)
 

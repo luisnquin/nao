@@ -36,7 +36,7 @@ func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCm
 			Short: "Edit any file",
 			Args:  cobra.MaximumNArgs(1),
 			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return SearchKeyTagsByPattern(toComplete, data), cobra.ShellCompDirectiveNoFileComp
+				return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
 			},
 			SilenceUsage:  true,
 			SilenceErrors: true,
@@ -81,7 +81,7 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 		case len(args) == 1:
 			c.log.Trace().Str("key/tag provided", args[0]).Send()
 
-			key, err := note.SearchByPattern(args[0], c.data)
+			key, err := note.SearchByPrefix(args[0], c.data)
 			if err != nil {
 				c.log.Err(err).Str("arg", args[0]).Msg("error with the argument supplied")
 

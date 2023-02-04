@@ -27,7 +27,7 @@ func BuildTag(log *zerolog.Logger, config *config.Core, data *data.Buffer) TagCm
 			SilenceUsage:  true,
 			SilenceErrors: true,
 			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return SearchKeyTagsByPattern(toComplete, data), cobra.ShellCompDirectiveNoFileComp
+				return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
 			},
 		},
 		config: config,
@@ -52,7 +52,7 @@ func (c *TagCmd) Main() cobra.PositionalArgs {
 			return fmt.Errorf("tag %s is not valid: %w", args[1], err)
 		}
 
-		key, err := note.SearchByPattern(args[0], c.data)
+		key, err := note.SearchByPrefix(args[0], c.data)
 		if err != nil {
 			return err
 		}
