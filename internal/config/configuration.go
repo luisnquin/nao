@@ -138,7 +138,6 @@ func (c *Core) Load() error {
 
 	c.FS = FSConfig{
 		ConfigFile: path.Join(configDir, "config.yml"),
-		DataFile:   path.Join(dataDir, "data.txt"),
 		ConfigDir:  configDir,
 		CacheDir:   cacheDir,
 		DataDir:    dataDir,
@@ -188,8 +187,6 @@ func (c *Core) Load() error {
 
 		c.log.Trace().Msg("file loaded into memory successfully")
 	}
-
-	c.Encrypt = true
 
 	if c.Encrypt {
 		c.FS.DataFile = path.Join(dataDir, "data.txt")
