@@ -1,7 +1,6 @@
 package data
 
 import (
-	"crypto/rand"
 	"errors"
 	"fmt"
 	"io"
@@ -65,7 +64,7 @@ func (b *Buffer) MigrateFileIfNeeded() error {
 		}
 
 		if b.config.Encrypt {
-			secret := generateRandomKey()
+			secret := security.CreateRandomSecret()
 
 			if err := security.SetSecretInKeyring(secret); err != nil {
 				return err
@@ -213,22 +212,4 @@ func (b *Buffer) Load() error {
 	}
 
 	return nil
-}
-
-func generateRandomKey() string {
-	size := 32
-
-	bts := make([]byte, size)
-
-	if _, err := rand.Read(bts); err != nil {
-		panic(err)
-	}
-
-	id := make([]rune, size)
-
-	for i := 0; i < size; i++ {
-		id[i] = []rune("..0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")[bts[i]&61]
-	}
-
-	return string(id[:size])
 }

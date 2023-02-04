@@ -4,8 +4,21 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/hex"
 	"errors"
 )
+
+// Creates a secret key compatible with the required
+// by AES-256 algorithm.
+func CreateRandomSecret() string {
+	bts := make([]byte, aes.BlockSize)
+
+	if _, err := rand.Read(bts); err != nil {
+		panic(err)
+	}
+
+	return hex.EncodeToString(bts)
+}
 
 // Decrypts the provided content by using AES-256 and also decodes
 // the content using std base64.
