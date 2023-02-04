@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/ProtonMail/go-appdir"
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/rs/zerolog"
@@ -30,11 +31,20 @@ type Core struct {
 }
 
 type FSConfig struct {
-	ConfigFile string
-	DataFile   string
-	ConfigDir  string
-	CacheDir   string
-	DataDir    string
+	DataEncryptedFile string
+	DataNormalFile    string
+	ConfigFile        string
+	ConfigDir         string
+	CacheDir          string
+	DataDir           string
+}
+
+func (fs *FSConfig) DataFile(forEncrypted bool) string {
+	if forEncrypted {
+		return fs.DataEncryptedFile
+	}
+
+	return fs.DataNormalFile
 }
 
 type EditorConfig struct {
@@ -65,31 +75,6 @@ type (
 		Ommit bool   `yaml:"ommit"`
 	}
 )
-
-/*
-	go get github.com/99designs/keyring@latest
-	go get "github.com/google/uuid@latest
-
-	keyStore, err := keyring.Open(keyring.Config{
-		ServiceName: "nao",
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	err = keyStore.Set(keyring.Item{
-		Key:  "secret-key",
-		Data: []byte(uuid.NewString()),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	item, err := keyStore.Get("secret-key")
-	if err != nil {
-		return nil, err
-	}
-*/
 
 func New(logger *zerolog.Logger) (*Core, error) {
 	config := Core{log: logger}
@@ -143,6 +128,9 @@ func (c *Core) Load() error {
 		DataDir:    dataDir,
 	}
 
+	c.FS.DataEncryptedFile = path.Join(dataDir, "data.txt")
+	c.FS.DataNormalFile = path.Join(dataDir, "data.json")
+
 	files := []string{c.FS.ConfigFile}
 
 	if strings.HasPrefix(runtime.GOOS, "linux") { // ? macos
@@ -188,12 +176,6 @@ func (c *Core) Load() error {
 		c.log.Trace().Msg("file loaded into memory successfully")
 	}
 
-	if c.Encrypt {
-		c.FS.DataFile = path.Join(dataDir, "data.txt")
-	} else {
-		c.FS.DataFile = path.Join(dataDir, "data.json")
-	}
-
 	return nil
 }
 
@@ -203,7 +185,7 @@ func (c *Core) Save() error {
 		return fmt.Errorf("unexpected error, cannot encode config to json: %w", err)
 	}
 
-	return ioutil.WriteFile(c.FS.ConfigFile, content, 0o644)
+	return ioutil.WriteFile(c.FS.ConfigFile, content, internal.PermReadWrite)
 }
 
 func (c *Core) fillOrFix() {
