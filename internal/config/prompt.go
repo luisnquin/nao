@@ -16,7 +16,6 @@ var docStyle = lipgloss.NewStyle().Margin(1, 2)
 // Config panel views.
 const (
 	FileConflict = "File conflict resolution"
-	Encryption   = "Encryption"
 	Language     = "Language"
 	Editor       = "Editor"
 	Themes       = "Themes"
@@ -127,10 +126,6 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return c, tea.Quit
 
-			case Encryption:
-				c.Encrypt = selectedItem == Enable
-				try(c.Save())
-
 			case Themes:
 				if !strings.Contains(selectedItem, "(current)") {
 					// c.UpdateTheme(theme)
@@ -171,11 +166,6 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					return c, c.list.SetItems(getLanguageItems())
 
-				case Encryption:
-					c.currentView = Encryption
-
-					return c, c.list.SetItems(getEncryptionOptions())
-
 				case Exit:
 					return c, tea.Quit
 
@@ -211,7 +201,6 @@ func getDefaultPanelItems() []list.Item {
 		genericItem{name: FileConflict, desc: "Prevent multiple instances of the same file from opening the file in read-only mode or exit with an error"},
 		genericItem{name: Editor, desc: "Select the terminal editor of your preference"},
 		genericItem{name: Language, desc: "Set your preferred language for program output"},
-		genericItem{name: Encryption, desc: "Protect confidential data files with encryption by using a keyring tool 🔑"},
 		genericItem{name: Themes, desc: "Explore dream options 🌌"},
 		genericItem{name: Exit, desc: "Secret ending"},
 	}
@@ -221,13 +210,6 @@ func getFileConflictResolutionOpts() []list.Item {
 	return []list.Item{
 		genericItem{name: UseInReadOnlyMode, desc: "Open the file in read-only mode without editing anything"},
 		genericItem{name: ExitProgram, desc: "Only exit with an error when this event is detected"},
-	}
-}
-
-func getEncryptionOptions() []list.Item {
-	return []list.Item{
-		genericItem{name: Enable, desc: "Enable boolean to encrypt all your data"},
-		genericItem{name: Disable, desc: "Disable and revert encryption in case you already use encryption"},
 	}
 }
 

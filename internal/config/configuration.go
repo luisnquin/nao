@@ -19,7 +19,7 @@ import (
 )
 
 type Core struct {
-	Encrypt            bool           `json:"encrypt" yaml:"encrypt"`
+	Encrypt            bool           `json:"-" yaml:"-"`
 	Editor             EditorConfig   `json:"editor" yaml:"editor"`
 	Theme              string         `json:"theme" yaml:"theme"`
 	ReadOnlyOnConflict bool           `json:"readOnlyOnConflict" yaml:"readOnlyOnConflict"`
@@ -175,6 +175,8 @@ func (c *Core) Load() error {
 
 		c.log.Trace().Msg("file loaded into memory successfully")
 	}
+
+	c.Encrypt = true
 
 	return nil
 }
