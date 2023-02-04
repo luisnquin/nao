@@ -116,7 +116,7 @@ func (r NotesRepository) Delete(key string) error {
 
 	delete(r.data.Notes, key)
 
-	return r.data.Commit(key)
+	return r.data.Commit("")
 }
 
 func (r NotesRepository) Slice() []models.Note {

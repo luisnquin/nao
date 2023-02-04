@@ -115,13 +115,19 @@ func (b *Buffer) Commit(keyToCare string) error {
 		return err
 	}
 
-	if keyToCare != "" {
+	if keyToCare != "" && note.Version != 0 {
 		if b.Notes == nil {
 			b.Notes = make(map[string]models.Note, 1)
 		}
 
 		b.Notes[keyToCare] = note // TODO: suspect this
 		b.Metadata = md
+	}
+
+	for k, n := range b.Notes { // TODO: log it
+		if n.Tag == "" { // ? Or should I hide it in the ls command
+			delete(b.Notes, k)
+		}
 	}
 
 	data, err := json.MarshalIndent(b, "", "\t")
