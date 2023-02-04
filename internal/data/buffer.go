@@ -10,10 +10,13 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/user"
 
 	"github.com/goccy/go-json"
+	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/models"
+	"github.com/zalando/go-keyring"
 )
 
 type (
@@ -36,10 +39,7 @@ type (
 	}
 )
 
-var (
-	bytes = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 0o5}
-	key   = "ebee6254-d04e-4e51-be09-d0c7c8d4"
-)
+var bytes = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 0o5}
 
 func NewBuffer(config *config.Core) (*Buffer, error) {
 	data := Buffer{config: config}
@@ -71,9 +71,19 @@ func (b *Buffer) Commit(keyToCare string) error {
 		return fmt.Errorf("unexpected error, can't format data buffer to json: %w", err)
 	}
 
-	cipherText, err := encryptAndEncode(content, key)
+	caller, err := user.Current()
 	if err != nil {
 		panic(err)
+	}
+
+	key, err := keyring.Get(internal.AppName, caller.Username)
+	if err != nil {
+		return err
+	}
+
+	cipherText, err := encryptAndEncode(content, key)
+	if err != nil {
+		return err
 	}
 
 	return ioutil.WriteFile(b.config.FS.DataFile, cipherText, 0o644)
@@ -115,9 +125,24 @@ func (b *Buffer) Load() error {
 		return err
 	}
 
-	// TODO: There should be something to migrate data.json to data.txt
+	var data []byte
 
-	data, err := decryptAndDecode(file, key)
+	if b.config.Encrypt {
+		caller, err := user.Current()
+		if err != nil {
+			panic(err)
+		}
+
+		key, err := keyring.Get(internal.AppName, caller.Username)
+		if err != nil {
+			return err
+		}
+
+		data, err = decryptAndDecode(file, key)
+	} else {
+		data, err = io.ReadAll(file)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -194,29 +219,3 @@ func generateRandomKey() []byte {
 
 	return []byte(string(id[:size]))
 }
-
-/*
-	config.Encrypt = true
-
-	if config.Encrypt {
-		keyStore, err := keyring.Open(keyring.Config{ServiceName: "nao"})
-		if err != nil {
-			return nil, err
-		}
-
-		item, err := keyStore.Get("secret-key")
-		if err != nil {
-			if errors.Is(err, keyring.ErrKeyNotFound) {
-				keyStore.Set(keyring.Item{
-					Key:         "secret-key",
-					Data:        generateRandomKey(),
-					Label:       "",
-					Description: "",
-				})
-			} else {
-				return nil, err
-			}
-		}
-
-		fmt.Println(item, string(item.Data))		}
-*/

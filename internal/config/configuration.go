@@ -146,7 +146,7 @@ func (c *Core) Load() error {
 
 	files := []string{c.FS.ConfigFile}
 
-	if strings.HasPrefix(runtime.GOOS, "linux") {
+	if strings.HasPrefix(runtime.GOOS, "linux") { // ? macos
 		files = append(files, "/etc/nao/config.yml")
 	}
 
@@ -187,6 +187,14 @@ func (c *Core) Load() error {
 		}
 
 		c.log.Trace().Msg("file loaded into memory successfully")
+	}
+
+	c.Encrypt = true
+
+	if c.Encrypt {
+		c.FS.DataFile = path.Join(dataDir, "data.txt")
+	} else {
+		c.FS.DataFile = path.Join(dataDir, "data.json")
 	}
 
 	return nil
