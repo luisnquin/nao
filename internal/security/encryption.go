@@ -3,9 +3,9 @@ package security
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/rand"
+	"errors"
 )
-
-var iv = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 0o5}
 
 // Decrypts the provided content by using AES-256 and also decodes
 // the content using std base64.
@@ -30,9 +30,17 @@ func EncryptAndEncode(plainText []byte, key string) ([]byte, error) {
 }
 
 func DecryptFromAES256(encryptedText []byte, key string) ([]byte, error) {
+	// iv is always stored in the encrypted text
+	iv := encryptedText[:aes.BlockSize]
+	encryptedText = encryptedText[aes.BlockSize:]
+
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
 		return nil, err
+	}
+
+	if len(encryptedText) < aes.BlockSize { // ? maybe remove/improve this
+		return nil, errors.New("ciphertext too short")
 	}
 
 	plainText := make([]byte, len(encryptedText))
@@ -48,9 +56,19 @@ func EncryptToAES256(text []byte, key string) ([]byte, error) {
 		return nil, err
 	}
 
-	cipherText := make([]byte, len(text))
+	iv := make([]byte, aes.BlockSize)
+	if _, err := rand.Read(iv); err != nil {
+		return nil, err
+	}
 
-	cipher.NewCFBEncrypter(block, iv).XORKeyStream(cipherText, text)
+	encryptedText := make([]byte, len(text))
 
-	return cipherText, nil
+	cipher.NewCFBEncrypter(block, iv).XORKeyStream(encryptedText, text)
+
+	// concatenate the iv and the ciphertext
+	cipherWithVi := make([]byte, aes.BlockSize+len(encryptedText))
+	copy(cipherWithVi[:aes.BlockSize], iv)
+	copy(cipherWithVi[aes.BlockSize:], encryptedText)
+
+	return cipherWithVi, nil
 }
