@@ -38,31 +38,15 @@ type configPanel struct {
 }
 
 type (
-	configItem struct {
-		title, desc string
-	}
-
 	editorItem struct {
 		name   string
 		usable bool
 	}
 
-	themeItem struct {
-		name, schema string
-	}
-
-	languageItem struct {
-		name, desc string
-	}
-
-	genericItem struct { // TODO: enforce use of this
+	genericItem struct {
 		name, desc string
 	}
 )
-
-func (c configItem) Title() string       { return c.title }
-func (c configItem) Description() string { return c.desc }
-func (c configItem) FilterValue() string { return c.title }
 
 func (e editorItem) Title() string { return e.name }
 func (e editorItem) Description() string {
@@ -73,14 +57,6 @@ func (e editorItem) Description() string {
 	return "available in $PATH"
 }
 func (e editorItem) FilterValue() string { return e.name }
-
-func (t themeItem) Title() string       { return t.name }
-func (t themeItem) Description() string { return t.schema }
-func (t themeItem) FilterValue() string { return t.name }
-
-func (l languageItem) Title() string       { return l.name }
-func (l languageItem) Description() string { return l.desc }
-func (l languageItem) FilterValue() string { return l.name }
 
 func (g genericItem) Title() string       { return g.name }
 func (g genericItem) Description() string { return g.desc }
@@ -181,9 +157,14 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return c, c.list.SetItems(getFileConflictResolutionOpts())
 
 				case Language:
+					c.currentView = Language
+
 					return c, c.list.SetItems(getLanguageItems())
 
-				case Encryption, Exit:
+				case Encryption:
+					return c, tea.Quit
+
+				case Exit:
 					return c, tea.Quit
 
 				default:
@@ -215,12 +196,12 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func getDefaultPanelItems() []list.Item {
 	return []list.Item{
-		configItem{title: FileConflict, desc: "Prevent multiple instances of the same file from opening the file in read-only mode or exit with an error"},
-		configItem{title: Editor, desc: "Select the terminal editor of your preference"},
-		configItem{title: Language, desc: "Set your preferred language for program output"},
-		configItem{title: Encryption, desc: "Protect confidential data files with encryption by using a keyring tool 🔑"},
-		configItem{title: Themes, desc: "Explore dream options 🌌"},
-		configItem{title: Exit, desc: "Secret ending"},
+		genericItem{name: FileConflict, desc: "Prevent multiple instances of the same file from opening the file in read-only mode or exit with an error"},
+		genericItem{name: Editor, desc: "Select the terminal editor of your preference"},
+		genericItem{name: Language, desc: "Set your preferred language for program output"},
+		genericItem{name: Encryption, desc: "Protect confidential data files with encryption by using a keyring tool 🔑"},
+		genericItem{name: Themes, desc: "Explore dream options 🌌"},
+		genericItem{name: Exit, desc: "Secret ending"},
 	}
 }
 
@@ -261,9 +242,9 @@ func getThemeItems(c *Core) []list.Item {
 			name += ui.GetPrinter(c.Colors.One).Sprint(" (current)")
 		}
 
-		listItems[i] = themeItem{
-			name:   name,
-			schema: theme.Pretty(),
+		listItems[i] = genericItem{
+			name: name,
+			desc: theme.Pretty(),
 		}
 	}
 
@@ -272,15 +253,15 @@ func getThemeItems(c *Core) []list.Item {
 
 func getLanguageItems() []list.Item {
 	return []list.Item{
-		languageItem{
+		genericItem{
 			name: "English - en",
 			desc: "whoami",
 		},
-		languageItem{
+		genericItem{
 			name: "Spanish - es",
 			desc: "quiénsoy",
 		},
-		languageItem{
+		genericItem{
 			name: "French - fr",
 			desc: "quisuisje",
 		},
