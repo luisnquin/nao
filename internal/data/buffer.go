@@ -39,7 +39,7 @@ type (
 )
 
 func NewBuffer(logger *zerolog.Logger, config *config.Core) (*Buffer, error) {
-	data := Buffer{config: config}
+	data := Buffer{log: logger, config: config}
 
 	if err := data.MigrateFileIfNeeded(); err != nil {
 		return nil, err

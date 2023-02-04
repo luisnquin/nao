@@ -13,7 +13,6 @@ import (
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 func main() {
@@ -46,7 +45,7 @@ func main() {
 		panic(err) // Otherwise the program cannot be used and nothing will be broken
 	}
 
-	log.Trace().
+	logger.Trace().
 		Str("app", internal.AppName).Str("version", internal.Version).Str("kind", internal.Kind).
 		Str("runtime", runtime.Version()).Str("os", runtime.GOOS).Str("arch", runtime.GOARCH).Send()
 
