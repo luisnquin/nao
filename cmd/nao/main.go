@@ -24,7 +24,7 @@ func main() {
 
 	logFile, err := os.OpenFile("/tmp/nao.log", os.O_CREATE|os.O_RDWR|os.O_APPEND, internal.PermReadWrite)
 	if err != nil {
-		panic(err)
+		panic(err) // Read-only temp directory aaS
 	}
 
 	logFile.WriteString("\n\n")
