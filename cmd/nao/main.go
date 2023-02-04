@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"os/user"
 	"runtime"
 
 	"github.com/luisnquin/nao/v3/internal"
@@ -12,6 +13,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
@@ -37,11 +39,19 @@ func main() {
 		logger = zerolog.New(logFile)
 	}
 
-	ctx := context.Background()
+	caller, err := user.Current()
+	if err != nil {
+		logger.Err(err).Msg("unable to get current user, incoming panic")
 
-	logger.Trace().
+		panic(err) // Otherwise the program cannot be used and nothing will be broken
+	}
+
+	log.Trace().
 		Str("app", internal.AppName).Str("version", internal.Version).Str("kind", internal.Kind).
 		Str("runtime", runtime.Version()).Str("os", runtime.GOOS).Str("arch", runtime.GOARCH).Send()
+
+	logger.Debug().Str("username", caller.Username).Str("uid", caller.Uid).
+		Str("gid", caller.Gid).Str("home", caller.HomeDir).Strs("input", os.Args).Send()
 
 	logger.Trace().Msg("loading configuration...")
 
@@ -55,7 +65,7 @@ func main() {
 
 	logger.Trace().Msg("loading data...")
 
-	data, err := data.NewBuffer(config)
+	data, err := data.NewBuffer(&logger, config)
 	if err != nil {
 		logger.Err(err).Msg("an error was encountered while loading data...")
 
@@ -64,6 +74,8 @@ func main() {
 	}
 
 	logger.Trace().Msg("executing command...")
+
+	ctx := context.Background()
 
 	if err := cmd.Execute(ctx, &logger, config, data); err != nil {
 		logger.Err(err).Msg("an error was encountered while executing command...")

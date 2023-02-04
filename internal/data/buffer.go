@@ -13,6 +13,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal/models"
 	"github.com/luisnquin/nao/v3/internal/security"
 	"github.com/luisnquin/nao/v3/internal/utils"
+	"github.com/rs/zerolog"
 	"github.com/zalando/go-keyring"
 )
 
@@ -20,6 +21,7 @@ type (
 	Buffer struct {
 		Notes    map[string]models.Note `json:"notes"`
 		Metadata Metadata               `json:"metadata"`
+		log      *zerolog.Logger
 		config   *config.Core
 	}
 
@@ -36,7 +38,7 @@ type (
 	}
 )
 
-func NewBuffer(config *config.Core) (*Buffer, error) {
+func NewBuffer(logger *zerolog.Logger, config *config.Core) (*Buffer, error) {
 	data := Buffer{config: config}
 
 	if err := data.MigrateFileIfNeeded(); err != nil {
@@ -49,17 +51,30 @@ func NewBuffer(config *config.Core) (*Buffer, error) {
 func (b *Buffer) MigrateFileIfNeeded() error {
 	var srcFile, dstFile string
 
+	b.log.Trace().Bool("encrypt", b.config.Encrypt).Send()
+
 	if b.config.Encrypt {
+		b.log.Trace().Msg("migration with projection from normal to encrypted")
+
 		srcFile = b.config.FS.DataNormalFile
 		dstFile = b.config.FS.DataEncryptedFile
 	} else {
+		b.log.Trace().Msg("migration with projection from encrypted to normal")
+
 		srcFile = b.config.FS.DataEncryptedFile
 		dstFile = b.config.FS.DataNormalFile
 	}
 
 	if !utils.FileExists(dstFile) && utils.FileExists(srcFile) {
+		b.log.Trace().Str("source", srcFile).Str("destiny", dstFile).Msg("necessary migration, expected file not found")
+
 		data, err := os.ReadFile(srcFile) // TODO: check that contains a valid json
 		if err != nil {
+			b.log.Err(err).Msg("unable to read source file")
+			if os.IsPermission(err) {
+				b.log.Error().Msg("it's a permissions error...")
+			}
+
 			return err
 		}
 
@@ -67,16 +82,23 @@ func (b *Buffer) MigrateFileIfNeeded() error {
 			secret := security.CreateRandomSecret()
 
 			if err := security.SetSecretInKeyring(secret); err != nil {
+				b.log.Err(err).Msg("failed attempt to set secret in keyring tool")
+
 				return err
 			}
 
 			data, err = security.EncryptAndEncode(data, secret)
 			if err != nil {
+				b.log.Err(err).Msg("unable to encrypt and encode data by using SHA256 and base64, why?")
+
 				return err
 			}
 		} else {
 			secret, err := security.GetSecretFromKeyring()
 			if err != nil {
+				b.log.Err(err).
+					Msg("failed attempt to get secret from keyring tool, this means that probably the data is irrecoverable")
+
 				if errors.Is(err, keyring.ErrNotFound) {
 					return errors.New("irrecoverable data file, secret not found")
 				}
@@ -86,17 +108,29 @@ func (b *Buffer) MigrateFileIfNeeded() error {
 
 			data, err = security.DecryptAndDecode(data, secret)
 			if err != nil {
+				b.log.Err(err).Msg("cannot decrypt the data file, maybe the file or secret is corrupted?")
+
 				return err
 			}
+
+			b.log.Trace().Msg("deleting secret from keyring tool...")
 
 			security.DeleteSecretFromKeyring()
 		}
 
+		b.log.Trace().Msg("data successfully recovered, the destiny file will be created and the other deleted")
+
 		f, err := os.Create(dstFile)
 		if err != nil {
+			b.log.Err(err).Msg("failed attempt to create destiny file")
+			if os.IsPermission(err) {
+				b.log.Error().Msg("it's a permissions error...")
+			}
+
 			return err
 		}
 
+		b.log.Trace().Msg("deleting source file...")
 		os.Remove(srcFile)
 		f.Write(data)
 		f.Close()

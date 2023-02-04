@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"runtime"
-	"strings"
 
 	"github.com/ProtonMail/go-appdir"
 	"github.com/luisnquin/nao/v3/internal"
@@ -133,7 +132,7 @@ func (c *Core) Load() error {
 
 	files := []string{c.FS.ConfigFile}
 
-	if strings.HasPrefix(runtime.GOOS, "linux") { // ? macos
+	if utils.Contains([]string{"linux", "darwin"}, runtime.GOOS) {
 		files = append(files, "/etc/nao/config.yml")
 	}
 
@@ -176,6 +175,7 @@ func (c *Core) Load() error {
 		c.log.Trace().Msg("file loaded into memory successfully")
 	}
 
+	c.log.Trace().Msg("the data encryption feature is being forced")
 	c.Encrypt = true
 
 	return nil
@@ -191,11 +191,15 @@ func (c *Core) Save() error {
 }
 
 func (c *Core) fillOrFix() {
-	if !utils.Contains([]string{"nano", "nvim", "vim"}, c.Editor.Name) {
-		c.Editor.Name = "nano"
+	if !utils.Contains([]string{internal.Nano, internal.Neovim, internal.Vim}, c.Editor.Name) {
+		c.log.Debug().Str("target", c.Editor.Name).Msg("provided unrecognized editor in configuration file")
+
+		c.Editor.Name = internal.Nano
 	}
 
 	if !utils.Contains(ui.GetThemeNames(), c.Theme) {
+		c.log.Debug().Str("target", c.Theme).Msg("provided unrecognized theme in configuration file")
+
 		c.Theme = ui.Default
 	}
 
