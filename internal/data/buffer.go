@@ -118,12 +118,10 @@ func (b *Buffer) Reload() error {
 // Reloads the data taking it from the expected file. If the file
 // doesn't exists then throws an error and doesn't updates anything.
 func (b *Buffer) Load() error {
-	file, err := os.Open(b.config.FS.DataFile)
+	data, err := os.ReadFile(b.config.FS.DataFile)
 	if err != nil {
 		return err
 	}
-
-	var data []byte
 
 	if b.config.Encrypt {
 		caller, err := user.Current()
@@ -136,16 +134,11 @@ func (b *Buffer) Load() error {
 			return err
 		}
 
-		data, err = security.DecryptAndDecode(file, key)
-	} else {
-		data, err = io.ReadAll(file)
+		data, err = security.DecryptAndDecode(data, key)
+		if err != nil {
+			return err
+		}
 	}
-
-	if err != nil {
-		return err
-	}
-
-	defer file.Close()
 
 	err = json.Unmarshal(data, b)
 	if err != nil && !errors.Is(err, io.EOF) {

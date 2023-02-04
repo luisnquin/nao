@@ -3,44 +3,54 @@ package security
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/base64"
-	"io"
 )
 
 var iv = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 0o5}
 
-func DecryptAndDecode(stream io.Reader, key string) ([]byte, error) {
+// Decrypts the provided content by using AES-256 and also decodes
+// the content using std base64.
+func DecryptAndDecode(encryptedText []byte, key string) ([]byte, error) {
+	encryptedText, err := DecodeFromBase64(encryptedText)
+	if err != nil {
+		return nil, err
+	}
+
+	return DecryptFromAES256(encryptedText, key)
+}
+
+// Encrypts the provided content by using AES-256 and also encodes
+// the content using std base64.
+func EncryptAndEncode(plainText []byte, key string) ([]byte, error) {
+	encryptedText, err := EncryptToAES256(plainText, key)
+	if err != nil {
+		return nil, err
+	}
+
+	return EncodeToBase64(encryptedText), nil
+}
+
+func DecryptFromAES256(encryptedText []byte, key string) ([]byte, error) {
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
 		return nil, err
 	}
 
-	encodedData, err := io.ReadAll(stream)
-	if err != nil {
-		return nil, err
-	}
+	plainText := make([]byte, len(encryptedText))
 
-	cipherText, err := base64.StdEncoding.DecodeString(string(encodedData))
-	if err != nil {
-		return nil, err
-	}
-
-	plainText := make([]byte, len(cipherText))
-
-	cipher.NewCFBDecrypter(block, iv).XORKeyStream(plainText, cipherText)
+	cipher.NewCFBDecrypter(block, iv).XORKeyStream(plainText, encryptedText)
 
 	return plainText, nil
 }
 
-func EncryptAndEncode(plainText []byte, key string) ([]byte, error) {
+func EncryptToAES256(text []byte, key string) ([]byte, error) {
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
 		return nil, err
 	}
 
-	cipherText := make([]byte, len(plainText))
+	cipherText := make([]byte, len(text))
 
-	cipher.NewCFBEncrypter(block, iv).XORKeyStream(cipherText, plainText)
+	cipher.NewCFBEncrypter(block, iv).XORKeyStream(cipherText, text)
 
-	return []byte(base64.StdEncoding.EncodeToString(cipherText)), nil
+	return cipherText, nil
 }
