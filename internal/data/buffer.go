@@ -13,6 +13,8 @@ import (
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/models"
 	"github.com/luisnquin/nao/v3/internal/security"
+	"github.com/luisnquin/nao/v3/internal/utils"
+	"github.com/zalando/go-keyring"
 )
 
 type (
@@ -38,7 +40,70 @@ type (
 func NewBuffer(config *config.Core) (*Buffer, error) {
 	data := Buffer{config: config}
 
+	if err := data.MigrateFileIfNeeded(); err != nil {
+		return nil, err
+	}
+
 	return &data, data.Reload()
+}
+
+func (b *Buffer) MigrateFileIfNeeded() error {
+	var srcFile, dstFile string
+
+	if b.config.Encrypt {
+		srcFile = b.config.FS.DataNormalFile
+		dstFile = b.config.FS.DataEncryptedFile
+	} else {
+		srcFile = b.config.FS.DataEncryptedFile
+		dstFile = b.config.FS.DataNormalFile
+	}
+
+	if !utils.FileExists(dstFile) && utils.FileExists(srcFile) {
+		data, err := os.ReadFile(srcFile) // TODO: check that contains a valid json
+		if err != nil {
+			return err
+		}
+
+		if b.config.Encrypt {
+			secret := generateRandomKey()
+
+			if err := security.SetSecretInKeyring(secret); err != nil {
+				return err
+			}
+
+			data, err = security.EncryptAndEncode(data, secret)
+			if err != nil {
+				return err
+			}
+		} else {
+			secret, err := security.GetSecretFromKeyring()
+			if err != nil {
+				if errors.Is(err, keyring.ErrNotFound) {
+					return errors.New("irrecoverable data file, secret not found")
+				}
+
+				return err
+			}
+
+			data, err = security.DecryptAndDecode(data, secret)
+			if err != nil {
+				return err
+			}
+
+			security.DeleteSecretFromKeyring()
+		}
+
+		f, err := os.Create(dstFile)
+		if err != nil {
+			return err
+		}
+
+		os.Remove(srcFile)
+		f.Write(data)
+		f.Close()
+	}
+
+	return nil
 }
 
 // Saves the current state of the data in the file. If the file
@@ -77,21 +142,23 @@ func (b *Buffer) Commit(keyToCare string) error {
 		}
 	}
 
-	return ioutil.WriteFile(b.config.FS.DataFile, data, internal.PermReadWrite)
+	return ioutil.WriteFile(b.config.FS.DataFile(b.config.Encrypt), data, internal.PermReadWrite)
 }
 
 // First data load, if there's no file to load then it creates it.
 func (b *Buffer) Reload() error {
 	if err := b.Load(); err != nil {
 		if os.IsNotExist(err) {
+			dataFile := b.config.FS.DataFile(b.config.Encrypt)
+
 			err = os.MkdirAll(b.config.FS.DataDir, os.ModePerm)
 			if err != nil {
-				return fmt.Errorf("unable to create a new directory in '%s': %w", b.config.FS.DataFile, err)
+				return fmt.Errorf("unable to create a new directory in '%s': %w", dataFile, err)
 			}
 
-			file, err := os.Create(b.config.FS.DataFile)
+			file, err := os.Create(dataFile)
 			if err != nil {
-				return fmt.Errorf("unable to create data file %s: %v", b.config.FS.DataFile, err)
+				return fmt.Errorf("unable to create data file %s: %v", dataFile, err)
 			}
 
 			if !b.config.Encrypt {
@@ -115,7 +182,7 @@ func (b *Buffer) Reload() error {
 // Reloads the data taking it from the expected file. If the file
 // doesn't exists then throws an error and doesn't updates anything.
 func (b *Buffer) Load() error {
-	data, err := os.ReadFile(b.config.FS.DataFile)
+	data, err := os.ReadFile(b.config.FS.DataFile(b.config.Encrypt))
 	if err != nil {
 		return err
 	}
@@ -148,8 +215,7 @@ func (b *Buffer) Load() error {
 	return nil
 }
 
-// Generates secure URL-friendly unique ID.
-func generateRandomKey() []byte {
+func generateRandomKey() string {
 	size := 32
 
 	bts := make([]byte, size)
@@ -164,5 +230,5 @@ func generateRandomKey() []byte {
 		id[i] = []rune("..0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")[bts[i]&61]
 	}
 
-	return []byte(string(id[:size]))
+	return string(id[:size])
 }
