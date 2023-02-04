@@ -29,6 +29,12 @@ const (
 	ExitProgram       = "Exit program"
 )
 
+// Basic boolean options.
+const (
+	Enable  = "Enable"
+	Disable = "Disable"
+)
+
 type configPanel struct {
 	*Core
 
@@ -89,6 +95,12 @@ func (c configPanel) Init() tea.Cmd { return nil }
 func (c configPanel) View() string { return docStyle.Render(c.list.View()) }
 
 func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	try := func(err error) {
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -110,29 +122,27 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case Editor:
 				if !strings.Contains(selectedItem, "(current)") {
 					c.Editor.Name = selectedItem
-					if err := c.Save(); err != nil {
-						panic(err)
-					}
+					try(c.Save())
 				}
 
 				return c, tea.Quit
+
+			case Encryption:
+				c.Encrypt = selectedItem == Enable
+				try(c.Save())
 
 			case Themes:
 				if !strings.Contains(selectedItem, "(current)") {
 					// c.UpdateTheme(theme)
 					c.Theme = selectedItem
-					if err := c.Save(); err != nil {
-						panic(err)
-					}
+					try(c.Save())
 				}
 
 				return c, tea.Quit
 
 			case FileConflict:
 				c.Core.ReadOnlyOnConflict = selectedItem == UseInReadOnlyMode
-				if err := c.Save(); err != nil {
-					panic(err)
-				}
+				try(c.Save())
 
 				return c, tea.Quit
 
@@ -162,7 +172,9 @@ func (c configPanel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return c, c.list.SetItems(getLanguageItems())
 
 				case Encryption:
-					return c, tea.Quit
+					c.currentView = Encryption
+
+					return c, c.list.SetItems(getEncryptionOptions())
 
 				case Exit:
 					return c, tea.Quit
@@ -209,6 +221,13 @@ func getFileConflictResolutionOpts() []list.Item {
 	return []list.Item{
 		genericItem{name: UseInReadOnlyMode, desc: "Open the file in read-only mode without editing anything"},
 		genericItem{name: ExitProgram, desc: "Only exit with an error when this event is detected"},
+	}
+}
+
+func getEncryptionOptions() []list.Item {
+	return []list.Item{
+		genericItem{name: Enable, desc: "Enable boolean to encrypt all your data"},
+		genericItem{name: Disable, desc: "Disable and revert encryption in case you already use encryption"},
 	}
 }
 
