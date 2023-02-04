@@ -1,10 +1,7 @@
 package data
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -16,6 +13,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/models"
+	"github.com/luisnquin/nao/v3/internal/security"
 	"github.com/zalando/go-keyring"
 )
 
@@ -38,8 +36,6 @@ type (
 		Tag string `json:"tag"`
 	}
 )
-
-var bytes = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 0o5}
 
 func NewBuffer(config *config.Core) (*Buffer, error) {
 	data := Buffer{config: config}
@@ -66,27 +62,29 @@ func (b *Buffer) Commit(keyToCare string) error {
 		b.Metadata = md
 	}
 
-	content, err := json.MarshalIndent(b, "", "\t")
+	data, err := json.MarshalIndent(b, "", "\t")
 	if err != nil {
 		return fmt.Errorf("unexpected error, can't format data buffer to json: %w", err)
 	}
 
-	caller, err := user.Current()
-	if err != nil {
-		panic(err)
+	if b.config.Encrypt {
+		caller, err := user.Current()
+		if err != nil {
+			panic(err)
+		}
+
+		key, err := keyring.Get(internal.AppName, caller.Username)
+		if err != nil {
+			return err
+		}
+
+		data, err = security.EncryptAndEncode(data, key)
+		if err != nil {
+			return err
+		}
 	}
 
-	key, err := keyring.Get(internal.AppName, caller.Username)
-	if err != nil {
-		return err
-	}
-
-	cipherText, err := encryptAndEncode(content, key)
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(b.config.FS.DataFile, cipherText, 0o644)
+	return ioutil.WriteFile(b.config.FS.DataFile, data, 0o644)
 }
 
 // First data load, if there's no file to load then it creates it.
@@ -138,7 +136,7 @@ func (b *Buffer) Load() error {
 			return err
 		}
 
-		data, err = decryptAndDecode(file, key)
+		data, err = security.DecryptAndDecode(file, key)
 	} else {
 		data, err = io.ReadAll(file)
 	}
@@ -163,42 +161,6 @@ func (b *Buffer) Load() error {
 	}
 
 	return nil
-}
-
-func decryptAndDecode(stream io.Reader, key string) ([]byte, error) {
-	block, err := aes.NewCipher([]byte(key))
-	if err != nil {
-		return nil, err
-	}
-
-	encodedData, err := io.ReadAll(stream)
-	if err != nil {
-		return nil, err
-	}
-
-	cipherText, err := base64.StdEncoding.DecodeString(string(encodedData))
-	if err != nil {
-		return nil, err
-	}
-
-	plainText := make([]byte, len(cipherText))
-
-	cipher.NewCFBDecrypter(block, bytes).XORKeyStream(plainText, cipherText)
-
-	return plainText, nil
-}
-
-func encryptAndEncode(plainText []byte, key string) ([]byte, error) {
-	block, err := aes.NewCipher([]byte(key))
-	if err != nil {
-		return nil, err
-	}
-
-	cipherText := make([]byte, len(plainText))
-
-	cipher.NewCFBEncrypter(block, bytes).XORKeyStream(cipherText, plainText)
-
-	return []byte(base64.StdEncoding.EncodeToString(cipherText)), nil
 }
 
 // Generates secure URL-friendly unique ID.
