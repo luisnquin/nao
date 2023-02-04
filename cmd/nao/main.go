@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"runtime"
-	"strings"
 
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/cmd"
@@ -28,6 +27,8 @@ func main() {
 		panic(err)
 	}
 
+	logFile.WriteString("\n\n")
+
 	var logger zerolog.Logger
 
 	if internal.Debug {
@@ -35,8 +36,6 @@ func main() {
 	} else {
 		logger = zerolog.New(logFile)
 	}
-
-	logger.Trace().Str("new program call", strings.Repeat("-x+", 10*2)).Send()
 
 	ctx := context.Background()
 
