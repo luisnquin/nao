@@ -24,6 +24,12 @@ func NewRepository(data *data.Buffer) NotesRepository {
 
 type ModifyOption func(*models.Note)
 
+func WithKey(key string) ModifyOption {
+	return func(n *models.Note) {
+		n.Key = key
+	}
+}
+
 func WithTag(tag string) ModifyOption {
 	return func(n *models.Note) {
 		n.Tag = tag
@@ -59,8 +65,6 @@ func (r NotesRepository) Get(key string) (models.Note, error) {
 }
 
 func (r NotesRepository) New(content string, modifiers ...ModifyOption) (string, error) {
-	key := utils.NewKey()
-
 	note := models.Note{
 		Content:    content,
 		CreatedAt:  time.Now(),
@@ -78,6 +82,11 @@ func (r NotesRepository) New(content string, modifiers ...ModifyOption) (string,
 		if err := r.tag.IsValidAsNew(note.Tag); err != nil {
 			return "", err
 		}
+	}
+
+	key := note.Key
+	if key == "" {
+		key = utils.GenerateKey()
 	}
 
 	r.data.Metadata.LastCreated = data.KeyTag{
