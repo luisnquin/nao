@@ -66,7 +66,7 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 		var nt models.Note
 
 		switch {
-		case c.latest: // mandatory
+		case c.latest:
 			var err error
 
 			c.log.Trace().Msg("the last note accessed has been requested")
@@ -124,7 +124,7 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 
 		c.log.Trace().Msg("creating temporary file")
 
-		filePath, err := NewFileCached(c.config, nt.Content)
+		filePath, err := NewFileCached(c.config, nt.Key, nt.Content)
 		if err != nil {
 			return err
 		}

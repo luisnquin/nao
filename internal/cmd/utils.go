@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
 	"gopkg.in/yaml.v3"
@@ -34,13 +34,13 @@ func RunEditor(ctx context.Context, editor, filePath string, args ...string) err
 	return bin.Run()
 }
 
-func NewFileCached(config *config.Core, content string) (string, error) {
+func NewFileCached(config *config.Core, key, content string) (string, error) {
 	err := os.MkdirAll(config.FS.CacheDir, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
 
-	f, err := os.Create(config.FS.CacheDir + "/" + strings.ReplaceAll(uuid.NewString(), "-", "") + ".tmp")
+	f, err := os.Create(filepath.Join(config.FS.CacheDir, key+".tmp"))
 	if err != nil {
 		return "", err
 	}

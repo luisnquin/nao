@@ -10,6 +10,7 @@ import (
 	"github.com/luisnquin/nao/v3/internal/config"
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/note"
+	"github.com/luisnquin/nao/v3/internal/utils"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -67,11 +68,9 @@ func (c *NewCmd) Main() cobra.PositionalArgs {
 			return fmt.Errorf("tag already exists, try 'nao mod %s'", c.tag)
 		}
 
-		// TODO: cobra.Max and with 'from'
+		key := utils.GenerateKey()
 
-		// TODO: from, title
-
-		path, err := NewFileCached(c.config, "")
+		path, err := NewFileCached(c.config, key, "")
 		if err != nil {
 			return err
 		}
@@ -115,7 +114,11 @@ func (c *NewCmd) Main() cobra.PositionalArgs {
 			c.tag = autoname.Generate("-")
 		}
 
-		key, err := notesRepo.New(string(content), note.WithTag(c.tag), note.WithSpentTime(time.Now().Sub(start)))
+		_, err = notesRepo.New(string(content),
+			note.WithSpentTime(time.Now().Sub(start)),
+			note.WithTag(c.tag),
+			note.WithKey(key),
+		)
 		if err != nil {
 			return err
 		}
