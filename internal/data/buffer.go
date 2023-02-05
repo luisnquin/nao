@@ -139,24 +139,44 @@ func (b *Buffer) MigrateFileIfNeeded() error {
 	return nil
 }
 
-// Saves the current state of the data in the file. If the file
-// doesn't exists then it will be created.
-func (b *Buffer) Commit(keyToCare string) error {
-	note := b.Notes[keyToCare]
-	md := b.Metadata
-
+func (b *Buffer) Undo(keys ...string) error {
 	if err := b.Reload(); err != nil {
 		return err
 	}
 
-	if keyToCare != "" && note.Version != 0 {
-		if b.Notes == nil {
-			b.Notes = make(map[string]models.Note, 1)
+	for _, key := range keys {
+		delete(b.Notes, key)
+	}
+
+	return b.save()
+}
+
+// Saves the current state of the data in the file. If the file
+// doesn't exists then it will be created.
+func (b *Buffer) Commit(keys ...string) error {
+	metaData := b.Metadata
+
+	if len(keys) > 0 {
+		keyNote := make(map[string]models.Note, len(keys))
+
+		for _, key := range keys {
+			keyNote[key] = b.Notes[key]
 		}
 
-		b.Notes[keyToCare] = note // TODO: suspect this
-		b.Metadata = md
+		if err := b.Reload(); err != nil {
+			return err
+		}
+
+		for k, n := range keyNote {
+			b.Notes[k] = n
+		}
+	} else {
+		if err := b.Reload(); err != nil {
+			return err
+		}
 	}
+
+	b.Metadata = metaData
 
 	for k, n := range b.Notes { // TODO: log it
 		if n.Tag == "" { // ? Or should I hide it in the ls command
@@ -164,6 +184,10 @@ func (b *Buffer) Commit(keyToCare string) error {
 		}
 	}
 
+	return b.save()
+}
+
+func (b *Buffer) save() error {
 	data, err := json.MarshalIndent(b, "", "\t")
 	if err != nil {
 		return fmt.Errorf("unexpected error, can't format data buffer to json: %w", err)

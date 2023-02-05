@@ -114,9 +114,7 @@ func (r NotesRepository) Delete(key string) error {
 		return ErrNoteNotFound
 	}
 
-	delete(r.data.Notes, key)
-
-	return r.data.Commit("")
+	return r.data.Undo(key)
 }
 
 func (r NotesRepository) Slice() []models.Note {
