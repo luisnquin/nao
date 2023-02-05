@@ -7,12 +7,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func NewKey() string {
+// Generates a new key by removing the '-' from a new uuid.
+func GenerateKey() string {
 	return strings.ReplaceAll(uuid.NewString(), "-", "")
 }
 
-// NewNanoID generates secure URL-friendly unique ID.
-func NewNanoID() string {
+// Generates secure URL-friendly unique ID.
+func GenerateNanoID() string {
 	size := 20
 
 	bytes := make([]byte, size)
