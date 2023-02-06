@@ -32,14 +32,12 @@ type ModCmd struct {
 func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCmd {
 	c := ModCmd{
 		Command: &cobra.Command{
-			Use:   "mod [<id> | <tag>]",
-			Short: "Edit any file",
-			Args:  cobra.MaximumNArgs(1),
-			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
-			},
-			SilenceUsage:  true,
-			SilenceErrors: true,
+			Use:               "mod [<id> | <tag>]",
+			Short:             "Edit any file",
+			Args:              cobra.MaximumNArgs(1),
+			ValidArgsFunction: KeyTagCompletions(data),
+			SilenceUsage:      true,
+			SilenceErrors:     true,
 		},
 		config: config,
 		data:   data,

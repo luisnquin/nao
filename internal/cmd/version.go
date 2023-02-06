@@ -33,10 +33,10 @@ const tagsUrl = "https://api.github.com/repos/luisnquin/nao/tags"
 func BuildVersion(log *zerolog.Logger, config *config.Core) VersionCmd {
 	c := VersionCmd{
 		Command: &cobra.Command{
-			Use:     "version",
-			Short:   "Print the nao version number",
-			Args:    cobra.NoArgs,
-			PreRunE: nil,
+			Use:               "version",
+			Short:             "Print the nao version number",
+			Args:              cobra.NoArgs,
+			ValidArgsFunction: cobra.NoFileCompletions,
 		},
 		config: config,
 		log:    log,

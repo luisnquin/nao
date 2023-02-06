@@ -29,11 +29,12 @@ type NewCmd struct {
 func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCmd {
 	c := NewCmd{
 		Command: &cobra.Command{
-			Use:           "new",
-			Short:         "Creates a new nao file",
-			Args:          cobra.MaximumNArgs(1),
-			SilenceErrors: true,
-			SilenceUsage:  true,
+			Use:               "new",
+			Short:             "Creates a new nao file",
+			Args:              cobra.MaximumNArgs(1),
+			SilenceErrors:     true,
+			SilenceUsage:      true,
+			ValidArgsFunction: cobra.NoFileCompletions,
 		},
 		config: config,
 		data:   data,

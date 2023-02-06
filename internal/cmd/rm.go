@@ -25,14 +25,12 @@ type RmCmd struct {
 func BuildRm(log *zerolog.Logger, config *config.Core, data *data.Buffer) *RmCmd {
 	c := &RmCmd{
 		Command: &cobra.Command{
-			Use:           "rm [<id> | <tag>]...",
-			Short:         "Removes a file",
-			Args:          cobra.MinimumNArgs(1),
-			SilenceUsage:  true,
-			SilenceErrors: true,
-			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
-			},
+			Use:               "rm [<id> | <tag>]...",
+			Short:             "Removes a file",
+			Args:              cobra.MinimumNArgs(1),
+			SilenceUsage:      true,
+			SilenceErrors:     true,
+			ValidArgsFunction: KeyTagCompletions(data),
 		},
 		config: config,
 		data:   data,

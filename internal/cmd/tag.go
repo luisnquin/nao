@@ -21,14 +21,12 @@ type TagCmd struct {
 func BuildTag(log *zerolog.Logger, config *config.Core, data *data.Buffer) TagCmd {
 	c := TagCmd{
 		Command: &cobra.Command{
-			Use:           "tag <old> <new>",
-			Short:         "Rename the tag of any file",
-			Args:          cobra.ExactArgs(2),
-			SilenceUsage:  true,
-			SilenceErrors: true,
-			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
-			},
+			Use:               "tag <old> <new>",
+			Short:             "Rename the tag of any file",
+			Args:              cobra.ExactArgs(2),
+			SilenceUsage:      true,
+			SilenceErrors:     true,
+			ValidArgsFunction: KeyTagCompletions(data),
 		},
 		config: config,
 		data:   data,

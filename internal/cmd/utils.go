@@ -10,6 +10,9 @@ import (
 
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
+	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/luisnquin/nao/v3/internal/note"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
@@ -51,6 +54,12 @@ func NewFileCached(config *config.Core, key, content string) (string, error) {
 	}
 
 	return f.Name(), f.Close()
+}
+
+func KeyTagCompletions(data *data.Buffer) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
+	}
 }
 
 func NavigateMapAndSet(m map[string]any, path string, value any) error {

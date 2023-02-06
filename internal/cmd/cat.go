@@ -20,14 +20,12 @@ type CatCmd struct {
 func BuildCat(log *zerolog.Logger, data *data.Buffer) CatCmd {
 	c := CatCmd{
 		Command: &cobra.Command{
-			Use:           "cat",
-			Short:         "Displays the note in the standard output",
-			Args:          cobra.MinimumNArgs(1),
-			SilenceErrors: true,
-			SilenceUsage:  true,
-			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
-			},
+			Use:               "cat",
+			Short:             "Displays the note in the standard output",
+			Args:              cobra.MinimumNArgs(1),
+			SilenceErrors:     true,
+			SilenceUsage:      true,
+			ValidArgsFunction: KeyTagCompletions(data),
 		},
 		data: data,
 		log:  log,
