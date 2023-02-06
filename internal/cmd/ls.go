@@ -33,14 +33,12 @@ type LsCmd struct {
 func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd {
 	c := LsCmd{
 		Command: &cobra.Command{
-			Use:           "ls",
-			Short:         "See a list of all available files",
-			Args:          cobra.NoArgs,
-			SilenceUsage:  true,
-			SilenceErrors: true,
-			ValidArgsFunction: func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return note.SearchKeyTagsByPrefix(toComplete, data), cobra.ShellCompDirectiveNoFileComp
-			},
+			Use:               "ls",
+			Short:             "See a list of all available files",
+			Args:              cobra.NoArgs,
+			SilenceUsage:      true,
+			SilenceErrors:     true,
+			ValidArgsFunction: cobra.NoFileCompletions,
 		},
 		config: config,
 		data:   data,
