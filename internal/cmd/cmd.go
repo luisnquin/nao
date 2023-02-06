@@ -32,6 +32,9 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 		SuggestionsMinimumDistance: 2,
 	}
 
+	root.SetHelpCommand(&cobra.Command{Hidden: true})
+	log.Trace().Msg("help command has been removed")
+
 	// root.CompletionOptions = cobra.CompletionOptions{}
 	// root.ValidArgsFunction
 
