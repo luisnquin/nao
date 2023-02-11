@@ -44,7 +44,9 @@ func WithSpentTime(duration time.Duration) ModifyOption {
 
 func WithContent(content string) ModifyOption {
 	return func(n *models.Note) {
+		n.LastUpdate = time.Now()
 		n.Content = content
+		n.Version++
 	}
 }
 
@@ -108,9 +110,6 @@ func (r NotesRepository) Update(key string, modifiers ...ModifyOption) error {
 	for _, option := range modifiers {
 		option(&note)
 	}
-
-	note.LastUpdate = time.Now()
-	note.Version++
 
 	r.data.Notes[key] = note
 
