@@ -23,11 +23,11 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 
 			return cmd.Usage()
 		},
-		// CompletionOptions:  cobra.CompletionOptions{},
-		// ValidArgsFunction:  nil,
-		DisableFlagParsing: false,
-		TraverseChildren:   false,
-		// DisableAutoGenTag:  false,
+		CompletionOptions: cobra.CompletionOptions{
+			HiddenDefaultCmd: true,
+		},
+		DisableFlagParsing:         false,
+		TraverseChildren:           false,
 		DisableSuggestions:         false,
 		SuggestionsMinimumDistance: 2,
 	}
