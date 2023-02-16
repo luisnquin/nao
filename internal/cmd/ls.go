@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"encoding/csv"
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
 	"time"
 
+	"github.com/goccy/go-json"
 	"github.com/gookit/color"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
@@ -23,11 +26,11 @@ import (
 type LsCmd struct {
 	*cobra.Command
 
-	log    *zerolog.Logger
-	config *config.Core
-	data   *data.Buffer
-	Quiet  bool
-	Long   bool
+	log         *zerolog.Logger
+	config      *config.Core
+	data        *data.Buffer
+	Quiet, Long bool
+	json, csv   bool
 }
 
 func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd {
@@ -52,12 +55,20 @@ func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd 
 	flags := c.Flags()
 	flags.BoolVarP(&c.Long, "long", "l", false, "display the content as long as possible")
 	flags.BoolVarP(&c.Quiet, "quiet", "q", false, "only display file ID's")
+	flags.BoolVar(&c.csv, "csv", false, "the displayed output will be in CSV format")
+	flags.BoolVar(&c.json, "json", false, "the displayed output will be in JSON format")
 
 	return c
 }
 
 func (c *LsCmd) Main() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
+		if c.json && c.csv {
+			c.log.Error().Msg("both json and csv formats were passed in the same call")
+
+			return fmt.Errorf("only use a single format")
+		}
+
 		notesRepo := note.NewRepository(c.data)
 
 		keySize := 10
@@ -70,13 +81,20 @@ func (c *LsCmd) Main() cobra.PositionalArgs {
 
 		if c.Quiet {
 			c.log.Trace().Msg("listing all the note keys in quiet mode...")
+			keys := notesRepo.AllKeys()
 
-			for key := range notesRepo.IterKey() {
-				if c.Long {
-					fmt.Fprintln(os.Stdout, key)
-				} else {
-					fmt.Fprintln(os.Stdout, key[:keySize])
+			if !c.Long {
+				for i, key := range keys {
+					keys[i] = key[:keySize]
 				}
+			}
+
+			if c.json {
+				return json.NewEncoder(os.Stdout).Encode(keys)
+			}
+
+			for _, key := range keys {
+				fmt.Fprintln(os.Stdout, key)
 			}
 
 			return nil
@@ -115,6 +133,56 @@ func (c *LsCmd) Main() cobra.PositionalArgs {
 		sort.SliceStable(notes, func(i, j int) bool {
 			return notes[i].LastUpdate.After(notes[j].LastUpdate)
 		})
+
+		rawHeader := []string{"ID", "TAG", "SIZE", "LAST UPDATE", "CREATION DATE", "TIME SPENT", "VERSION"}
+		rawRows := make([][]string, len(notes))
+
+		for i, n := range notes {
+			if !c.Long {
+				n.Key = n.Key[:keySize]
+			}
+
+			rawRows[i] = []string{
+				n.Key, n.Tag, n.ReadableSize(),
+				timeago.English.Format(n.LastUpdate),
+				timeago.English.Format(n.CreatedAt),
+				n.TimeSpent.Round(time.Second).String(),
+				strconv.Itoa(n.Version),
+			}
+		}
+
+		if c.csv {
+			for i, column := range rawHeader {
+				rawHeader[i] = utils.ToPascalCase(column)
+			}
+
+			csvWriter := csv.NewWriter(os.Stdout)
+			csvWriter.Comma = ';'
+
+			csvWriter.Write(rawHeader)
+			csvWriter.WriteAll(rawRows)
+			csvWriter.Flush()
+
+			return csvWriter.Error()
+		} else if c.json {
+			for i, column := range rawHeader {
+				rawHeader[i] = utils.ToCamelCase(column)
+			}
+
+			content := make([]map[string]string, len(rawRows))
+
+			for i := range content {
+				row := make(map[string]string, len(rawHeader))
+
+				for j, column := range rawHeader {
+					row[column] = rawRows[i][j]
+				}
+
+				content[i] = row
+			}
+
+			return json.NewEncoder(os.Stdout).Encode(content)
+		}
 
 		c.log.Trace().Msg("creating table rows from notes, printer faces and configuration")
 
