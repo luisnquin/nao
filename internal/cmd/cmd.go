@@ -60,7 +60,6 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 
 	root.AddCommand(
 		BuildCat(log, data).Command,
-		BuildConfig(log, config).Command,
 		BuildLs(log, config, data).Command,
 		BuildMod(log, config, data).Command,
 		BuildNew(log, config, data).Command,
