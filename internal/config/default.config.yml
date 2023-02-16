@@ -1,10 +1,21 @@
-# Configuring the editor to be executed
+# The terminal editor
 editor:
     # Possible values: nano, vim, nvim
     name: nano
     extraArgs: []
-# Possible values: default, nord, part, beach-day, skip
+# Possible values:
+# - default
+# - beach-day
+# - party
+# - nord
+# - no-theme
+# - rose-pine
+# - rose-pine-dawn
+# - rose-pine-moon
 theme: default
-# Your default keystore tool will provide us a key to  decrypt and encrypt your content
-# To see more about the supported wallets, see: https://github.com/99designs/keyring
-encrypt: false
+# In case an already open note is being called, the program can act in two ways
+# 1. Blocking access until the other note is closed
+# 2. Opening the note but in read-only mode for the selected editor
+#
+# The reason for this feature is to avoid overwriting issues
+readOnlyOnConflict: false
