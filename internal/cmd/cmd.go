@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"context"
-	"io"
+	"fmt"
 
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/config"
@@ -10,6 +10,16 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
+
+type cobraWriter struct {
+	log *zerolog.Logger
+}
+
+func (cw cobraWriter) Write(p []byte) (n int, err error) {
+	cw.log.Err(fmt.Errorf("%s", p)).Msg("from cobra")
+
+	return
+}
 
 func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data *data.Buffer) error {
 	log.Trace().Msg("configuring cli...")
@@ -32,7 +42,7 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 		SuggestionsMinimumDistance: 2,
 	}
 
-	root.SetHelpCommand(&cobra.Command{Hidden: true})
+	root.SetHelpCommand(&cobra.Command{Hidden: true}) // TODO: complete and return usage func
 	log.Trace().Msg("help command has been hidden")
 
 	// root.CompletionOptions = cobra.CompletionOptions{}
@@ -71,9 +81,7 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 		command.RunE = LifeTimeDecorator(log, name, command.RunE)
 	}
 
-	// Errors are also returned by execute context
-	root.SetErr(io.Discard)
-	log.Trace().Msg("all cobra errors will be sent to /dev/null")
+	root.SetErr(&cobraWriter{log: log})
 
 	log.Trace().Bool("¿context == nil?", ctx == nil).Msg("executing root command with context...")
 
