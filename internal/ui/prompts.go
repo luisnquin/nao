@@ -2,19 +2,22 @@ package ui
 
 import (
 	"fmt"
+	"os"
+	"unicode"
 
-	"github.com/manifoldco/promptui"
+	"github.com/luisnquin/nao/v3/internal"
 )
 
 func YesOrNoPrompt(v *bool, format string, a ...any) {
-	prompt := promptui.Select{
-		HideSelected: true,
-		HideHelp:     true,
-		Label:        fmt.Sprintf(format, a...),
-		Items:        []string{"Yes", "No"},
+	fmt.Fprintf(os.Stdout, "%s: %s ", internal.AppName, fmt.Sprintf(format, a...))
+
+	result := ""
+
+	fmt.Scan(&result)
+
+	if len(result) > 0 {
+		result = string(unicode.ToLower(rune(result[0])))
 	}
 
-	_, r, _ := prompt.Run()
-
-	*v = r == "Yes"
+	*v = result == "y"
 }
