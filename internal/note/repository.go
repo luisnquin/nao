@@ -1,7 +1,7 @@
 package note
 
 import (
-	"sync"
+	"sort"
 	"time"
 
 	"github.com/cip8/autoname"
@@ -150,22 +150,16 @@ func (r NotesRepository) LastAccessed() (models.Note, error) {
 	return note, nil
 }
 
-func (r NotesRepository) IterKey() <-chan string {
-	ch := make(chan string)
-	mu := new(sync.RWMutex)
+func (r NotesRepository) AllKeys() []string {
+	keys := make([]string, 0, len(r.data.Notes))
 
-	go func() {
-		mu.RLock()
+	for key := range r.data.Notes {
+		keys = append(keys, key)
+	}
 
-		for key := range r.data.Notes {
-			ch <- key
-		}
+	sort.Strings(keys) // TODO: sort by last update
 
-		close(ch)
-		mu.RUnlock()
-	}()
-
-	return ch
+	return keys
 }
 
 func (r NotesRepository) TagExists(tag string) bool {
