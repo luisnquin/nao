@@ -27,7 +27,7 @@ func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data
 	root := cobra.Command{
 		Use:   "nao",
 		Short: "nao is a tool to manage your notes",
-		Long:  `A tool to manage your notes or other types of files without worry about the path where it is`,
+		Long:  `Manage your notes or other types of files without worry about the path where it is`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Debug().Strs("args", args).Msg("no command specified, returning usage...")
 
