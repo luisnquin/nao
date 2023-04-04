@@ -103,6 +103,10 @@ All the available commands will sound familiar to you
 
     Keep in mind, if you know docker then you know nao
 
+## Why did I do this?
+
+No one has been able to do this, so here we are
+
 ## License
 
 [MIT](https://raw.githubusercontent.com/luisnquin/nao/main/.github/LICENSE)
