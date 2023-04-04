@@ -20,7 +20,7 @@
 - [x] No need to specify a path to access a note
 - [x] Edit from terminal editor
 - [x] Encryption
-- [x] One writer by note, multiple readers
+- [x] One writer and multiple readers by note
 
 ## Some basic commands
 
@@ -103,15 +103,6 @@ All the available commands will sound familiar to you
 
     Keep in mind, if you know docker then you know nao
 
-## Configuration
-
-```bash
- # Type
- nao config
- # or to see more options that you can use to edit the configuration file
- nao config --help
-```
-
 ## License
 
-MIT © [Luis Quiñones](https://github.com/luisnquin)
+[MIT](https://raw.githubusercontent.com/luisnquin/nao/main/.github/LICENSE)
