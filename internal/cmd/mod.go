@@ -173,7 +173,7 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 
 func (c ModCmd) openKeysInUseFile() (*os.File, error) {
 	return os.OpenFile(
-		path.Join(c.config.FS.CacheDir, "keys-in-use.txt"),
+		path.Join(os.TempDir(), ".nao.keys"),
 		os.O_CREATE|os.O_APPEND|os.O_RDWR, internal.PermReadWrite,
 	)
 }
