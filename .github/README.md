@@ -10,8 +10,8 @@
 ## Install
 
 ```bash
-    # Requires go 1.18>=
-    $ go install github.com/luisnquin/nao/v3/cmd/nao@v3.1.1
+# Requires go 1.18>=
+$ go install github.com/luisnquin/nao/v3/cmd/nao@v3.1.1
 ```
 
 ## Features
