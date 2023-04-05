@@ -7,12 +7,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/luisnquin/nao.svg?style=social&label=Star&maxAge=2592000)](https://github.com/luisnquin/nao)
 [![Built with Nix](https://img.shields.io/static/v1?logo=nixos&logoColor=white&label=&message=Built%20with%20Nix&color=41439a)](https://github.com/luisnquin/nao)
 
-## Install
-
-```bash
-# Requires go 1.18>=
-$ go install github.com/luisnquin/nao/v3/cmd/nao@v3.1.1
-```
+Take notes without worrying about the path where the file is, it is written in a similar way to any other docker command, the terminal editor is customizable closed_umbrella
 
 ## Features
 
@@ -25,6 +20,24 @@ $ go install github.com/luisnquin/nao/v3/cmd/nao@v3.1.1
 ## Demo
 
 [![asciicast](https://asciinema.org/a/9DETM5MtJaA9d0emviPvz1n0s.svg)](https://asciinema.org/a/9DETM5MtJaA9d0emviPvz1n0s)
+
+## Install
+
+```bash
+# Requires go 1.18>=
+$ go install github.com/luisnquin/nao/v3/cmd/nao@v3.1.1
+```
+
+## Completions
+
+```bash
+# Bash
+source <(nao completion bash)
+
+# Zsh
+source <(nao completion zsh)
+compdef _nao nao
+```
 
 ## Why did I do this?
 
