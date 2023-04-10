@@ -34,10 +34,10 @@ $ go install github.com/luisnquin/nao/v3/cmd/nao@v3.1.1
 ## Completions
 
 ```bash
-# Bash
+# bash
 source <(nao completion bash)
 
-# Zsh
+# zsh
 source <(nao completion zsh)
 compdef _nao nao
 ```
