@@ -1,5 +1,7 @@
 
-# nao 🍵
+<h1 align="center"><code>nao🍵</code></h1>
+
+<div align="center">
 
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/luisnquin/nao)](https://github.com/luisnquin/nao)
 [![CI](https://github.com/luisnquin/nao/actions/workflows/go.yml/badge.svg)](https://github.com/luisnquin/nao/actions/workflows/go.yml)
@@ -7,7 +9,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/luisnquin/nao.svg?style=social&label=Star&maxAge=2592000)](https://github.com/luisnquin/nao)
 [![Built with Nix](https://img.shields.io/static/v1?logo=nixos&logoColor=white&label=&message=Built%20with%20Nix&color=41439a)](https://github.com/luisnquin/nao)
 
-Take notes without worrying about the path where the file is, it is written in a similar way to any other docker command, the terminal editor is customizable closed_umbrella
+<p>Take notes without worrying about the path where the file is, it is written in a similar way to any other docker command, the terminal editor is customizable closed_umbrella</p>
+</div>
 
 ## Features
 
