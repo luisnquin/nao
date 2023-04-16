@@ -189,7 +189,9 @@ func (c ModCmd) logKeyInUse(key string) (remove func() error, err error) {
 		return nil, err
 	}
 
-	if utils.Contains(strings.Split(string(content), ","), key) {
+	separator := "\n"
+
+	if utils.Contains(strings.Split(string(content), separator), key) {
 		return nil, fmt.Errorf("key '%s' already in use", key)
 	}
 
@@ -198,7 +200,7 @@ func (c ModCmd) logKeyInUse(key string) (remove func() error, err error) {
 		return nil, err
 	}
 
-	f.WriteString("," + key)
+	f.WriteString(key + "\n")
 
 	return func() error {
 		f, err = c.openKeysInUseFile()
@@ -211,7 +213,7 @@ func (c ModCmd) logKeyInUse(key string) (remove func() error, err error) {
 			return err
 		}
 
-		keys := strings.Split(string(content), ",")
+		keys := strings.Split(string(content), separator)
 
 		updatedKeys := make([]string, 0, len(keys)-1)
 
@@ -225,7 +227,7 @@ func (c ModCmd) logKeyInUse(key string) (remove func() error, err error) {
 			return err
 		}
 
-		f.WriteString(strings.Join(updatedKeys, ","))
+		f.WriteString(strings.Join(updatedKeys, separator))
 
 		return f.Close()
 	}, f.Close()
