@@ -9,7 +9,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/luisnquin/nao.svg?style=social&label=Star&maxAge=2592000)](https://github.com/luisnquin/nao)
 [![Built with Nix](https://img.shields.io/static/v1?logo=nixos&logoColor=white&label=&message=Built%20with%20Nix&color=41439a)](https://github.com/luisnquin/nao)
 
-<p>Take notes without worrying about the path where the file is, it's much easier</p>
+<p>Take notes without worrying about the path where the file is</p>
 </div>
 
 ## Features
