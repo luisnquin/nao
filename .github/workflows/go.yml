@@ -3,87 +3,80 @@ name: Go
 on: [push, pull_request]
 
 permissions:
-    # required for all workflows
-    security-events: write
-    #  privileged: true
+  # required for all workflows
+  security-events: write
+  #  privileged: true
 
 jobs:
-    build:
-        name: build
-        runs-on: ubuntu-20.04
+  build:
+    name: build
+    runs-on: ubuntu-20.04
 
-        steps:
-            - uses: actions/checkout@v3
-            - name: Set up Go
-              uses: actions/setup-go@v3
-              with:
-                  cache-dependency-path: ./go.sum
-                  go-version-file: ./go.mod
-                  go-version: '>=1.18.0'
-                  check-latest: false
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          cache-dependency-path: ./go.sum
+          go-version-file: ./go.mod
+          go-version: ">=1.18.0"
+          check-latest: false
 
-            - name: Build
-              run: go build -v ./...
+      - name: Build
+        run: go build -v ./...
 
-    gofumpt:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-go@v2
-              with:
-                  go-version: '>=1.18.0'
-            - name: Install gofumpt
-              run: |
-                  wget https://github.com/mvdan/gofumpt/releases/download/v0.4.0/gofumpt_v0.4.0_linux_amd64
-                  mv gofumpt_v0.4.0_linux_amd64 gofumpt
-                  chmod +x gofumpt
-                  mv gofumpt /usr/local/bin
-            - name: Check and format .go files
-              run: |
-                  [ "$(gofumpt -d ./..)" = "" ]
-    test:
-        runs-on: ubuntu-20.04
-        steps:
-            - uses: actions/checkout@v3
-            - name: Set up Go
-              uses: actions/setup-go@v3
-              with:
-                  cache-dependency-path: ./go.sum
-                  go-version-file: ./go.mod
-                  go-version: '>=1.18.0'
-                  check-latest: false
-            - name: Tests
-              run: go test -v ./...
+  gofumpt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Gofumpt
+        uses: luisnquin/setup-gofumpt@v1.0.0
+      - name: Check and format .go files
+        run: |
+          [ "$(gofumpt -d ./..)" = "" ]
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          cache-dependency-path: ./go.sum
+          go-version-file: ./go.mod
+          go-version: ">=1.18.0"
+          check-latest: false
+      - name: Tests
+        run: go test -v ./...
 
-    #golangci:
-    #    name: lint
-    #    runs-on: ubuntu-20.04
-    #    steps:
-    #        - uses: actions/setup-go@v3
-    #          with:
-    #              go-version: '>=1.18.0'
-    #        - uses: actions/checkout@v3
-    #        - name: golangci-lint
-    #          uses: golangci/golangci-lint-action@v3
-    #          with:
-    #              # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
-    #              version: v1.29
+  #golangci:
+  #    name: lint
+  #    runs-on: ubuntu-20.04
+  #    steps:
+  #        - uses: actions/setup-go@v3
+  #          with:
+  #              go-version: '>=1.18.0'
+  #        - uses: actions/checkout@v3
+  #        - name: golangci-lint
+  #          uses: golangci/golangci-lint-action@v3
+  #          with:
+  #              # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
+  #              version: v1.29
 
-    # Optional: working directory, useful for monorepos
-    # working-directory: somedir
+  # Optional: working directory, useful for monorepos
+  # working-directory: somedir
 
-    # Optional: golangci-lint command line arguments.
-    # args: --issues-exit-code=0
+  # Optional: golangci-lint command line arguments.
+  # args: --issues-exit-code=0
 
-    # Optional: show only new issues if it's a pull request. The default value is `false`.
-    # only-new-issues: true
+  # Optional: show only new issues if it's a pull request. The default value is `false`.
+  # only-new-issues: true
 
-    # Optional: if set to true then the all caching functionality will be complete disabled,
-    #           takes precedence over all other caching options.
-    # skip-cache: true
+  # Optional: if set to true then the all caching functionality will be complete disabled,
+  #           takes precedence over all other caching options.
+  # skip-cache: true
 
-    # Optional: if set to true then the action don't cache or restore ~/go/pkg.
-    # skip-pkg-cache: true
+  # Optional: if set to true then the action don't cache or restore ~/go/pkg.
+  # skip-pkg-cache: true
 
-    # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
-    # skip-build-cache: true
+  # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
+  # skip-build-cache: true
