@@ -50,4 +50,4 @@ No one has been able to do this, so here we are
 
 ## License
 
-[MIT](https://raw.githubusercontent.com/luisnquin/nao/main/.github/LICENSE)
+[MIT](https://raw.githubusercontent.com/luisnquin/nao/main/LICENSE)
