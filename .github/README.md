@@ -33,6 +33,8 @@ $ go install github.com/luisnquin/nao/v3/cmd/nao@v3.1.1
 
 ## Completions
 
+Add the line(s) of your corresponding shell to your .zshrc|.bashrc file
+
 ```bash
 # bash
 source <(nao completion bash)
