@@ -28,7 +28,7 @@
 
 ```bash
 # Requires go 1.18>=
-$ go install github.com/luisnquin/nao/v3/cmd/nao@v3.1.2
+$ go install github.com/luisnquin/nao/v3/cmd/nao@v3.1.3
 ```
 
 ## Completions
