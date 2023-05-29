@@ -253,12 +253,22 @@ func (b *Buffer) Load() error {
 	if b.config.Encrypt {
 		secret, err := security.GetSecretFromKeyring()
 		if err != nil {
-			return err
-		}
+			if !errors.Is(err, keyring.ErrNotFound) {
+				return err
+			}
 
-		data, err = security.DecryptAndDecode(data, secret)
-		if err != nil {
-			return err
+			secret := security.CreateRandomSecret()
+
+			if err := security.SetSecretInKeyring(secret); err != nil {
+				b.log.Err(err).Msg("failed attempt to set secret in keyring tool")
+
+				return err
+			}
+		} else {
+			data, err = security.DecryptAndDecode(data, secret)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
