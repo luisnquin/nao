@@ -264,6 +264,8 @@ func (b *Buffer) Load() error {
 
 				return err
 			}
+
+			data = []byte("{}")
 		} else {
 			data, err = security.DecryptAndDecode(data, secret)
 			if err != nil {
