@@ -38,19 +38,17 @@ func main() {
 		logger = zerolog.New(logFile)
 	}
 
-	caller, err := user.Current()
-	if err != nil {
-		logger.Err(err).Msg("unable to get current user, incoming panic")
-
-		panic(err) // Otherwise the program cannot be used and nothing will be broken
-	}
-
 	logger.Trace().
 		Str("app", internal.AppName).Str("version", internal.Version).Str("kind", internal.Kind).
 		Str("runtime", runtime.Version()).Str("os", runtime.GOOS).Str("arch", runtime.GOARCH).Send()
 
-	logger.Debug().Str("username", caller.Username).Str("uid", caller.Uid).
-		Str("gid", caller.Gid).Str("home", caller.HomeDir).Strs("input", os.Args).Send()
+	caller, err := user.Current()
+	if err != nil {
+		logger.Err(err).Msg("unable to get current user, incoming panic")
+	} else {
+		logger.Debug().Str("username", caller.Username).Str("uid", caller.Uid).
+			Str("gid", caller.Gid).Str("home", caller.HomeDir).Strs("input", os.Args).Send()
+	}
 
 	logger.Trace().Msg("loading configuration...")
 
@@ -64,7 +62,7 @@ func main() {
 
 	logger.Trace().Msg("loading data...")
 
-	data, err := data.NewBuffer(&logger, config)
+	data, err := data.Load(&logger, config)
 	if err != nil {
 		logger.Err(err).Msg("an error was encountered while loading data...")
 
