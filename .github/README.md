@@ -17,7 +17,6 @@
 - [x] You know terminal, you know nao
 - [x] No need to specify a path to access a note
 - [x] Edit from terminal editor
-- [x] Encryption
 - [x] One writer and multiple readers by note
 
 ## Demo
