@@ -15,9 +15,9 @@ const (
 
 // Supported terminal editors.
 const (
-	Neovim = "nvim"
-	Nano   = "nano"
-	Vim    = "vim"
+	NVim = "nvim"
+	Nano = "nano"
+	Vim  = "vim"
 )
 
 // Read write permissions for current user.

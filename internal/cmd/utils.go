@@ -111,7 +111,7 @@ func getReadOnlyFlag(editor string) string {
 	switch editor {
 	case internal.Nano:
 		return "-v"
-	case internal.Neovim, internal.Vim:
+	case internal.NVim, internal.Vim:
 		return "-R"
 	}
 	return ""
@@ -119,7 +119,7 @@ func getReadOnlyFlag(editor string) string {
 
 func getSupportedEditors() []string { // TODO: use it to validate editor
 	return []string{
-		internal.Neovim,
+		internal.NVim,
 		internal.Nano,
 		internal.Vim,
 	}
