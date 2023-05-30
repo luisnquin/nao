@@ -16,28 +16,30 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type App struct {
-	Editor             EditorConfig   `json:"editor" yaml:"editor"`
-	Theme              string         `json:"theme" yaml:"theme"`
-	ReadOnlyOnConflict bool           `json:"readOnlyOnConflict" yaml:"readOnlyOnConflict"`
-	Command            CommandOptions `json:"-" yaml:"-"`
-	FS                 FSConfig       `json:"-" yaml:"-"`
-	Colors             ui.ColorScheme `json:"-" yaml:"-"` // ???
-
-	log *zerolog.Logger
-}
-
-type EditorConfig struct {
-	Name      string   `json:"name" yaml:"name"`
-	ExtraArgs []string `json:"extraArgs" yaml:"extraArgs"`
-}
-
 type (
+	App struct {
+		Editor             EditorConfig   `json:"editor" yaml:"editor"`
+		Theme              string         `json:"theme" yaml:"theme"`
+		ReadOnlyOnConflict bool           `json:"readOnlyOnConflict" yaml:"readOnlyOnConflict"`
+		Command            CommandOptions `json:"-" yaml:"-"`
+		FS                 FSConfig       `json:"-" yaml:"-"`
+		Colors             ui.ColorScheme `json:"-" yaml:"-"` // ???
+
+		log *zerolog.Logger
+	}
+
+	EditorConfig struct {
+		Name      string   `json:"name" yaml:"name"`
+		ExtraArgs []string `json:"extraArgs" yaml:"extraArgs"`
+	}
+
 	CommandOptions struct {
 		Version VersionConfig `yaml:"version"`
 		Ls      LsConfig      `yaml:"ls"`
 	}
+)
 
+type (
 	VersionConfig struct {
 		NoColor bool   `yaml:"noColor,omitempty"`
 		Color   string `yaml:"color,omitempty"`
@@ -86,7 +88,7 @@ func New(logger *zerolog.Logger) (*App, error) {
 
 	logger.Trace().Msgf("loading '%s' theme or default", config.Theme)
 
-	config.UpdateTheme(config.Theme)
+	config.updateTheme(config.Theme)
 
 	return &config, nil
 }
@@ -151,45 +153,4 @@ func (c *App) Save() error {
 	}
 
 	return ioutil.WriteFile(c.FS.GetConfigFile(), content, internal.PermReadWrite)
-}
-
-func (c *App) fillOrFix() {
-	if !utils.Contains([]string{internal.Nano, internal.NVim, internal.Vim}, c.Editor.Name) {
-		c.log.Debug().Str("target", c.Editor.Name).Msg("provided unrecognized editor in configuration file")
-
-		c.Editor.Name = internal.Nano
-	}
-
-	if !utils.Contains(ui.GetThemeNames(), c.Theme) {
-		c.log.Debug().Str("target", c.Theme).Msg("provided unrecognized theme in configuration file")
-
-		c.Theme = ui.Default
-	}
-
-	c.log.Trace().Str("editor", c.Editor.Name).Str("theme", c.Theme).Send()
-}
-
-func (c *App) adoptTheme(theme *ui.ColorScheme) {
-	c.Colors = *theme
-}
-
-func (c *App) UpdateTheme(name string) {
-	switch name { // The configuration should not be updated for this
-	case ui.Nord:
-		c.adoptTheme(ui.GetNordTheme())
-	case ui.Nop:
-		c.adoptTheme(ui.NoTheme)
-	case ui.Party:
-		c.adoptTheme(ui.GetPartyTheme())
-	case ui.BeachDay:
-		c.adoptTheme(ui.GetBeachDayTheme())
-	case ui.RosePine:
-		c.adoptTheme(ui.GetRosePineTheme())
-	case ui.RosePineDawn:
-		c.adoptTheme(ui.GetRosePineDawnTheme())
-	case ui.RosePineMoon:
-		c.adoptTheme(ui.GetRosePineMoonTheme())
-	default:
-		c.adoptTheme(ui.GetDefaultTheme())
-	}
 }
