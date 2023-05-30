@@ -94,7 +94,7 @@ func New(logger *zerolog.Logger) (*App, error) {
 }
 
 func (c *App) Load() error {
-	c.FS.Dirs = appdir.New(internal.AppName)
+	c.FS.dirs = appdir.New(internal.AppName)
 
 	files := []string{c.FS.GetConfigFile()}
 
