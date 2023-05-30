@@ -176,7 +176,7 @@ func (c *Core) Load() error {
 	}
 
 	c.log.Trace().Msg("the data encryption feature is being forced")
-	c.Encrypt = true
+	c.Encrypt = false
 
 	return nil
 }

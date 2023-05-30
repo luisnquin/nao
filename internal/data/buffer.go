@@ -3,7 +3,6 @@ package data
 import (
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 
@@ -40,10 +39,6 @@ type (
 
 func NewBuffer(logger *zerolog.Logger, config *config.Core) (*Buffer, error) {
 	data := Buffer{log: logger, config: config}
-
-	if err := data.MigrateFileIfNeeded(); err != nil {
-		return nil, err
-	}
 
 	return &data, data.Reload()
 }
@@ -95,13 +90,9 @@ func (b *Buffer) MigrateFileIfNeeded() error {
 			}
 		} else {
 			secret, err := security.GetSecretFromKeyring()
-			if err != nil {
+			if err != nil && !errors.Is(err, keyring.ErrNotFound) {
 				b.log.Err(err).
 					Msg("failed attempt to get secret from keyring tool, this means that probably the data is irrecoverable")
-
-				if errors.Is(err, keyring.ErrNotFound) {
-					return errors.New("irrecoverable data file, secret not found")
-				}
 
 				return err
 			}
@@ -239,13 +230,17 @@ func (b *Buffer) Reload() error {
 		return fmt.Errorf("unexpected error: %w", err)
 	}
 
+	b.log.Trace().Msg("data file has been loaded")
+
 	return nil
 }
 
 // Reloads the data taking it from the expected file. If the file
 // doesn't exists then throws an error and doesn't updates anything.
 func (b *Buffer) Load() error {
-	data, err := os.ReadFile(b.config.FS.DataFile(b.config.Encrypt))
+	dataFilePath := b.config.FS.DataFile(b.config.Encrypt)
+
+	data, err := os.ReadFile(dataFilePath)
 	if err != nil {
 		return err
 	}
@@ -275,7 +270,7 @@ func (b *Buffer) Load() error {
 	}
 
 	err = json.Unmarshal(data, b)
-	if err != nil && !errors.Is(err, io.EOF) {
+	if err != nil {
 		return fmt.Errorf("unreadable json file: %w", err)
 	}
 
