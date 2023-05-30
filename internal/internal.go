@@ -10,7 +10,7 @@ import (
 const (
 	AppName = "nao"
 	Kind    = "azoricum"
-	Version = "v3.1.4"
+	Version = "v3.2.0"
 )
 
 // Supported terminal editors.
