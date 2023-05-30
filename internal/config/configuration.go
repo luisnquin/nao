@@ -55,7 +55,7 @@ type (
 func New(logger *zerolog.Logger) (*App, error) {
 	config := App{log: logger}
 
-	if err := config.Load(); err != nil {
+	if err := config.load(); err != nil {
 		logger.Error().Err(err).Msg("an error occurred while loading configuration")
 
 		if os.IsNotExist(err) {
@@ -69,7 +69,7 @@ func New(logger *zerolog.Logger) (*App, error) {
 
 			logger.Debug().Msg("saving default configuration...")
 
-			err = config.Save()
+			err = config.save()
 			if err != nil {
 				logger.Error().Err(err).Msg("unexpected error while saving configuration")
 
@@ -93,7 +93,7 @@ func New(logger *zerolog.Logger) (*App, error) {
 	return &config, nil
 }
 
-func (c *App) Load() error {
+func (c *App) load() error {
 	c.FS.dirs = appdir.New(internal.AppName)
 
 	files := []string{c.FS.GetConfigFile()}
@@ -146,7 +146,7 @@ func (c *App) Load() error {
 	return nil
 }
 
-func (c *App) Save() error {
+func (c *App) save() error {
 	content, err := yaml.Marshal(c)
 	if err != nil {
 		return fmt.Errorf("unexpected error, cannot encode config to json: %w", err)
