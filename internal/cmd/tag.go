@@ -14,11 +14,11 @@ type TagCmd struct {
 	*cobra.Command
 
 	log    *zerolog.Logger
-	config *config.Core
+	config *config.App
 	data   *data.Buffer
 }
 
-func BuildTag(log *zerolog.Logger, config *config.Core, data *data.Buffer) TagCmd {
+func BuildTag(log *zerolog.Logger, config *config.App, data *data.Buffer) TagCmd {
 	c := TagCmd{
 		Command: &cobra.Command{
 			Use:               "tag <old> <new>",

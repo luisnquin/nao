@@ -21,7 +21,7 @@ type VersionCmd struct {
 	*cobra.Command
 
 	log    *zerolog.Logger
-	config *config.Core
+	config *config.App
 }
 
 type githubTagInfo struct {
@@ -30,7 +30,7 @@ type githubTagInfo struct {
 
 const tagsUrl = "https://api.github.com/repos/luisnquin/nao/tags"
 
-func BuildVersion(log *zerolog.Logger, config *config.Core) VersionCmd {
+func BuildVersion(log *zerolog.Logger, config *config.App) VersionCmd {
 	c := VersionCmd{
 		Command: &cobra.Command{
 			Use:               "version",
@@ -63,7 +63,7 @@ func (c VersionCmd) Main() cobra.PositionalArgs {
 
 		b.WriteString(", ")
 
-		f, err := os.Open(path.Join(c.config.FS.CacheDir, "version_info.json"))
+		f, err := os.Open(path.Join(c.config.FS.GetCacheDir(), "version_info.json"))
 		if err == nil {
 			var tag githubTagInfo
 
@@ -154,7 +154,7 @@ func (c VersionCmd) EnsureVersionFile() cobra.PositionalArgs {
 		client := http.Client{Timeout: time.Second}
 		hoursToDeemItObsolete := time.Hour * 12
 
-		filePath := path.Join(c.config.FS.CacheDir, "version_info.json")
+		filePath := path.Join(c.config.FS.GetCacheDir(), "version_info.json")
 
 		c.log.Trace().
 			Str("http client timeout", client.Timeout.String()).

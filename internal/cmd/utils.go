@@ -37,13 +37,15 @@ func RunEditor(ctx context.Context, editor, filePath string, args ...string) err
 	return bin.Run()
 }
 
-func NewFileCached(config *config.Core, key, content string) (string, error) {
-	err := os.MkdirAll(config.FS.CacheDir, os.ModePerm)
+func NewFileCached(config *config.App, key, content string) (string, error) {
+	cacheDirPath := config.FS.GetCacheDir()
+
+	err := os.MkdirAll(cacheDirPath, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
 
-	f, err := os.Create(filepath.Join(config.FS.CacheDir, key+".tmp"))
+	f, err := os.Create(filepath.Join(cacheDirPath, key+".tmp"))
 	if err != nil {
 		return "", err
 	}

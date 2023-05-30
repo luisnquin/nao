@@ -17,7 +17,7 @@ type (
 		Notes    map[string]models.Note `json:"notes"`
 		Metadata Metadata               `json:"metadata"`
 		log      *zerolog.Logger
-		config   *config.Core
+		config   *config.App
 	}
 
 	Metadata struct {
@@ -33,7 +33,7 @@ type (
 	}
 )
 
-func NewBuffer(logger *zerolog.Logger, config *config.Core) (*Buffer, error) {
+func NewBuffer(logger *zerolog.Logger, config *config.App) (*Buffer, error) {
 	data := Buffer{log: logger, config: config}
 
 	return &data, data.Reload()
@@ -93,16 +93,16 @@ func (b *Buffer) save() error {
 		return fmt.Errorf("unexpected error, can't format data buffer to json: %w", err)
 	}
 
-	return ioutil.WriteFile(b.config.FS.DataFile, data, internal.PermReadWrite)
+	return ioutil.WriteFile(b.config.FS.GetDataFile(), data, internal.PermReadWrite)
 }
 
 // First data load, if there's no file to load then it creates it.
 func (b *Buffer) Reload() error {
 	if err := b.Load(); err != nil {
 		if os.IsNotExist(err) {
-			dataFile := b.config.FS.DataFile
+			dataFile := b.config.FS.GetDataFile()
 
-			err = os.MkdirAll(b.config.FS.DataDir, os.ModePerm)
+			err = os.MkdirAll(b.config.FS.GetCacheDir(), os.ModePerm)
 			if err != nil {
 				return fmt.Errorf("unable to create a new directory in '%s': %w", dataFile, err)
 			}
@@ -133,7 +133,7 @@ func (b *Buffer) Reload() error {
 // Reloads the data taking it from the expected file. If the file
 // doesn't exists then throws an error and doesn't updates anything.
 func (b *Buffer) Load() error {
-	dataFilePath := b.config.FS.DataFile
+	dataFilePath := b.config.FS.GetDataFile()
 
 	data, err := os.ReadFile(dataFilePath)
 	if err != nil {

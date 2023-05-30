@@ -17,12 +17,12 @@ type RmCmd struct {
 	*cobra.Command
 
 	log    *zerolog.Logger
-	config *config.Core
+	config *config.App
 	data   *data.Buffer
 	yes    bool
 }
 
-func BuildRm(log *zerolog.Logger, config *config.Core, data *data.Buffer) *RmCmd {
+func BuildRm(log *zerolog.Logger, config *config.App, data *data.Buffer) *RmCmd {
 	c := &RmCmd{
 		Command: &cobra.Command{
 			Use:               "rm [<id> | <tag>]...",

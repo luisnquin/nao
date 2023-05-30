@@ -21,7 +21,7 @@ func (cw cobraWriter) Write(p []byte) (n int, err error) {
 	return
 }
 
-func Execute(ctx context.Context, log *zerolog.Logger, config *config.Core, data *data.Buffer) error {
+func Execute(ctx context.Context, log *zerolog.Logger, config *config.App, data *data.Buffer) error {
 	log.Trace().Msg("configuring cli...")
 
 	root := cobra.Command{

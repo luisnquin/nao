@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
 	"runtime"
 
 	"github.com/ProtonMail/go-appdir"
@@ -17,7 +16,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Core struct {
+type App struct {
 	Editor             EditorConfig   `json:"editor" yaml:"editor"`
 	Theme              string         `json:"theme" yaml:"theme"`
 	ReadOnlyOnConflict bool           `json:"readOnlyOnConflict" yaml:"readOnlyOnConflict"`
@@ -26,14 +25,6 @@ type Core struct {
 	Colors             ui.ColorScheme `json:"-" yaml:"-"` // ???
 
 	log *zerolog.Logger
-}
-
-type FSConfig struct {
-	DataFile   string
-	ConfigFile string
-	ConfigDir  string
-	CacheDir   string
-	DataDir    string
 }
 
 type EditorConfig struct {
@@ -59,8 +50,8 @@ type (
 	}
 )
 
-func New(logger *zerolog.Logger) (*Core, error) {
-	config := Core{log: logger}
+func New(logger *zerolog.Logger) (*App, error) {
+	config := App{log: logger}
 
 	if err := config.Load(); err != nil {
 		logger.Error().Err(err).Msg("an error occurred while loading configuration")
@@ -100,20 +91,10 @@ func New(logger *zerolog.Logger) (*Core, error) {
 	return &config, nil
 }
 
-func (c *Core) Load() error {
-	dirs := appdir.New(internal.AppName)
-	configDir, dataDir, cacheDir := dirs.UserConfig(), dirs.UserData(), dirs.UserCache()
+func (c *App) Load() error {
+	c.FS.Dirs = appdir.New(internal.AppName)
 
-	c.FS = FSConfig{
-		ConfigFile: path.Join(configDir, "config.yml"),
-		ConfigDir:  configDir,
-		CacheDir:   cacheDir,
-		DataDir:    dataDir,
-	}
-
-	c.FS.DataFile = path.Join(dataDir, "data.json")
-
-	files := []string{c.FS.ConfigFile}
+	files := []string{c.FS.GetConfigFile()}
 
 	if utils.Contains([]string{"linux", "darwin"}, runtime.GOOS) {
 		files = append(files, "/etc/nao/config.yml")
@@ -163,16 +144,16 @@ func (c *Core) Load() error {
 	return nil
 }
 
-func (c *Core) Save() error {
+func (c *App) Save() error {
 	content, err := yaml.Marshal(c)
 	if err != nil {
 		return fmt.Errorf("unexpected error, cannot encode config to json: %w", err)
 	}
 
-	return ioutil.WriteFile(c.FS.ConfigFile, content, internal.PermReadWrite)
+	return ioutil.WriteFile(c.FS.GetConfigFile(), content, internal.PermReadWrite)
 }
 
-func (c *Core) fillOrFix() {
+func (c *App) fillOrFix() {
 	if !utils.Contains([]string{internal.Nano, internal.Neovim, internal.Vim}, c.Editor.Name) {
 		c.log.Debug().Str("target", c.Editor.Name).Msg("provided unrecognized editor in configuration file")
 
@@ -188,11 +169,11 @@ func (c *Core) fillOrFix() {
 	c.log.Trace().Str("editor", c.Editor.Name).Str("theme", c.Theme).Send()
 }
 
-func (c *Core) adoptTheme(theme *ui.ColorScheme) {
+func (c *App) adoptTheme(theme *ui.ColorScheme) {
 	c.Colors = *theme
 }
 
-func (c *Core) UpdateTheme(name string) {
+func (c *App) UpdateTheme(name string) {
 	switch name { // The configuration should not be updated for this
 	case ui.Nord:
 		c.adoptTheme(ui.GetNordTheme())

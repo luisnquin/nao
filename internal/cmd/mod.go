@@ -23,13 +23,13 @@ type ModCmd struct {
 	*cobra.Command
 
 	log    *zerolog.Logger
-	config *config.Core
+	config *config.App
 	data   *data.Buffer
 	latest bool
 	editor string
 }
 
-func BuildMod(log *zerolog.Logger, config *config.Core, data *data.Buffer) ModCmd {
+func BuildMod(log *zerolog.Logger, config *config.App, data *data.Buffer) ModCmd {
 	c := ModCmd{
 		Command: &cobra.Command{
 			Use:               "mod [<id> | <tag>]",

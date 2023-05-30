@@ -27,13 +27,13 @@ type LsCmd struct {
 	*cobra.Command
 
 	log         *zerolog.Logger
-	config      *config.Core
+	config      *config.App
 	data        *data.Buffer
 	Quiet, Long bool
 	json, csv   bool
 }
 
-func BuildLs(log *zerolog.Logger, config *config.Core, data *data.Buffer) LsCmd {
+func BuildLs(log *zerolog.Logger, config *config.App, data *data.Buffer) LsCmd {
 	c := LsCmd{
 		Command: &cobra.Command{
 			Use:               "ls",

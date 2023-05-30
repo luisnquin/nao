@@ -19,14 +19,14 @@ type NewCmd struct {
 	*cobra.Command
 
 	log    *zerolog.Logger
-	config *config.Core
+	config *config.App
 	data   *data.Buffer
 	editor string
 	from   string
 	tag    string
 }
 
-func BuildNew(log *zerolog.Logger, config *config.Core, data *data.Buffer) NewCmd {
+func BuildNew(log *zerolog.Logger, config *config.App, data *data.Buffer) NewCmd {
 	c := NewCmd{
 		Command: &cobra.Command{
 			Use:               "new",
