@@ -18,7 +18,6 @@ import (
 )
 
 type Core struct {
-	Encrypt            bool           `json:"-" yaml:"-"`
 	Editor             EditorConfig   `json:"editor" yaml:"editor"`
 	Theme              string         `json:"theme" yaml:"theme"`
 	ReadOnlyOnConflict bool           `json:"readOnlyOnConflict" yaml:"readOnlyOnConflict"`
@@ -30,20 +29,11 @@ type Core struct {
 }
 
 type FSConfig struct {
-	DataEncryptedFile string
-	DataNormalFile    string
-	ConfigFile        string
-	ConfigDir         string
-	CacheDir          string
-	DataDir           string
-}
-
-func (fs *FSConfig) DataFile(forEncrypted bool) string {
-	if forEncrypted {
-		return fs.DataEncryptedFile
-	}
-
-	return fs.DataNormalFile
+	DataFile   string
+	ConfigFile string
+	ConfigDir  string
+	CacheDir   string
+	DataDir    string
 }
 
 type EditorConfig struct {
@@ -71,7 +61,7 @@ type (
 	ElementConfig struct {
 		Alias string `yaml:"alias,omitempty"`
 		Color string `yaml:"color,omitempty"`
-		Ommit bool   `yaml:"ommit"`
+		Omit  bool   `yaml:"omit"`
 	}
 )
 
@@ -117,7 +107,7 @@ func New(logger *zerolog.Logger) (*Core, error) {
 }
 
 func (c *Core) Load() error {
-	dirs := appdir.New("nao")
+	dirs := appdir.New(internal.AppName)
 	configDir, dataDir, cacheDir := dirs.UserConfig(), dirs.UserData(), dirs.UserCache()
 
 	c.FS = FSConfig{
@@ -127,8 +117,7 @@ func (c *Core) Load() error {
 		DataDir:    dataDir,
 	}
 
-	c.FS.DataEncryptedFile = path.Join(dataDir, "data.txt")
-	c.FS.DataNormalFile = path.Join(dataDir, "data.json")
+	c.FS.DataFile = path.Join(dataDir, "data.json")
 
 	files := []string{c.FS.ConfigFile}
 
@@ -176,7 +165,6 @@ func (c *Core) Load() error {
 	}
 
 	c.log.Trace().Msg("the data encryption feature is being forced")
-	c.Encrypt = false
 
 	return nil
 }
