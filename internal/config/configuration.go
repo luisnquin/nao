@@ -57,12 +57,6 @@ type (
 		NoColor bool `yaml:"NoColor,omitempty"`
 		Columns []string
 	}
-
-	ElementConfig struct {
-		Alias string `yaml:"alias,omitempty"`
-		Color string `yaml:"color,omitempty"`
-		Omit  bool   `yaml:"omit"`
-	}
 )
 
 func New(logger *zerolog.Logger) (*Core, error) {
