@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/user"
+	"path"
 	"runtime"
 
 	"github.com/luisnquin/nao/v3/internal"
@@ -23,9 +24,9 @@ func main() {
 		}
 	}()
 
-	logFile, err := os.OpenFile("/tmp/nao.log", os.O_CREATE|os.O_RDWR|os.O_APPEND, internal.PermReadWrite)
+	logFile, err := os.OpenFile(path.Join(os.TempDir(), "nao.log"), os.O_CREATE|os.O_RDWR|os.O_APPEND, internal.PermReadWrite)
 	if err != nil {
-		panic(err) // Read-only temp directory aaS
+		panic(err)
 	}
 
 	logFile.WriteString("\n\n")
