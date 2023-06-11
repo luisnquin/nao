@@ -141,8 +141,6 @@ func (c *App) load() error {
 		c.log.Trace().Msg("file loaded into memory successfully")
 	}
 
-	c.log.Trace().Msg("the data encryption feature is being forced")
-
 	return nil
 }
 
