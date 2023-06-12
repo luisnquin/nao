@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path"
 	"strings"
@@ -171,20 +173,19 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 	}
 }
 
-func (c ModCmd) openKeysInUseFile() (*os.File, error) {
-	return os.OpenFile(
-		path.Join(os.TempDir(), ".nao.keys"),
-		os.O_CREATE|os.O_APPEND|os.O_RDWR, internal.PermReadWrite,
-	)
+func (c ModCmd) getNameAndContentOfKeysFile() (string, []byte, error) {
+	filePath := path.Join(os.TempDir(), ".nao.keys")
+
+	content, err := os.ReadFile(filePath)
+	if err != nil && errors.Is(err, io.EOF) {
+		return "", nil, err
+	}
+
+	return filePath, content, nil
 }
 
 func (c ModCmd) logKeyInUse(key string) (remove func() error, err error) {
-	f, err := c.openKeysInUseFile()
-	if err != nil {
-		return nil, err
-	}
-
-	content, err := io.ReadAll(f)
+	fileName, content, err := c.getNameAndContentOfKeysFile()
 	if err != nil {
 		return nil, err
 	}
@@ -195,20 +196,13 @@ func (c ModCmd) logKeyInUse(key string) (remove func() error, err error) {
 		return nil, fmt.Errorf("key '%s' already in use", key)
 	}
 
-	_, err = f.Seek(0, io.SeekEnd)
+	err = os.WriteFile(fileName, []byte(key+separator), fs.ModePerm|os.ModeAppend)
 	if err != nil {
 		return nil, err
 	}
 
-	f.WriteString(key + "\n")
-
 	return func() error {
-		f, err = c.openKeysInUseFile()
-		if err != nil {
-			return err
-		}
-
-		content, err := io.ReadAll(f)
+		fileName, content, err := c.getNameAndContentOfKeysFile()
 		if err != nil {
 			return err
 		}
@@ -223,14 +217,12 @@ func (c ModCmd) logKeyInUse(key string) (remove func() error, err error) {
 			}
 		}
 
-		if err := f.Truncate(0); err != nil {
+		if err := os.Truncate(fileName, 0); err != nil {
 			return err
 		}
 
-		f.WriteString(strings.Join(updatedKeys, separator))
-
-		return f.Close()
-	}, f.Close()
+		return os.WriteFile(fileName, []byte(strings.Join(updatedKeys, separator)), os.ModePerm)
+	}, nil
 }
 
 func (c *ModCmd) getEditorName() string {
