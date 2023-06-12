@@ -43,6 +43,38 @@ source <(nao completion zsh)
 compdef _nao nao
 ```
 
+## Configuration
+
+  Nao keeps its configuration file inside of a `nao` directory and the location depends on your operating system. This program leverages [XDG](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) to load its various configurations files. For information on the default locations for your OS please see [this link](https://github.com/adrg/xdg/blob/master/README.md).
+
+  | Unix            | macOS                              | Windows               |
+  |-----------------|------------------------------------|-----------------------|
+  | `~/.config/nao/config.yml` | `~/Library/Application Support/nao/config.yml` | `%LOCALAPPDATA%\nao\config.yml`  |
+
+```yaml
+# The terminal editor
+editor:
+    # Possible values: nano, vim, nvim
+    name: nano
+    extraArgs: []
+# Possible values:
+# - default
+# - beach-day
+# - party
+# - nord
+# - no-theme
+# - rose-pine
+# - rose-pine-dawn
+# - rose-pine-moon
+theme: default
+# In case an already open note is being called, the program can act in two ways
+# 1. Blocking access until the other note is closed
+# 2. Opening the note but in read-only mode for the selected editor
+#
+# The reason for this feature is to avoid overwriting issues
+readOnlyOnConflict: false
+```
+
 ## Why did I do this?
 
 No one has been able to do this, so here we are
