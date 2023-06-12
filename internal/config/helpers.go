@@ -1,12 +1,18 @@
 package config
 
 import (
+	"os"
+
 	"github.com/luisnquin/nao/v3/internal"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/luisnquin/nao/v3/internal/utils"
 )
 
 func (c *App) fillOrFix() {
+	if c.Editor.Name == "" {
+		c.Editor.Name = os.Getenv("EDITOR")
+	}
+
 	if !utils.Contains([]string{internal.Nano, internal.NVim, internal.Vim}, c.Editor.Name) {
 		c.log.Debug().Str("target", c.Editor.Name).Msg("provided unrecognized editor in configuration file")
 
