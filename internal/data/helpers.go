@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/goccy/go-json"
@@ -16,7 +15,7 @@ func (b *Buffer) save() error {
 		return fmt.Errorf("unexpected error, can't format data buffer to json: %w", err)
 	}
 
-	return ioutil.WriteFile(b.config.FS.GetDataFile(), data, internal.PermReadWrite)
+	return os.WriteFile(b.config.FS.GetDataFile(), data, internal.PermReadWrite)
 }
 
 // First data load, if there's no file to load then it creates it.
@@ -27,6 +26,10 @@ func (b *Buffer) loadData() error {
 
 			err = os.MkdirAll(b.config.FS.GetDataDir(), os.ModePerm)
 			if err != nil {
+				if isHomelessShelterError(err) { // NixOS
+					return ErrRunningOnHomelessShelter
+				}
+
 				return fmt.Errorf("unable to create a new directory in '%s': %w", dataFile, err)
 			}
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os"
 	"os/user"
@@ -14,6 +15,14 @@ import (
 	"github.com/luisnquin/nao/v3/internal/data"
 	"github.com/luisnquin/nao/v3/internal/ui"
 	"github.com/rs/zerolog"
+)
+
+const DEFAULT_VERSION = "unversioned"
+
+var (
+	version = DEFAULT_VERSION
+	commit  string
+	date    string
 )
 
 func main() {
@@ -63,19 +72,23 @@ func main() {
 
 	logger.Trace().Msg("loading data...")
 
-	data, err := data.Load(&logger, config)
+	appData, err := data.Load(&logger, config)
 	if err != nil {
-		logger.Err(err).Msg("an error was encountered while loading data...")
-
-		ui.Error(err.Error())
-		os.Exit(1)
+		if errors.Is(err, data.ErrRunningOnHomelessShelter) {
+			logger.Warn().Err(err).Msg("error will be ignored")
+			ui.Warnf("got this error %s but it will be ignored", err.Error())
+		} else {
+			logger.Err(err).Msg("an error was encountered while loading data...")
+			ui.Error(err.Error())
+			os.Exit(1)
+		}
 	}
 
 	logger.Trace().Msg("executing command...")
 
 	ctx := context.Background()
 
-	if err := cmd.Execute(ctx, &logger, config, data); err != nil {
+	if err := cmd.Execute(ctx, &logger, config, appData); err != nil {
 		logger.Err(err).Msg("an error was encountered while executing command...")
 
 		ui.Error(err.Error())

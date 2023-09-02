@@ -32,3 +32,11 @@ func Fatal(message string) Suggest {
 func Fatalf(message string, more ...any) Suggest {
 	return Fatal(fmt.Sprintf(message, more...))
 }
+
+func Warn(message string) {
+	fmt.Fprintf(os.Stderr, color.HEX("#fafa91").Sprintf("Warn: %s\n", message))
+}
+
+func Warnf(message string, more ...any) {
+	Warn(fmt.Sprintf(message, more...))
+}

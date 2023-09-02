@@ -226,6 +226,8 @@ func (c ModCmd) logKeyInUse(key string) (remove func() error, err error) {
 }
 
 func (c *ModCmd) getEditorName() string {
+	// return "kibi"
+
 	if c.editor != "" {
 		return c.editor
 	}
