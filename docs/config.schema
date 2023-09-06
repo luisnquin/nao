@@ -1,0 +1,46 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "type": "object",
+    "properties": {
+        "editor": {
+            "description": "Terminal editor settings.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "The bin name of the terminal editor to use.",
+                    "type": "string",
+                    "enum": [
+                        "nano",
+                        "vim",
+                        "nvim"
+                    ]
+                },
+                "extraArgs": {
+                    "description": "Extra argument to pass to selected terminal editor.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "theme": {
+            "description": "The program theme to use.",
+            "type": "string",
+            "enum": [
+                "default",
+                "beach-day",
+                "party",
+                "nord",
+                "no-theme",
+                "rose-pine",
+                "rose-pine-dawn",
+                "rose-pine-moon"
+            ]
+        },
+        "readOnlyOnConflict": {
+            "description": "In case an already open note is being called, the program can act in two ways:\n1. Blocking access until the other note is closed.\n2. Opening the note but in read-only mode for the selected editor.\n\nThe reason for this feature is to avoid overwriting issues.",
+            "type": "boolean"
+        }
+    }
+}

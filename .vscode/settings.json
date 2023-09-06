@@ -9,6 +9,9 @@
         "ui": "Theme",
         "note": "Helper"
     },
+    "files.associations": {
+        "*schema": "json"
+    },
     "go.liveErrors": {
         "enabled": false,
         "delay": 500
