@@ -52,6 +52,8 @@ compdef _nao nao
   | `~/.config/nao/config.yml` | `~/Library/Application Support/nao/config.yml` | `%LOCALAPPDATA%\nao\config.yml`  |
 
 ```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/luisnquin/nao/main/docs/config.schema
+
 # The terminal editor
 editor:
     # Possible values: nano, vim, nvim
