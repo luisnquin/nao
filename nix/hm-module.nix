@@ -14,12 +14,12 @@ in {
       config = let
         editorModule = types.submodule {
           options = {
-            name = {
+            name = mkOption {
               type = types.str;
               default = "nano";
             };
 
-            extraArgs = {
+            extraArgs = mkOption {
               type = types.listOf types.str;
               default = [];
             };
@@ -30,7 +30,6 @@ in {
           options = {
             editor = mkOption {
               type = editorModule;
-              default = "nano";
             };
 
             theme = mkOption {
