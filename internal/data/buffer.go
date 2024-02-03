@@ -30,7 +30,16 @@ type (
 func Load(logger *zerolog.Logger, config *config.App) (*Buffer, error) {
 	data := Buffer{log: logger, config: config}
 
-	return &data, data.loadData()
+	if err := data.loadData(); err != nil {
+		return nil, err
+	}
+
+	for k, n := range data.Notes {
+		n.Key = k
+		data.Notes[k] = n
+	}
+
+	return &data, nil
 }
 
 func (b *Buffer) Undo(keys ...string) error {
