@@ -79,12 +79,7 @@ func (c *NewCmd) Main() cobra.PositionalArgs {
 		defer os.Remove(path)
 
 		if c.from != "" {
-			key, err := note.SearchByPrefix(c.from, c.data)
-			if err != nil {
-				return err
-			}
-
-			note, err := notesRepo.Get(key)
+			note, err := note.Search(c.data, c.from)
 			if err != nil {
 				return err
 			}

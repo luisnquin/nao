@@ -56,12 +56,7 @@ func (c *RmCmd) Main() cobra.PositionalArgs {
 		maxSize := 0
 
 		for _, arg := range args {
-			key, err := note.SearchByPrefix(arg, c.data)
-			if err != nil {
-				return err
-			}
-
-			note, err := repo.Get(key)
+			note, err := note.Search(c.data, arg)
 			if err != nil {
 				return err
 			}
@@ -69,7 +64,7 @@ func (c *RmCmd) Main() cobra.PositionalArgs {
 			maxSize += note.Size()
 
 			tags = append(tags, note.Tag)
-			keys = append(keys, key)
+			keys = append(keys, note.Key)
 		}
 
 		if !c.yes {

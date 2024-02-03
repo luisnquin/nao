@@ -81,18 +81,11 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 		case len(args) == 1:
 			c.log.Trace().Str("key/tag provided", args[0]).Send()
 
-			key, err := note.SearchByPrefix(args[0], c.data)
+			var err error
+
+			nt, err = note.Search(c.data, args[0])
 			if err != nil {
 				c.log.Err(err).Str("arg", args[0]).Msg("error with the argument supplied")
-
-				return err
-			}
-
-			c.log.Trace().Str("key found", key).Send()
-
-			nt, err = notesRepo.Get(key)
-			if err != nil {
-				c.log.Err(err).Msg("unexpected error trying to get a previously found note")
 
 				return err
 			}

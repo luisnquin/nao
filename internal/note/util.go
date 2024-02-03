@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/luisnquin/nao/v3/internal/data"
+	"github.com/luisnquin/nao/v3/internal/models"
 	"github.com/luisnquin/nao/v3/internal/utils"
 )
 
@@ -17,7 +18,7 @@ func SearchKeyTagsByPrefix(prefix string, data *data.Buffer) []string {
 		}
 
 		if strings.HasPrefix(key, prefix) {
-			if len(key) >= 10 {
+			if len(key) >= 10 { //nolint:gomnd
 				results = append(results, key[:10])
 			} else {
 				results = append(results, key)
@@ -28,23 +29,24 @@ func SearchKeyTagsByPrefix(prefix string, data *data.Buffer) []string {
 	return results
 }
 
-func SearchByPrefix(prefix string, data *data.Buffer) (string, error) {
-	var result string
+func Search(data *data.Buffer, searchTerm string) (models.Note, error) {
+	var result models.Note
 
 	// We look for the pattern most similar to the available keys/tags
 	for key, note := range data.Notes {
-		if strings.HasPrefix(note.Tag, prefix) && len(note.Tag) > len(result) ||
-			strings.HasPrefix(key, prefix) && len(key) > len(result) {
-			result = key
+		if note.Tag == searchTerm {
+			return note, nil
+		}
 
-			if note.Tag == prefix || key == prefix {
-				break
-			}
+		tagLike := strings.HasPrefix(note.Tag, searchTerm) && len(note.Tag) > len(result.Key)
+		keyLike := strings.HasPrefix(key, searchTerm) && len(key) > len(result.Key)
+
+		if tagLike || keyLike {
+			result = note
 		}
 	}
 
-	// Your last bullet, I think
-	if result != "" {
+	if result.Key != "" {
 		return result, nil
 	}
 
@@ -54,10 +56,10 @@ func SearchByPrefix(prefix string, data *data.Buffer) (string, error) {
 		opts = append(opts, n.Tag)
 	}
 
-	bestMatch := utils.CalculateNearestString(opts, prefix)
+	bestMatch := utils.CalculateNearestString(opts, searchTerm)
 	if bestMatch != "" {
-		return "", fmt.Errorf("key not found, did you mean '%s'?", bestMatch)
+		return models.Note{}, fmt.Errorf("key not found, did you mean '%s'?", bestMatch)
 	}
 
-	return "", ErrNoteNotFound
+	return models.Note{}, ErrNoteNotFound
 }

@@ -45,16 +45,16 @@ func (c CatCmd) Main() cobra.PositionalArgs {
 		for i, arg := range args {
 			c.log.Trace().Msgf("searching key or tag '%s', %d/%d", arg, i+1, nbOfArgs)
 
-			key, err := note.SearchByPrefix(arg, c.data)
+			nt, err := note.Search(c.data, arg)
 			if err != nil {
 				c.log.Err(err).Msgf("an error occurred while searching key/tag '%s", arg)
 
 				return err
 			}
 
-			note := c.data.Notes[key]
+			note := c.data.Notes[nt.Key]
 
-			c.log.Trace().Str("key", key).Str("tag", note.Tag).Send()
+			c.log.Trace().Str("key", nt.Key).Str("tag", note.Tag).Send()
 			c.log.Trace().Msg("sending note content to stdout...")
 
 			fmt.Fprintln(os.Stdout, note.Content)

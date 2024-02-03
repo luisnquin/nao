@@ -50,11 +50,11 @@ func (c *TagCmd) Main() cobra.PositionalArgs {
 			return fmt.Errorf("tag %s is not valid: %w", args[1], err)
 		}
 
-		key, err := note.SearchByPrefix(args[0], c.data)
+		nt, err := note.Search(c.data, args[0])
 		if err != nil {
 			return err
 		}
 
-		return notesRepo.Update(key, note.WithTag(args[1]))
+		return notesRepo.Update(nt.Key, note.WithTag(args[1]))
 	}
 }
