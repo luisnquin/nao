@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+const (
+	MB = 1 << 20
+	GB = 1 << 30
+	KB = 1 << 10
+)
+
 // Returns an human-readable representation of the size of the passed JSON value.
 func GetHumanReadableSize(v any) string {
 	return SizeToStorageUnits(int64(GetSize(v)))
@@ -19,13 +25,13 @@ func GetSize(v any) int {
 
 func SizeToStorageUnits[T int64 | int | float64](n T) string {
 	switch {
-	case n > 1000000:
-		return fmt.Sprintf("%.2f%s", float64(n)/(1<<20), "MB")
+	case n > GB:
+		return fmt.Sprintf("%.2f%s", float64(n)/(GB), "GB")
 
-	case n > 1_000_000_000:
-		return fmt.Sprintf("%.2f%s", float64(n)/(1<<30), "GB")
+	case n > MB:
+		return fmt.Sprintf("%.2f%s", float64(n)/(MB), "MB")
 
 	default:
-		return fmt.Sprintf("%.2f%s", float64(n)/(1<<10), "KB")
+		return fmt.Sprintf("%.2f%s", float64(n)/(KB), "KB")
 	}
 }
