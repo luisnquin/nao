@@ -5,7 +5,7 @@
 }:
 buildGoModule rec {
   pname = "nao";
-  version = "3.2.2";
+  version = "3.2.3";
 
   src = builtins.path {
     name = "nao";
