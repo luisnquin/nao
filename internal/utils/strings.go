@@ -15,6 +15,7 @@ func ToCamelCase(s string) string {
 
 func toTitleCase(s string, capitalizeFirst bool) string {
 	var result strings.Builder
+
 	result.Grow(len(s))
 
 	for _, r := range s {

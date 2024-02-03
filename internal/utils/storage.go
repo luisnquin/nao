@@ -10,7 +10,7 @@ func GetHumanReadableSize(v any) string {
 	return SizeToStorageUnits(int64(GetSize(v)))
 }
 
-// Returns the size of the passed JSON value
+// Returns the size of the passed JSON value.
 func GetSize(v any) int {
 	content, _ := json.Marshal(v)
 

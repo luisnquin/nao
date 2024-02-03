@@ -31,7 +31,7 @@ func SearchKeyTagsByPrefix(prefix string, data *data.Buffer) []string {
 func SearchByPrefix(prefix string, data *data.Buffer) (string, error) {
 	var result string
 
-	// We look for the pattern most similar to the availables keys/tags
+	// We look for the pattern most similar to the available keys/tags
 	for key, note := range data.Notes {
 		if strings.HasPrefix(note.Tag, prefix) && len(note.Tag) > len(result) ||
 			strings.HasPrefix(key, prefix) && len(key) > len(result) {
@@ -54,7 +54,7 @@ func SearchByPrefix(prefix string, data *data.Buffer) (string, error) {
 		opts = append(opts, n.Tag)
 	}
 
-	bestMatch := utils.BestMatch(opts, prefix)
+	bestMatch := utils.CalculateNearestString(opts, prefix)
 	if bestMatch != "" {
 		return "", fmt.Errorf("key not found, did you mean '%s'?", bestMatch)
 	}

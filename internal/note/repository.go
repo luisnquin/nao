@@ -117,8 +117,7 @@ func (r NotesRepository) Update(key string, modifiers ...ModifyOption) error {
 }
 
 func (r NotesRepository) Delete(key string) error {
-	_, ok := r.data.Notes[key]
-	if !ok {
+	if _, ok := r.data.Notes[key]; !ok {
 		return ErrNoteNotFound
 	}
 
@@ -127,8 +126,6 @@ func (r NotesRepository) Delete(key string) error {
 
 func (r NotesRepository) Slice() []models.Note {
 	notes := make([]models.Note, 0, len(r.data.Notes))
-
-	// TODO: autorepair key
 
 	for key, note := range r.data.Notes {
 		note.Key = key
@@ -157,7 +154,7 @@ func (r NotesRepository) AllKeys() []string {
 		keys = append(keys, key)
 	}
 
-	sort.Strings(keys) // TODO: sort by last update
+	sort.Strings(keys)
 
 	return keys
 }

@@ -2,8 +2,6 @@ package utils
 
 import (
 	"os"
-
-	"github.com/agnivade/levenshtein"
 )
 
 // Asks for the hour to the host and returns true in case of consider this a lucky day.
@@ -34,28 +32,4 @@ func IsDirectory(path string) bool {
 	info, err := os.Stat(path)
 
 	return err == nil && info.IsDir()
-}
-
-// Using the levenshtein distance algorithm, it returns
-// the best candidate between the options to match with
-// the argument of `toInspect`.
-//
-// If returns an empty result in case the nearest distance
-// is greater than 3.
-func BestMatch(options []string, toInspect string) string {
-	bestCandidate, nearestDistance := "", 100
-
-	for _, opt := range options {
-		currentDistance := levenshtein.ComputeDistance(toInspect, opt)
-
-		if currentDistance < nearestDistance {
-			bestCandidate, nearestDistance = opt, currentDistance
-		}
-	}
-
-	if nearestDistance <= 3 {
-		return bestCandidate
-	}
-
-	return ""
 }

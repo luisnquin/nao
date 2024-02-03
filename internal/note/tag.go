@@ -58,8 +58,7 @@ func (t Tagger) IsValid(tag string) error {
 }
 
 func (t Tagger) IsValidAsNew(tag string) error {
-	err := t.IsValid(tag)
-	if err != nil {
+	if err := t.IsValid(tag); err != nil {
 		return err
 	}
 
