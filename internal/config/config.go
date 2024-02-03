@@ -18,18 +18,18 @@ import (
 
 type (
 	App struct {
-		Editor             EditorConfig   `json:"editor" yaml:"editor"`
-		Theme              string         `json:"theme" yaml:"theme"`
+		Editor             EditorConfig   `json:"editor"             yaml:"editor"`
+		Theme              string         `json:"theme"              yaml:"theme"`
 		ReadOnlyOnConflict bool           `json:"readOnlyOnConflict" yaml:"readOnlyOnConflict"`
-		Command            CommandOptions `json:"-" yaml:"-"`
-		FS                 FSConfig       `json:"-" yaml:"-"`
-		Colors             ui.ColorScheme `json:"-" yaml:"-"` // ???
+		Command            CommandOptions `json:"-"                  yaml:"-"`
+		FS                 FSConfig       `json:"-"                  yaml:"-"`
+		Colors             ui.ColorScheme `json:"-"                  yaml:"-"` // ???
 
 		log *zerolog.Logger
 	}
 
 	EditorConfig struct {
-		Name      string   `json:"name" yaml:"name"`
+		Name      string   `json:"name"      yaml:"name"`
 		ExtraArgs []string `json:"extraArgs" yaml:"extraArgs"`
 	}
 
@@ -47,7 +47,7 @@ type (
 
 	LsConfig struct {
 		KeySize int  `yaml:"keyLength,omitempty"`
-		NoColor bool `yaml:"NoColor,omitempty"`
+		NoColor bool `yaml:"noColor,omitempty"`
 		Columns []string
 	}
 )
