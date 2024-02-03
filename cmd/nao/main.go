@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"os/user"
-	"path"
 	"runtime"
 
 	"github.com/luisnquin/nao/v3/internal"
@@ -20,9 +19,8 @@ import (
 const DEFAULT_VERSION = "unversioned"
 
 var (
-	version = DEFAULT_VERSION
-	commit  string
-	date    string
+	version      = DEFAULT_VERSION
+	commit, date string
 )
 
 func main() {
@@ -33,19 +31,15 @@ func main() {
 		}
 	}()
 
-	logFile, err := os.OpenFile(path.Join(os.TempDir(), "nao.log"), os.O_CREATE|os.O_RDWR|os.O_APPEND, internal.PermReadWrite)
-	if err != nil {
-		panic(err)
-	}
-
-	logFile.WriteString("\n\n")
+	lw := getAppLogsWriter()
+	lw.WriteString("\n\n")
 
 	var logger zerolog.Logger
 
 	if internal.Debug {
-		logger = zerolog.New(io.MultiWriter(logFile, os.Stderr))
+		logger = zerolog.New(io.MultiWriter(lw, os.Stderr))
 	} else {
-		logger = zerolog.New(logFile)
+		logger = zerolog.New(lw)
 	}
 
 	logger.Trace().
