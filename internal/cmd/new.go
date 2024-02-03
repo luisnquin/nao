@@ -97,7 +97,7 @@ func (c *NewCmd) Main() cobra.PositionalArgs {
 			return err
 		}
 
-		content, err := ioutil.ReadFile(path)
+		content, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
