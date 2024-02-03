@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"runtime"
 
@@ -150,5 +149,5 @@ func (c *App) save() error {
 		return fmt.Errorf("unexpected error, cannot encode config to json: %w", err)
 	}
 
-	return ioutil.WriteFile(c.FS.GetConfigFile(), content, internal.PermReadWrite)
+	return os.WriteFile(c.FS.GetConfigFile(), content, internal.PermReadWrite)
 }

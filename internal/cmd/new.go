@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -84,7 +83,7 @@ func (c *NewCmd) Main() cobra.PositionalArgs {
 				return err
 			}
 
-			err = ioutil.WriteFile(path, []byte(note.Content), 0o644)
+			err = os.WriteFile(path, []byte(note.Content), os.ModePerm)
 			if err != nil {
 				return err
 			}
