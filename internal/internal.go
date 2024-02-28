@@ -12,7 +12,7 @@ const DISCORD_APP_ID = "1212321808355692564"
 const (
 	AppName = "nao"
 	Kind    = "azoricum"
-	Version = "v3.2.3"
+	Version = "v3.3.0"
 )
 
 // Supported terminal editors.
