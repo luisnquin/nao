@@ -138,6 +138,8 @@ func (c *ModCmd) Main() cobra.PositionalArgs {
 
 		c.log.Trace().Str("editor", editorName).Strs("flags", editorArgs).Msg("running editor...")
 
+		go handleRichPresence(c.log, fmt.Sprintf("Editing \"%s\"...", nt.Tag))
+
 		err = RunEditor(cmd.Context(), editorName, filePath, editorArgs...)
 		if err != nil {
 			c.log.Err(err).Msg("error running the editor")

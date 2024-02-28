@@ -6,6 +6,8 @@ import (
 	"github.com/luisnquin/nao/v3/internal/utils"
 )
 
+const DISCORD_APP_ID = "1212321808355692564"
+
 // Program metadata.
 const (
 	AppName = "nao"

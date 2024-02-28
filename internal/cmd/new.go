@@ -91,6 +91,8 @@ func (c *NewCmd) Main() cobra.PositionalArgs {
 
 		start := time.Now()
 
+		go handleRichPresence(c.log, "Writing a new note...")
+
 		err = RunEditor(cmd.Context(), c.getEditorName(), path)
 		if err != nil {
 			return err
