@@ -12,7 +12,7 @@ buildGoModule rec {
     path = ./.;
   };
 
-  vendorSha256 = "sha256-vpZt2SYjS6KsVA+Vee+r2UvRpDDGv0XoF0DHW9VGsbQ=";
+  vendorHash = "sha256-vpZt2SYjS6KsVA+Vee+r2UvRpDDGv0XoF0DHW9VGsbQ=";
   doCheck = false;
 
   buildTarget = "./cmd/nao";
