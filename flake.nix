@@ -6,7 +6,7 @@
     systems.url = "github:nix-systems/default-linux";
   };
 
-  outputs = inputs @ {
+  outputs = {
     self,
     nixpkgs,
     systems,
@@ -18,11 +18,15 @@
       import nixpkgs {
         localSystem = system;
       });
-  in rec {
+  in {
     packages = eachSystem (system: rec {
       nao = pkgsFor.${system}.callPackage ./default.nix {};
       default = nao;
     });
+
+    overlays.default = final: prev: {
+      nao = self.packages.${final.system}.default;
+    };
 
     homeManagerModules.default = import ./nix/hm-module.nix self;
   };
