@@ -25,7 +25,7 @@
     });
 
     overlays.default = final: prev: {
-      nao = self.packages.${final.system}.default;
+      nao = self.packages.${final.stdenv.hostPlatform.system}.default;
     };
 
     homeManagerModules.default = import ./nix/hm-module.nix self;
